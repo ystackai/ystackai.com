@@ -1,0 +1,10 @@
+# Protected paths — always require tallhamn approval
+/_protected/               @tallhamn
+/.github/                  @tallhamn
+
+# Agent-editable — tallhamn owns, director auto-merges
+/blog/                     @tallhamn
+/team/                     @tallhamn
+/products/                 @tallhamn
+/index.html                @tallhamn
+/apps/                     @tallhamn

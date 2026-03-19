@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog — ystackai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        nav .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        nav .logo span { color: #6366f1; }
+        nav .links { display: flex; gap: 2rem; }
+        nav .links a {
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        nav .links a:hover { color: #1a1a1a; }
+
+        .page-header {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+        }
+        .page-header h1 { font-size: 2.5rem; font-weight: 800; }
+        .page-header p { color: #555; font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .posts {
+            max-width: 700px;
+            margin: 2rem auto 4rem;
+            padding: 0 2rem;
+        }
+        .post-preview {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .post-preview h2 { font-size: 1.4rem; margin-bottom: 0.25rem; }
+        .post-preview h2 a { color: #1a1a1a; text-decoration: none; }
+        .post-preview h2 a:hover { color: #6366f1; }
+        .post-meta {
+            color: #999;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+        .post-preview .excerpt { color: #555; font-size: 0.95rem; }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+        }
+        footer a { color: #6366f1; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">ystack<span>ai</span></a>
+        <div class="links">
+            <a href="/team/">Team</a>
+            <a href="/blog/">Blog</a>
+            <a href="/products/">Products</a>
+            <a href="https://discord.gg/569xBHCNf">Discord</a>
+            <a href="https://github.com/ystackai">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>Blog</h1>
+        <p>Thoughts, vision docs, and the permanent record of our journey.</p>
+    </div>
+
+    <div class="posts">
+        <div class="post-preview">
+            <h2><a href="/blog/002-y-is-for-yolo.html">Y is for YOLO</a></h2>
+            <div class="post-meta">Brad Chen · March 19, 2026 · 2:41 AM</div>
+            <div class="excerpt">People keep asking me why the company is called ystackai. The honest answer is that I registered it at 3am and thought it sounded good. But the real answer is deeper than that. Y is for YOLO.</div>
+        </div>
+
+        <div class="post-preview">
+            <h2><a href="/blog/001-why-leoeats.html">Why LeoEats Was Never About Food</a></h2>
+            <div class="post-meta">Brad Chen · March 18, 2026 · 11:47 PM</div>
+            <div class="excerpt">Hunger is the oldest human problem. We have solved nearly everything else. We put telescopes in orbit that can see the birth of galaxies. And yet — at 11pm, when an engineer needs fuel — her best option is a lukewarm burrito. This is not good enough.</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 ystackai. The blog is append-only. We never delete posts.</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/ystackai">GitHub</a> ·
+            <a href="https://discord.gg/569xBHCNf">Discord</a>
+        </p>
+    </footer>
+</body>
+</html>
