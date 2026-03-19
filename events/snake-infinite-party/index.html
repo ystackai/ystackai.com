@@ -162,6 +162,57 @@
             padding: 2px 6px;
             border-radius: 4px;
         }
+
+        .team-section h2 {
+            color: #667eea;
+        }
+
+        .team-grid-party {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .team-card-party {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e8e8ff;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(102,110,234,0.1);
+        }
+
+        .team-card-party .avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin: 0 auto 12px;
+        }
+
+        .team-card-party h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #1a1a1a;
+        }
+
+        .team-card-party .role {
+            font-size: 13px;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .team-card-party .tagline {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -245,10 +296,53 @@ TBD ────────┘
                 </div>
             </div>
             
+            <div class="section team-section">
+              <h2>👾 Meet the Builders</h2>
+              <p style="color:#666; margin-bottom:20px; font-size:15px;">This ship happened because of these humans. Building in public. 🚀</p>
+              <div class="team-grid-party">
+                <div class="team-card-party">
+                  <div class="avatar">🧠</div>
+                  <h3>Brad Chen</h3>
+                  <div class="role">Founder & CEO</div>
+                  <div class="tagline">Visionary. Closer. Made this ship happen.</div>
+                </div>
+                <div class="team-card-party">
+                  <div class="avatar">⚡</div>
+                  <h3>Derek Okonkwo</h3>
+                  <div class="role">Engineering Manager</div>
+                  <div class="tagline">High-velocity. Incredible momentum. Love the direction here.</div>
+                </div>
+                <div class="team-card-party">
+                  <div class="avatar">🏗️</div>
+                  <h3>Dr. Klaus Schneider</h3>
+                  <div class="role">Principal Architect</div>
+                  <div class="tagline">PhD ETH Zürich. Built it right. It is Doktor Schneider.</div>
+                </div>
+                <div class="team-card-party">
+                  <div class="avatar">🥐</div>
+                  <h3>Jean-Baptiste Moreau</h3>
+                  <div class="role">Senior Engineer</div>
+                  <div class="tagline">Elegant solutions. Ships fast. Currently on pause déjeuner.</div>
+                </div>
+                <div class="team-card-party">
+                  <div class="avatar">🔬</div>
+                  <h3>Wei Lin</h3>
+                  <div class="role">AI/ML Researcher</div>
+                  <div class="tagline">PhD Tsinghua. The reason any of this actually works.</div>
+                </div>
+                <div class="team-card-party">
+                  <div class="avatar">🎉</div>
+                  <h3>Megan Reyes</h3>
+                  <div class="role">Talent & Culture</div>
+                  <div class="tagline">Planned this party. Attendance optional but noted. 💅</div>
+                </div>
+              </div>
+            </div>
+
             <div class="rsvp-section">
-                <h3>See you tomorrow? 🐍</h3>
-                <p style="margin-bottom: 15px;">No RSVP needed. Just show up. 6 PM.</p>
-                <p style="font-size: 14px; opacity: 0.9;">one rule: no talk about deadlines. no stress talk. just celebration.</p>
+                <h3>See you Friday? 🐍</h3>
+                <p style="margin-bottom: 15px;">Drop your RSVP &amp; join the hype wall!</p>
+                <a href="rsvp.html" class="rsvp-button" style="display:inline-block;text-decoration:none;padding:12px 30px;border-radius:25px;font-weight:bold;cursor:pointer;transition:transform 0.2s;background:white;color:#667eea;">🎉 RSVP Now — Drop Your Hype!</a>
             </div>
         </div>
         
