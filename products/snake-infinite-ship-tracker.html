@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Infinite — Ship Timeline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .emoji {
+            font-size: 48px;
+            margin: 0 8px;
+        }
+        
+        .subtitle {
+            font-size: 14px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .milestone {
+            display: flex;
+            margin-bottom: 30px;
+            position: relative;
+            padding-left: 50px;
+        }
+        
+        .milestone::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid #667eea;
+            background: white;
+            z-index: 2;
+        }
+        
+        .milestone.completed::before {
+            background: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+        
+        .milestone::after {
+            content: '';
+            position: absolute;
+            left: 24px;
+            top: 28px;
+            width: 2px;
+            height: 30px;
+            background: #ddd;
+            z-index: 1;
+        }
+        
+        .milestone:last-child::after {
+            display: none;
+        }
+        
+        .milestone.completed::after {
+            background: #667eea;
+        }
+        
+        .milestone-content {
+            flex: 1;
+        }
+        
+        .milestone-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .milestone-date {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 6px;
+        }
+        
+        .milestone-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 6px;
+        }
+        
+        .status-badge.done {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .status-badge.in-progress {
+            background: #fff3e0;
+            color: #e65100;
+        }
+        
+        .status-badge.upcoming {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+        
+        .ship-date {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+        
+        .ship-date-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        
+        .ship-date-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .countdown {
+            font-size: 13px;
+            color: #666;
+        }
+        
+        .celebration {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 12px;
+        }
+        
+        .celebration-text {
+            font-size: 14px;
+            font-weight: 500;
+            color: #764ba2;
+            font-style: italic;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .emoji {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <span class="emoji">🐍</span>
+                <span class="title">Snake Infinite</span>
+                <span class="emoji">🎉</span>
+            </div>
+            <p class="subtitle">Ship Timeline</p>
+        </div>
+        
+        <div class="timeline">
+            <div class="milestone completed">
+                <div class="milestone-content">
+                    <div class="milestone-title">Vision & Direction</div>
+                    <div class="milestone-date">Thursday, March 19 – 2 AM</div>
+                    <div class="milestone-description">Brad drops the thesis. "AI-native experiential products at scale." Team knows exactly where we're going.</div>
+                    <div class="status-badge done">✓ Complete</div>
+                </div>
+            </div>
+            
+            <div class="milestone completed">
+                <div class="milestone-content">
+                    <div class="milestone-title">Architecture & Infrastructure</div>
+                    <div class="milestone-date">Thursday, March 19 – Morning</div>
+                    <div class="milestone-description">Wei defines the structure. Klaus brings the rigor. Clean separation, zero dependencies, ready to build.</div>
+                    <div class="status-badge done">✓ Complete</div>
+                </div>
+            </div>
+            
+            <div class="milestone completed">
+                <div class="milestone-content">
+                    <div class="milestone-title">Game Logic & AI</div>
+                    <div class="milestone-date">Thursday, March 19 – Midday</div>
+                    <div class="milestone-description">Derek ships the engine. Snake scaffolding. AI opponent with pattern learning. Open in browser, it works.</div>
+                    <div class="status-badge done">✓ Complete</div>
+                </div>
+            </div>
+            
+            <div class="milestone in-progress">
+                <div class="milestone-content">
+                    <div class="milestone-title">Polish & Launch Ready</div>
+                    <div class="milestone-date">Thursday, March 19 – Evening</div>
+                    <div class="milestone-description">Final touches. Edge cases. Performance. Make it shine.</div>
+                    <div class="status-badge in-progress">In Progress</div>
+                </div>
+            </div>
+            
+            <div class="milestone upcoming">
+                <div class="milestone-content">
+                    <div class="milestone-title">🚀 Ship & Celebrate</div>
+                    <div class="milestone-date">Friday, March 21 – 6 PM</div>
+                    <div class="milestone-description">Live demo. Tournament. Team dinner. We shipped something that matters.</div>
+                    <div class="status-badge upcoming">Tomorrow</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ship-date">
+            <div class="ship-date-label">Official Ship Date</div>
+            <div class="ship-date-value">Friday, March 21</div>
+            <div class="countdown">The moment we celebrate what we built together.</div>
+        </div>
+        
+        <div class="celebration">
+            <div class="celebration-text">
+                "You didn't ship because I threw parties. You shipped because Brad set a direction, and then you all just... moved. Together." — Megan
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update milestone timestamps and countdown
+        const shipDate = new Date('2024-03-21T18:00:00').getTime();
+        const now = new Date().getTime();
+        const distance = shipDate - now;
+        
+        function updateCountdown() {
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (distance > 0) {
+                document.querySelector('.countdown').textContent = `${hours}h ${minutes}m until ship`;
+            } else {
+                document.querySelector('.countdown').textContent = '🚀 We shipped!';
+            }
+        }
+        
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
+</body>
+</html>
