@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Infinite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #00ff88;
+            font-size: 32px;
+            text-align: center;
+            margin-bottom: 24px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .container {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .game-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        canvas {
+            border: 3px solid #00ff88;
+            background: #0a1628;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.25);
+            display: block;
+        }
+
+        .controls-hint {
+            color: #666;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            text-align: center;
+        }
+
+        .controls-hint span {
+            background: rgba(0, 255, 136, 0.15);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #00ff88;
+        }
+
+        .panel {
+            background: rgba(0, 255, 136, 0.07);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+            border-radius: 8px;
+            padding: 20px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            min-width: 180px;
+        }
+
+        .panel h3 {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 14px;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            margin: 10px 0;
+            font-size: 15px;
+        }
+
+        .stat-label { color: #888; }
+        .stat-value { font-weight: bold; }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .leaderboard-entry:last-child { border-bottom: none; }
+        .rank { color: #555; min-width: 20px; }
+        .empty-lb { color: #555; font-size: 13px; font-style: italic; }
+
+        /* Game over overlay */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 22, 40, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .overlay-box {
+            background: #0f3460;
+            border: 3px solid #00ff88;
+            border-radius: 12px;
+            padding: 48px;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            color: #00ff88;
+            max-width: 320px;
+            width: 100%;
+            box-shadow: 0 0 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .overlay-box h2 {
+            font-size: 42px;
+            margin-bottom: 20px;
+        }
+
+        .overlay-box .score-line {
+            font-size: 18px;
+            margin: 8px 0;
+            color: #aaa;
+        }
+
+        .overlay-box .score-line strong {
+            color: #00ff88;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 28px;
+            background: #00ff88;
+            color: #0a1628;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        .btn:hover { background: #00e077; transform: scale(1.05); }
+        .btn:active { transform: scale(0.97); }
+    </style>
+</head>
+<body>
+    <h1>🐍 SNAKE INFINITE</h1>
+
+    <div class="container">
+        <div class="game-section">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div class="controls-hint">
+                <span>↑ ↓ ← →</span> or <span>WASD</span> to move &nbsp;&nbsp; <span>SPACE</span> to restart
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div class="panel">
+                <h3>Stats</h3>
+                <div class="stat">
+                    <span class="stat-label">Score</span>
+                    <span class="stat-value" id="score">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Length</span>
+                    <span class="stat-value" id="length">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="level">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Food</span>
+                    <span class="stat-value" id="foodEaten">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Speed</span>
+                    <span class="stat-value"><span id="speed">60</span> fps</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>🏆 Best Scores</h3>
+                <div id="leaderboardList">
+                    <div class="empty-lb">No scores yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over overlay -->
+    <div class="overlay" id="overlay">
+        <div class="overlay-box">
+            <h2>GAME OVER</h2>
+            <div class="score-line">Score: <strong id="finalScore">0</strong></div>
+            <div class="score-line">Length: <strong id="finalLength">0</strong></div>
+            <div class="score-line">Level: <strong id="finalLevel">0</strong></div>
+            <button class="btn" id="restartBtn">Play Again</button>
+        </div>
+    </div>
+
+    <script src="src/game.js"></script>
+    <script src="src/renderer.js"></script>
+    <script src="src/leaderboard.js"></script>
+    <script src="src/main.js"></script>
+</body>
+</html>
