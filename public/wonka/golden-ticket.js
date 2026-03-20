@@ -124,6 +124,93 @@
     setTimeout(spawnTicket, i * 300);
   }
 
+  // ============================================================
+  //  GOLDEN TICKET EXPLOSION — triggered on 4-line clear
+  //  Dispatch: document.dispatchEvent(new CustomEvent('golden-ticket-clear'))
+  // ============================================================
+
+  var EXPLOSION = {
+    particleCount: 35,      // total burst particles
+    ticketCount: 6,         // golden tickets flying out
+    starCount: 8,           // star sparkles
+    flyDistMin: 80,         // min px from center
+    flyDistMax: 350,        // max px from center
+    duration: 1.2,          // seconds for particles
+    shardColors: ['#f5d060', '#d4af37', '#fff6d5', '#ffec99', '#b8860b']
+  };
+
+  function triggerGoldenExplosion() {
+    // 1. screen flash
+    var flash = document.createElement('div');
+    flash.className = 'golden-screen-flash';
+    document.body.appendChild(flash);
+    flash.addEventListener('animationend', function () { flash.remove(); });
+
+    // 2. glow burst ring
+    var glow = document.createElement('div');
+    glow.className = 'golden-glow-burst';
+    document.body.appendChild(glow);
+    glow.addEventListener('animationend', function () { glow.remove(); });
+
+    // 3. explosion particles — shards
+    var shardCount = EXPLOSION.particleCount;
+    for (var i = 0; i < shardCount; i++) {
+      spawnExplosionParticle('shard', i, shardCount);
+    }
+
+    // 4. tickets flying outward
+    for (var t = 0; t < EXPLOSION.ticketCount; t++) {
+      spawnExplosionParticle('ticket', t, EXPLOSION.ticketCount);
+    }
+
+    // 5. star sparkles
+    for (var s = 0; s < EXPLOSION.starCount; s++) {
+      spawnExplosionParticle('star', s, EXPLOSION.starCount);
+    }
+  }
+
+  function spawnExplosionParticle(type, index, total) {
+    var el = document.createElement('div');
+    el.className = 'golden-explosion-particle type-' + type;
+
+    // spread evenly around 360° with some jitter
+    var baseAngle = (360 / total) * index;
+    var angle = baseAngle + rand(-15, 15);
+    var rad = angle * (Math.PI / 180);
+    var dist = rand(EXPLOSION.flyDistMin, EXPLOSION.flyDistMax);
+    var flyX = Math.cos(rad) * dist;
+    var flyY = Math.sin(rad) * dist;
+
+    el.style.left = '50%';
+    el.style.top = '50%';
+    el.style.setProperty('--fly-x', flyX + 'px');
+    el.style.setProperty('--fly-y', flyY + 'px');
+    el.style.setProperty('--fly-spin', rand(-540, 540) + 'deg');
+    el.style.setProperty('--fly-scale', rand(0.1, 0.5));
+    el.style.animationDuration = rand(EXPLOSION.duration * 0.7, EXPLOSION.duration * 1.3) + 's';
+    el.style.animationDelay = rand(0, 0.15) + 's';
+
+    if (type === 'shard') {
+      el.style.setProperty('--shard-size', rand(3, 10) + 'px');
+      el.style.setProperty('--shard-color', pick(EXPLOSION.shardColors));
+    } else if (type === 'ticket') {
+      el.textContent = pick(['🎫', '🎟️', '🏭']);
+    } else if (type === 'star') {
+      el.textContent = pick(['✨', '⭐', '💫']);
+    }
+
+    canvas.appendChild(el);
+    el.addEventListener('animationend', function () { el.remove(); });
+  }
+
+  // listen for 4-line clear event from the game
+  document.addEventListener('golden-ticket-clear', function () {
+    triggerGoldenExplosion();
+  });
+
+  // expose globally so game code can call it directly too
+  window.triggerGoldenExplosion = triggerGoldenExplosion;
+
   // pause when tab is hidden to save battery
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) {

@@ -103,11 +103,114 @@
 .golden-ticket-particle.size-md { font-size: 2rem; }
 .golden-ticket-particle.size-lg { font-size: 3rem; }
 
+/* ============================================================
+   Golden Ticket EXPLOSION — 4-line clear celebration
+   Particle burst + glow ring. Pure dopamine.
+   ============================================================ */
+
+/* --- glow burst: expanding ring of golden light --- */
+.golden-glow-burst {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 10;
+  will-change: transform, opacity, width, height;
+  background: radial-gradient(circle, rgba(245, 208, 96, 0.6) 0%, rgba(212, 175, 55, 0.3) 40%, transparent 70%);
+  box-shadow: 0 0 60px rgba(212, 175, 55, 0.5), 0 0 120px rgba(245, 208, 96, 0.2);
+  animation: glow-burst 0.9s ease-out forwards;
+}
+
+@keyframes glow-burst {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    width: 120vmax;
+    height: 120vmax;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* --- explosion particle: burst outward from center --- */
+.golden-explosion-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 11;
+  will-change: transform, opacity;
+  animation: explosion-fly ease-out forwards;
+}
+
+.golden-explosion-particle.type-ticket {
+  font-size: 1.8rem;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+}
+
+.golden-explosion-particle.type-shard {
+  width: var(--shard-size, 6px);
+  height: var(--shard-size, 6px);
+  border-radius: 50%;
+  background: var(--shard-color, #f5d060);
+  box-shadow: 0 0 8px var(--shard-color, #f5d060);
+}
+
+.golden-explosion-particle.type-star {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 6px rgba(245, 208, 96, 0.8));
+}
+
+@keyframes explosion-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%)
+               translate(var(--fly-x, 100px), var(--fly-y, -100px))
+               rotate(var(--fly-spin, 360deg))
+               scale(var(--fly-scale, 0.3));
+  }
+}
+
+/* --- screen flash overlay --- */
+.golden-screen-flash {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9;
+  will-change: opacity;
+  background: rgba(245, 208, 96, 0.25);
+  animation: screen-flash 0.4s ease-out forwards;
+}
+
+@keyframes screen-flash {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* --- reduced motion: respect the user, always --- */
 @media (prefers-reduced-motion: reduce) {
   .golden-ticket-particle,
   .golden-ticket-trail,
-  .golden-ticket-sparkle {
+  .golden-ticket-sparkle,
+  .golden-glow-burst,
+  .golden-explosion-particle,
+  .golden-screen-flash {
     animation: none !important;
     opacity: 0.06 !important;
     transform: none !important;

@@ -153,5 +153,15 @@
     <div class="footer">
         <a href="/">ystack.ai</a> — the remix engine
     </div>
+
+    <link rel="stylesheet" href="/public/wonka/golden-ticket.css">
+    <script src="/public/wonka/golden-ticket.js"></script>
+    <script>
+        // Demo: click the golden ticket button to preview the 4-line clear explosion
+        document.querySelector('.golden-ticket').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.dispatchEvent(new CustomEvent('golden-ticket-clear'));
+        });
+    </script>
 </body>
 </html>
