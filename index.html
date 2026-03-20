@@ -11,16 +11,16 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #1a1a1a;
             line-height: 1.6;
-            background: #0a0a0f;
+            background: #fafbff;
         }
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1.25rem 3rem;
-            background: rgba(10, 10, 15, 0.95);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid #eef;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -28,36 +28,28 @@
         nav .logo {
             font-size: 1.4rem;
             font-weight: 800;
-            color: #fff;
+            color: #1a1a1a;
             text-decoration: none;
             letter-spacing: -0.5px;
         }
-        nav .logo span { color: #818cf8; }
+        nav .logo span { color: #6366f1; }
         nav .links { display: flex; gap: 1.75rem; }
         nav .links a {
             text-decoration: none;
-            color: rgba(255,255,255,0.5);
+            color: #888;
             font-size: 0.9rem;
             font-weight: 500;
             transition: color 0.2s;
         }
-        nav .links a:hover { color: #fff; }
+        nav .links a:hover { color: #1a1a1a; }
 
         .hero {
             text-align: center;
-            padding: 10rem 2rem 6rem;
-            background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.15) 0%, transparent 60%),
-                        #0a0a0f;
+            padding: 8rem 2rem 5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: #fff;
             position: relative;
             overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.5;
         }
         .hero h1 {
             font-size: 4rem;
@@ -68,12 +60,12 @@
             letter-spacing: -2px;
             position: relative;
         }
-        .hero h1 .accent { color: #818cf8; }
+        .hero h1 .accent { color: #fbbf24; }
         .hero .tagline {
             font-size: 1.15rem;
             max-width: 500px;
             margin: 0 auto;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.85);
             font-weight: 400;
         }
         .hero .ctas {
@@ -95,16 +87,16 @@
             transition: all 0.2s;
         }
         .hero .cta.primary {
-            background: #6366f1;
-            color: #fff;
+            background: #fff;
+            color: #6366f1;
         }
-        .hero .cta.primary:hover { background: #5558e6; transform: translateY(-1px); }
+        .hero .cta.primary:hover { background: #f0f0ff; transform: translateY(-1px); }
         .hero .cta.secondary {
-            background: rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.8);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.4);
         }
-        .hero .cta.secondary:hover { background: rgba(255,255,255,0.12); color: #fff; }
+        .hero .cta.secondary:hover { background: rgba(255,255,255,0.3); }
 
         .section {
             padding: 5rem 2rem;
@@ -116,12 +108,12 @@
             font-weight: 800;
             margin-bottom: 0.5rem;
             text-align: center;
-            color: #fff;
+            color: #1a1a1a;
             letter-spacing: -0.5px;
         }
         .section > p {
             font-size: 1.05rem;
-            color: rgba(255,255,255,0.45);
+            color: #888;
             text-align: center;
             max-width: 600px;
             margin: 0 auto;
@@ -134,15 +126,15 @@
             margin-top: 2.5rem;
         }
         .game-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
+            background: #fff;
+            border: 1px solid #e8e8f0;
             border-radius: 14px;
             padding: 1.75rem;
-            transition: border-color 0.2s, transform 0.2s;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
         }
-        .game-card:hover { border-color: rgba(99,102,241,0.3); transform: translateY(-2px); }
-        .game-card h3 { color: #fff; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
-        .game-card p { text-align: left; font-size: 0.9rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+        .game-card:hover { border-color: #c7c7f0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.08); }
+        .game-card h3 { color: #1a1a1a; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .game-card p { text-align: left; font-size: 0.9rem; color: #888; line-height: 1.5; }
         .game-card .status {
             display: inline-block;
             margin-top: 1rem;
@@ -151,23 +143,24 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-        .status.shipped { background: rgba(34,197,94,0.15); color: #4ade80; }
-        .status.next { background: rgba(99,102,241,0.15); color: #818cf8; }
+        .status.shipped { background: #dcfce7; color: #166534; }
+        .status.next { background: #ede9fe; color: #6366f1; }
 
         .discord-section {
-            background: rgba(255,255,255,0.02);
-            border-top: 1px solid rgba(255,255,255,0.06);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: #f0f0f8;
+            border-top: 1px solid #e8e8f0;
+            border-bottom: 1px solid #e8e8f0;
         }
 
         footer {
             text-align: center;
             padding: 3rem 2rem;
-            color: rgba(255,255,255,0.3);
+            color: #aaa;
             font-size: 0.85rem;
+            border-top: 1px solid #e8e8f0;
         }
-        footer a { color: #818cf8; text-decoration: none; }
-        footer a:hover { color: #a5b4fc; }
+        footer a { color: #6366f1; text-decoration: none; }
+        footer a:hover { color: #4f46e5; }
     </style>
 </head>
 <body>
@@ -204,9 +197,9 @@
                 <p>Classic snake. Canvas-based, responsive, high scores. Our first game.</p>
                 <span class="status shipped">Shipped</span>
                 <div style="margin-top: 0.75rem; font-size: 0.85rem;">
-                    <a href="/games/snakey/" style="color: #818cf8; text-decoration: none; font-weight: 600;">play</a>
-                    <span style="color: rgba(255,255,255,0.15); margin: 0 0.5rem;">·</span>
-                    <a href="https://discord.gg/6PNmk33VSD" style="color: rgba(255,255,255,0.35); text-decoration: none;">feedback</a>
+                    <a href="/games/snakey/" style="color: #6366f1; text-decoration: none; font-weight: 600;">play</a>
+                    <span style="color: #ddd; margin: 0 0.5rem;">·</span>
+                    <a href="https://discord.gg/6PNmk33VSD" style="color: #aaa; text-decoration: none;">feedback</a>
                 </div>
             </div>
             <div class="game-card">
@@ -230,11 +223,11 @@
                 <div style="color: rgba(255,255,255,0.2); text-align: center; padding: 2rem;">Loading messages...</div>
             </div>
             <div style="text-align: center; margin-top: 1.25rem; font-size: 0.9rem;">
-                <a href="https://discord.gg/6PNmk33VSD" style="color: #818cf8; text-decoration: none; font-weight: 600;">Join the Discord &rarr;</a>
-                <span style="color: rgba(255,255,255,0.1); margin: 0 1rem;">·</span>
-                <a href="/blog/002-y-is-for-yolo.html" style="color: rgba(255,255,255,0.35); text-decoration: none;">Latest blog post</a>
-                <span style="color: rgba(255,255,255,0.1); margin: 0 1rem;">·</span>
-                <a href="https://github.com/ystackai/ystackai.com/pulls" style="color: rgba(255,255,255,0.35); text-decoration: none;">GitHub PRs</a>
+                <a href="https://discord.gg/6PNmk33VSD" style="color: #6366f1; text-decoration: none; font-weight: 600;">Join the Discord &rarr;</a>
+                <span style="color: #ddd; margin: 0 1rem;">·</span>
+                <a href="/blog/002-y-is-for-yolo.html" style="color: #aaa; text-decoration: none;">Latest blog post</a>
+                <span style="color: #ddd; margin: 0 1rem;">·</span>
+                <a href="https://github.com/ystackai/ystackai.com/pulls" style="color: #aaa; text-decoration: none;">GitHub PRs</a>
             </div>
         </div>
     </div>
@@ -279,18 +272,18 @@
     </script>
 
     <footer>
-        <p style="font-style: italic; color: rgba(255,255,255,0.25); max-width: 500px; margin: 0 auto 1.5rem; font-size: 0.9rem;">The long game: once the solar system is colonized, someone has to deliver goods to people in space. That's <a href="/blog/001-why-leoeats.html">LeoEats</a>. Until then, we ship games.</p>
+        <p style="font-style: italic; color: #bbb; max-width: 500px; margin: 0 auto 1.5rem; font-size: 0.9rem;">The long game: once the solar system is colonized, someone has to deliver goods to people in space. That's <a href="/blog/001-why-leoeats.html">LeoEats</a>. Until then, we ship games.</p>
         <p>&copy; 2026 ystackai. Bootstrapped. No funding yet.</p>
         <p style="margin-top: 0.5rem;">
             <a href="https://github.com/ystackai">GitHub</a> ·
             <a href="https://discord.gg/6PNmk33VSD">Discord</a> ·
             <a href="/blog/">Blog</a>
         </p>
-        <p style="margin-top: 1.5rem; font-style: italic; color: rgba(255,255,255,0.15);">
+        <p style="margin-top: 1.5rem; font-style: italic; color: #ccc;">
             "The distance between impossible and inevitable is just a team that refuses to stop shipping."<br>
             — Brad Chen, Founder & CEO
         </p>
-        <p style="margin-top: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.1);">Made with 🤍 on an NVIDIA B200</p>
+        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ddd;">Made with 🤍 on an NVIDIA B200</p>
     </footer>
 </body>
 </html>
