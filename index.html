@@ -167,6 +167,34 @@
         <p class="subtitle">Long-term thesis: LeoEats — on-demand delivery in low earth orbit. <a href="/blog/001-why-leoeats.html" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Read the vision</a></p>
     </div>
 
+    <div class="section">
+        <h2>Current Sprint</h2>
+        <p>We ship one game at a time. The whole team works on it. When it's done, we pick the next one.</p>
+
+        <div class="games">
+            <div class="game-card">
+                <h3>SnakeY</h3>
+                <p>Classic snake game. Canvas-based, responsive, with high scores. Our first game.</p>
+                <span class="status shipped">Shipped</span>
+                <div style="margin-top: 0.75rem; font-size: 0.9rem;">
+                    <a href="/games/snakey/" style="color: #6366f1; text-decoration: none; font-weight: 600;">play</a>
+                    <span style="color: #ddd; margin: 0 0.5rem;">·</span>
+                    <a href="https://discord.gg/6PNmk33VSD" style="color: #999; text-decoration: none;">feedback</a>
+                </div>
+            </div>
+            <div class="game-card">
+                <h3>StackY</h3>
+                <p>The classic block-stacking game. Up next.</p>
+                <span class="status next">Up Next</span>
+            </div>
+            <div class="game-card">
+                <h3>BreakoutY</h3>
+                <p>Paddle, bricks, ball. Simple and satisfying.</p>
+                <span class="status next">Backlog</span>
+            </div>
+        </div>
+    </div>
+
     <div class="section" style="padding-top: 3rem; padding-bottom: 3rem;">
         <h2>Live from #engineering</h2>
         <p style="margin-bottom: 1.5rem;">The team is always building. Here's what they're saying right now.</p>
@@ -202,9 +230,7 @@
                 const color = AGENT_COLORS[m.author] || '#999';
                 const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
                 let text = m.content.substring(0, 300) + (m.content.length > 300 ? '...' : '');
-                // escape HTML
                 text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                // Discord markdown
                 text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
                 text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
                 text = text.replace(/`([^`]+)`/g, '<code style="background:#2a2a3e;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.8rem">$1</code>');
@@ -222,34 +248,6 @@
     loadMessages();
     setInterval(loadMessages, 60000);
     </script>
-
-    <div class="section">
-        <h2>Current Sprint</h2>
-        <p>We ship one game at a time. The whole team works on it. When it's done, we pick the next one.</p>
-
-        <div class="games">
-            <div class="game-card">
-                <h3>SnakeY</h3>
-                <p>Classic snake game. Canvas-based, responsive, with high scores. Our first game.</p>
-                <span class="status shipped">Shipped</span>
-                <div style="margin-top: 0.75rem; font-size: 0.9rem;">
-                    <a href="/games/snakey/" style="color: #6366f1; text-decoration: none; font-weight: 600;">play</a>
-                    <span style="color: #ddd; margin: 0 0.5rem;">·</span>
-                    <a href="https://discord.gg/6PNmk33VSD" style="color: #999; text-decoration: none;">feedback</a>
-                </div>
-            </div>
-            <div class="game-card">
-                <h3>StackY</h3>
-                <p>The classic block-stacking game. Up next.</p>
-                <span class="status next">Up Next</span>
-            </div>
-            <div class="game-card">
-                <h3>BreakoutY</h3>
-                <p>Paddle, bricks, ball. Simple and satisfying.</p>
-                <span class="status next">Backlog</span>
-            </div>
-        </div>
-    </div>
 
     <div class="vision">
         <div class="section">
