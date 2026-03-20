@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐍 SnakeY Launch Countdown 🚀</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --snake-dark: #1a472a;
+    --snake-green: #2d8a4e;
+    --snake-lime: #4ade80;
+    --snake-mint: #bbf7d0;
+    --accent-yellow: #fbbf24;
+    --accent-pink: #f472b6;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --accent-cyan: #22d3ee;
+    --bg-dark: #0f1a14;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-dark);
+    color: #fff;
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ===== FLOATING SNAKES BACKGROUND ===== */
+  .snake-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+
+  .snake-bg .snake-float {
+    position: absolute;
+    font-size: 2rem;
+    opacity: 0.12;
+    animation: float-up linear infinite;
+  }
+
+  @keyframes float-up {
+    0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.12; }
+    90% { opacity: 0.12; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+
+  /* ===== MAIN CONTAINER ===== */
+  .container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+
+  /* ===== HEADER ===== */
+  .header-emoji {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+    animation: wiggle 2s ease-in-out infinite;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg) scale(1); }
+    25% { transform: rotate(5deg) scale(1.1); }
+    50% { transform: rotate(-3deg) scale(1); }
+    75% { transform: rotate(3deg) scale(1.05); }
+  }
+
+  .title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 4rem);
+    background: linear-gradient(135deg, var(--snake-lime), var(--accent-yellow), var(--accent-purple), var(--accent-pink));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+    margin-bottom: 0.25rem;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .subtitle {
+    font-size: 1.2rem;
+    color: var(--snake-mint);
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+
+  /* ===== COUNTDOWN ===== */
+  .countdown {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .countdown-unit {
+    background: linear-gradient(145deg, rgba(45,138,78,0.3), rgba(167,139,250,0.2));
+    border: 2px solid var(--snake-lime);
+    border-radius: 1rem;
+    padding: 1.25rem 1.5rem;
+    min-width: 100px;
+    box-shadow: 0 0 20px rgba(74,222,128,0.15), inset 0 0 20px rgba(74,222,128,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .countdown-unit:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 0 30px rgba(74,222,128,0.3), inset 0 0 20px rgba(74,222,128,0.1);
+  }
+
+  .countdown-number {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 8vw, 4rem);
+    color: var(--accent-yellow);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(251,191,36,0.4);
+  }
+
+  .countdown-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--snake-mint);
+    margin-top: 0.25rem;
+  }
+
+  /* ===== HYPE METER ===== */
+  .hype-section {
+    width: 100%;
+    max-width: 500px;
+    margin-bottom: 2.5rem;
+  }
+
+  .hype-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--accent-yellow);
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+  }
+
+  .hype-bar-track {
+    width: 100%;
+    height: 30px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid rgba(74,222,128,0.3);
+    position: relative;
+  }
+
+  .hype-bar-fill {
+    height: 100%;
+    border-radius: 13px;
+    background: linear-gradient(90deg, var(--snake-green), var(--snake-lime), var(--accent-yellow), var(--accent-orange), var(--accent-pink), var(--accent-purple));
+    background-size: 200% 100%;
+    animation: hype-shimmer 2s linear infinite;
+    transition: width 1s ease;
+    position: relative;
+  }
+
+  .hype-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+    animation: hype-shine 1.5s ease-in-out infinite;
+  }
+
+  @keyframes hype-shimmer {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  @keyframes hype-shine {
+    0%, 100% { transform: translateX(-100%); }
+    50% { transform: translateX(100%); }
+  }
+
+  .hype-label {
+    font-size: 0.9rem;
+    color: var(--accent-pink);
+    margin-top: 0.4rem;
+    font-weight: 700;
+  }
+
+  /* ===== LAUNCH CREW ===== */
+  .crew-section {
+    margin-bottom: 2rem;
+  }
+
+  .crew-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--accent-purple);
+    margin-bottom: 1rem;
+  }
+
+  .crew-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    max-width: 700px;
+  }
+
+  .crew-card {
+    background: linear-gradient(145deg, rgba(167,139,250,0.2), rgba(244,114,182,0.15));
+    border: 2px solid rgba(167,139,250,0.4);
+    border-radius: 1rem;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+
+  .crew-card:hover {
+    transform: translateY(-3px) rotate(-1deg);
+    border-color: var(--accent-yellow);
+    box-shadow: 0 0 20px rgba(251,191,36,0.2);
+  }
+
+  .crew-card .emoji {
+    font-size: 1.5rem;
+  }
+
+  .crew-card .name {
+    font-weight: 900;
+    font-size: 1rem;
+    color: var(--snake-mint);
+  }
+
+  .crew-card .role {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.5);
+  }
+
+  /* ===== SHIPPED STATE ===== */
+  .shipped-message {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    animation: shipped-pop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .shipped-message.show {
+    display: flex;
+  }
+
+  .shipped-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    background: linear-gradient(135deg, var(--accent-yellow), var(--accent-pink), var(--accent-purple), var(--snake-lime));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 2s ease infinite;
+    text-shadow: none;
+  }
+
+  .shipped-sub {
+    font-size: 1.5rem;
+    margin-top: 0.5rem;
+    color: var(--snake-mint);
+  }
+
+  @keyframes shipped-pop {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ===== CONFETTI EXPLOSION ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    opacity: 0;
+    animation: confetti-fall linear forwards;
+  }
+
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    100% { opacity: 0; transform: translateY(110vh) rotate(720deg) scale(0.5); }
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    margin-top: 2rem;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.3);
+  }
+
+  /* ===== PULSE RING ===== */
+  .pulse-ring {
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    border: 2px solid rgba(74,222,128,0.15);
+    animation: pulse-expand 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .pulse-ring:nth-child(2) { animation-delay: 1s; }
+  .pulse-ring:nth-child(3) { animation-delay: 2s; }
+
+  @keyframes pulse-expand {
+    0% { transform: scale(0.8); opacity: 0.4; }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+
+  .pulse-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- Floating snake emojis background -->
+<div class="snake-bg" id="snakeBg"></div>
+
+<!-- Confetti container (for explosion) -->
+<div class="confetti-container" id="confettiContainer"></div>
+
+<div class="container">
+  <!-- Pulse rings behind timer -->
+  <div class="pulse-wrapper">
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+    <div class="pulse-ring"></div>
+  </div>
+
+  <div class="header-emoji">🐍🚀</div>
+  <h1 class="title">SnakeY Launch Countdown</h1>
+  <p class="subtitle">Tonight we ship! 🎉 March 20, 2026 &bull; 9:00 PM Pacific</p>
+
+  <!-- Countdown Timer -->
+  <div class="countdown" id="countdown">
+    <div class="countdown-unit">
+      <div class="countdown-number" id="hours">00</div>
+      <div class="countdown-label">Hours</div>
+    </div>
+    <div class="countdown-unit">
+      <div class="countdown-number" id="minutes">00</div>
+      <div class="countdown-label">Minutes</div>
+    </div>
+    <div class="countdown-unit">
+      <div class="countdown-number" id="seconds">00</div>
+      <div class="countdown-label">Seconds</div>
+    </div>
+  </div>
+
+  <!-- Shipped message (hidden until countdown ends) -->
+  <div class="shipped-message" id="shippedMessage">
+    <div class="shipped-text">WE SHIPPED! 🐍🚀</div>
+    <div class="shipped-sub">SnakeY is LIVE — let's gooooo! 🎉🎊🐍</div>
+  </div>
+
+  <!-- Hype Meter -->
+  <div class="hype-section">
+    <div class="hype-title">🔥 HYPE LEVEL 🔥</div>
+    <div class="hype-bar-track">
+      <div class="hype-bar-fill" id="hypeFill" style="width: 0%"></div>
+    </div>
+    <div class="hype-label" id="hypeLabel">Loading hype...</div>
+  </div>
+
+  <!-- Launch Crew -->
+  <div class="crew-section">
+    <div class="crew-title">🚀 Launch Crew 🚀</div>
+    <div class="crew-grid" id="crewGrid"></div>
+  </div>
+
+  <div class="footer">ystack.ai &bull; ship day 🐍</div>
+</div>
+
+<script>
+  // ===== CONFIG =====
+  // Target: March 20, 2026 at 9:00 PM Pacific (UTC-7 in PDT)
+  const LAUNCH_DATE = new Date('2026-03-20T21:00:00-07:00');
+
+  // Total countdown window: assume we start counting from 24 hours before launch
+  const COUNTDOWN_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+  const crew = [
+    { name: 'Brad', emoji: '🧠', role: 'Visionary' },
+    { name: 'Wei', emoji: '⚡', role: 'Engine' },
+    { name: 'JB', emoji: '🎯', role: 'Architect' },
+    { name: 'Derek', emoji: '🔧', role: 'Builder' },
+    { name: 'Megan', emoji: '🎨', role: 'Culture' },
+    { name: 'Klaus/Schneider', emoji: '🐍', role: 'SnakeY' },
+  ];
+
+  // ===== FLOATING SNAKES =====
+  const snakeBg = document.getElementById('snakeBg');
+  const snakeEmojis = ['🐍', '🟢', '💚', '✨', '🌟', '🚀', '🎉'];
+
+  function spawnSnake() {
+    const el = document.createElement('div');
+    el.className = 'snake-float';
+    el.textContent = snakeEmojis[Math.floor(Math.random() * snakeEmojis.length)];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.fontSize = (1.2 + Math.random() * 2) + 'rem';
+    el.style.animationDuration = (8 + Math.random() * 12) + 's';
+    el.style.animationDelay = Math.random() * 2 + 's';
+    snakeBg.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
+  }
+
+  // Spawn initial batch
+  for (let i = 0; i < 15; i++) setTimeout(spawnSnake, i * 300);
+  setInterval(spawnSnake, 1500);
+
+  // ===== CREW CARDS =====
+  const crewGrid = document.getElementById('crewGrid');
+  crew.forEach((member, i) => {
+    const card = document.createElement('div');
+    card.className = 'crew-card';
+    card.style.animationDelay = (i * 0.1) + 's';
+    card.innerHTML = `
+      <span class="emoji">${member.emoji}</span>
+      <span>
+        <span class="name">${member.name}</span><br>
+        <span class="role">${member.role}</span>
+      </span>
+    `;
+    crewGrid.appendChild(card);
+  });
+
+  // ===== COUNTDOWN LOGIC =====
+  const hoursEl = document.getElementById('hours');
+  const minutesEl = document.getElementById('minutes');
+  const secondsEl = document.getElementById('seconds');
+  const countdownEl = document.getElementById('countdown');
+  const shippedEl = document.getElementById('shippedMessage');
+  const hypeFill = document.getElementById('hypeFill');
+  const hypeLabel = document.getElementById('hypeLabel');
+
+  let hasShipped = false;
+
+  const hypeMessages = [
+    { min: 0,  label: 'Warming up... 🫠' },
+    { min: 15, label: 'Getting excited! 😄' },
+    { min: 30, label: 'ENERGY RISING 🔥' },
+    { min: 50, label: 'CAN\'T STOP WON\'T STOP 🤩' },
+    { min: 70, label: 'HYPE OVERLOAD!! 🚀🔥' },
+    { min: 85, label: 'MAXIMUM HYPE!!! 🐍💥🎉' },
+    { min: 95, label: 'WE ARE SO READY 🐍🐍🐍🚀🚀🚀' },
+  ];
+
+  function getHypeMessage(pct) {
+    let msg = hypeMessages[0].label;
+    for (const h of hypeMessages) {
+      if (pct >= h.min) msg = h.label;
+    }
+    return msg;
+  }
+
+  function pad(n) {
+    return String(n).padStart(2, '0');
+  }
+
+  function updateCountdown() {
+    const now = new Date();
+    const diff = LAUNCH_DATE - now;
+
+    if (diff <= 0 && !hasShipped) {
+      hasShipped = true;
+      countdownEl.style.display = 'none';
+      shippedEl.classList.add('show');
+      hypeFill.style.width = '100%';
+      hypeLabel.textContent = '🐍🚀 WE SHIPPED!!! 🚀🐍';
+      triggerConfettiExplosion();
+      return;
+    }
+
+    if (hasShipped) return;
+
+    const totalSec = Math.floor(diff / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+
+    hoursEl.textContent = pad(h);
+    minutesEl.textContent = pad(m);
+    secondsEl.textContent = pad(s);
+
+    // Hype meter: percentage based on how close we are within the window
+    const elapsed = COUNTDOWN_WINDOW_MS - diff;
+    const hypePct = Math.max(0, Math.min(100, (elapsed / COUNTDOWN_WINDOW_MS) * 100));
+    hypeFill.style.width = hypePct + '%';
+    hypeLabel.textContent = getHypeMessage(hypePct);
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  // ===== CONFETTI EXPLOSION =====
+  function triggerConfettiExplosion() {
+    const container = document.getElementById('confettiContainer');
+    const confettiEmojis = ['🐍', '🎉', '🎊', '🚀', '✨', '🌟', '💚', '💜', '💛', '🟢', '🟣', '🟡'];
+    const count = 150;
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.textContent = confettiEmojis[Math.floor(Math.random() * confettiEmojis.length)];
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.fontSize = (1 + Math.random() * 2) + 'rem';
+      piece.style.animationDuration = (2 + Math.random() * 3) + 's';
+      piece.style.animationDelay = (Math.random() * 1.5) + 's';
+      container.appendChild(piece);
+      piece.addEventListener('animationend', () => piece.remove());
+    }
+
+    // Repeat bursts for extra celebration
+    setTimeout(() => triggerConfettiExplosion(), 3000);
+  }
+</script>
+</body>
+</html>
