@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="58" fill="#dc2626" stroke="#b91c1c" stroke-width="2"/>
+  <circle cx="60" cy="48" r="20" fill="#fef2f2"/>
+  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#fef2f2"/>
+  <!-- half-lidded eyes (relaxed) -->
+  <ellipse cx="52" cy="46" rx="3" ry="2" fill="#7f1d1d"/>
+  <ellipse cx="68" cy="46" rx="3" ry="2" fill="#7f1d1d"/>
+  <!-- slight smirk -->
+  <path d="M 52 55 Q 58 58 68 54" fill="none" stroke="#7f1d1d" stroke-width="2" stroke-linecap="round"/>
+  <!-- antenna -->
+  <line x1="60" y1="28" x2="60" y2="10" stroke="#f87171" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+</svg>

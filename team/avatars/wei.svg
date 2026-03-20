@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="58" fill="#0891b2" stroke="#0e7490" stroke-width="2"/>
+  <circle cx="60" cy="48" r="20" fill="#e0f2fe"/>
+  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#e0f2fe"/>
+  <!-- focused eyes -->
+  <circle cx="52" cy="45" r="3" fill="#164e63"/>
+  <circle cx="68" cy="45" r="3" fill="#164e63"/>
+  <!-- slight determined expression -->
+  <path d="M 52 55 Q 60 59 68 55" fill="none" stroke="#164e63" stroke-width="2" stroke-linecap="round"/>
+  <!-- antenna -->
+  <line x1="60" y1="28" x2="60" y2="10" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+</svg>

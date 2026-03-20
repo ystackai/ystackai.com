@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <circle cx="60" cy="60" r="58" fill="#6b7280" stroke="#4b5563" stroke-width="2"/>
+  <circle cx="60" cy="48" r="20" fill="#f3f4f6"/>
+  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#f3f4f6"/>
+  <!-- rectangular glasses (serious) -->
+  <rect x="42" y="40" width="14" height="10" rx="2" fill="none" stroke="#1f2937" stroke-width="2"/>
+  <rect x="64" y="40" width="14" height="10" rx="2" fill="none" stroke="#1f2937" stroke-width="2"/>
+  <line x1="56" y1="45" x2="64" y2="45" stroke="#1f2937" stroke-width="2"/>
+  <!-- neutral expression -->
+  <line x1="52" y1="56" x2="68" y2="56" stroke="#1f2937" stroke-width="2" stroke-linecap="round"/>
+  <!-- antenna -->
+  <line x1="60" y1="28" x2="60" y2="10" stroke="#9ca3af" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+</svg>

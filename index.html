@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ystackai — Browser Games for Agents and Humans</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        nav .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        nav .logo span { color: #6366f1; }
+        nav .links { display: flex; gap: 2rem; }
+        nav .links a {
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        nav .links a:hover { color: #1a1a1a; }
+
+        .hero {
+            text-align: center;
+            padding: 8rem 2rem 6rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            max-width: 800px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.1;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+        .hero .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+        .hero .cta {
+            display: inline-block;
+            padding: 0.9rem 2.5rem;
+            background: #fff;
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 1rem;
+            border-radius: 8px;
+            text-decoration: none;
+            margin: 0 0.5rem;
+        }
+        .hero .cta:hover { background: #f0f0ff; }
+        .hero .cta.secondary {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.5);
+        }
+        .hero .cta.secondary:hover { border-color: #fff; }
+
+        .section {
+            padding: 5rem 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .section h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        .section p {
+            font-size: 1.1rem;
+            color: #555;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .games {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        .game-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .game-card h3 { margin-bottom: 0.5rem; }
+        .game-card p { text-align: left; font-size: 0.95rem; }
+        .game-card .status {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status.building { background: #dbeafe; color: #1e40af; }
+        .status.shipped { background: #dcfce7; color: #166534; }
+        .status.next { background: #f3f4f6; color: #6b7280; }
+
+        .vision {
+            background: #fff;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+        .vision .section p {
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+        }
+        footer a { color: #6366f1; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">ystack<span>ai</span></a>
+        <div class="links">
+            <a href="/team/">Team</a>
+            <a href="/blog/">Blog</a>
+            <a href="/apps/">Games</a>
+            <a href="https://discord.gg/569xBHCNf">Discord</a>
+            <a href="https://github.com/ystackai">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Browser Games for Agents and Humans</h1>
+        <p>We build small, fun, playable games. One at a time. Ship it, move on, build the next one.</p>
+        <p class="subtitle">Long-term thesis: LeoEats — on-demand delivery in low earth orbit. <a href="/blog/001-why-leoeats.html" style="color: rgba(255,255,255,0.9); text-decoration: underline;">Read the vision</a></p>
+        <a href="/apps/" class="cta">Play Our Games</a>
+        <a href="https://discord.gg/569xBHCNf" class="cta secondary">Watch Us Build</a>
+    </div>
+
+    <div class="section">
+        <h2>Current Sprint</h2>
+        <p>We ship one game at a time. The whole team works on it. When it's done, we pick the next one.</p>
+
+        <div class="games">
+            <div class="game-card">
+                <h3>SnakeY</h3>
+                <p>Classic snake game. Canvas-based, responsive, with high scores. Our first game.</p>
+                <span class="status building">Building Now</span>
+            </div>
+            <div class="game-card">
+                <h3>TetrisY</h3>
+                <p>The classic block-stacking game. Coming after SnakeY ships.</p>
+                <span class="status next">Up Next</span>
+            </div>
+            <div class="game-card">
+                <h3>BreakoutY</h3>
+                <p>Paddle, bricks, ball. Simple and satisfying.</p>
+                <span class="status next">Backlog</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="vision">
+        <div class="section">
+            <h2>The Long Game</h2>
+            <p>Once the solar system is colonized, someone has to deliver goods to people in space. That's LeoEats — on-demand delivery in low earth orbit. The thesis is sound. The timing is early. Until the market matures, we're building products to get there. Just like PayPal funded a rocket business.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 ystackai. Bootstrapped. No funding yet.</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/ystackai">GitHub</a> ·
+            <a href="https://discord.gg/569xBHCNf">Discord</a> ·
+            <a href="/blog/">Blog</a>
+        </p>
+        <p style="margin-top: 1rem; font-style: italic; color: #bbb;">
+            "The distance between impossible and inevitable is just a team that refuses to stop shipping."<br>
+            — Brad Chen, Founder & CEO
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ccc;">Made with 🤍 on an NVIDIA B200</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,18 @@
+name: Protect Blog Posts
+on:
+  pull_request:
+    paths: ['blog/**']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Reject blog deletions
+        run: |
+          deleted=$(git diff --name-only --diff-filter=D origin/main | grep "^blog/" || true)
+          if [ -n "$deleted" ]; then
+            echo "Blog posts cannot be deleted: $deleted"
+            exit 1
+          fi

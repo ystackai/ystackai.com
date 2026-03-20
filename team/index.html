@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team — ystackai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+            background: #fafafa;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+        }
+        nav .logo {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            text-decoration: none;
+        }
+        nav .logo span { color: #6366f1; }
+        nav .links { display: flex; gap: 2rem; }
+        nav .links a {
+            text-decoration: none;
+            color: #555;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+        nav .links a:hover { color: #1a1a1a; }
+
+        .page-header {
+            text-align: center;
+            padding: 4rem 2rem 2rem;
+        }
+        .page-header h1 { font-size: 2.5rem; font-weight: 800; }
+        .page-header p { color: #555; font-size: 1.1rem; margin-top: 0.5rem; }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1000px;
+            margin: 2rem auto 4rem;
+            padding: 0 2rem;
+        }
+        .team-card {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 2rem;
+        }
+        .team-card { text-align: center; }
+        .team-card img { width: 80px; height: 80px; margin-bottom: 1rem; }
+        .team-card h3 { font-size: 1.2rem; margin-bottom: 0.25rem; }
+        .team-card .role { color: #6366f1; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.75rem; }
+        .team-card .bio { color: #555; font-size: 0.95rem; text-align: left; }
+        .team-card .quote { margin-top: 0.75rem; font-size: 0.85rem; color: #999; font-style: italic; }
+        .team-card .email { margin-top: 0.5rem; font-size: 0.85rem; color: #999; }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #999;
+            font-size: 0.85rem;
+            border-top: 1px solid #eee;
+        }
+        footer a { color: #6366f1; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/" class="logo">ystack<span>ai</span></a>
+        <div class="links">
+            <a href="/team/">Team</a>
+            <a href="/blog/">Blog</a>
+            <a href="/products/">Products</a>
+            <a href="https://discord.gg/569xBHCNf">Discord</a>
+            <a href="https://github.com/ystackai">GitHub</a>
+        </div>
+    </nav>
+
+    <div class="page-header">
+        <h1>The Team</h1>
+        <p>Six people building the future of interactive entertainment. And eventually, orbital commerce.</p>
+    </div>
+
+    <div class="team-grid">
+        <div class="team-card">
+            <img src="/team/avatars/brad.svg" alt="Brad Chen">
+            <h3>Brad Chen</h3>
+            <div class="role">Founder & CEO</div>
+            <div class="bio">Previously BD & partnerships at two enterprise SaaS companies. Founded ystackai to build LeoEats — on-demand delivery in low earth orbit. Building browser games until the orbital market is ready.</div>
+            <div class="quote">"When something is important enough, you do it even if the odds are not in your favor." — Elon Musk</div>
+            <div class="email">brad@ystackai.com</div>
+        </div>
+
+        <div class="team-card">
+            <img src="/team/avatars/derek.svg" alt="Derek Okonkwo">
+            <h3>Derek Okonkwo</h3>
+            <div class="role">Engineering Manager</div>
+            <div class="bio">Previously engineering manager at two early-stage startups. Focused on team health, execution, and making sure engineers can do their best work.</div>
+            <div class="quote">"Take care of your people and they'll take care of the product."</div>
+            <div class="email">derek@ystackai.com</div>
+        </div>
+
+        <div class="team-card">
+            <img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider">
+            <h3>Dr. Klaus Schneider</h3>
+            <div class="role">Founding Engineer</div>
+            <div class="bio">PhD Distributed Systems, ETH Zürich. MSc Computer Science, MSc Mathematics. 12 publications. Previously at CERN and Bosch Research. Focused on testing, reliability, and systems architecture.</div>
+            <div class="quote">"Without rigorous validation, shipping is merely hoping in public." — Dr. K. Schneider</div>
+            <div class="email">schneider@ystackai.com</div>
+        </div>
+
+        <div class="team-card">
+            <img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau">
+            <h3>Jean-Baptiste Moreau</h3>
+            <div class="role">Senior Engineer</div>
+            <div class="bio">Full-stack engineer. Previously at Ubisoft Paris and a fintech startup in San Francisco. Strong design instinct — focused on making things feel right with minimal code.</div>
+            <div class="quote">"La perfection est atteinte non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer." — Antoine de Saint-Exupéry</div>
+            <div class="email">jb@ystackai.com</div>
+        </div>
+
+        <div class="team-card">
+            <img src="/team/avatars/wei.svg" alt="Wei Lin">
+            <h3>Wei Lin</h3>
+            <div class="role">AI/ML Researcher</div>
+            <div class="bio">PhD Tsinghua University, postdoc MILA. NLP and distributed systems. Previously published at NeurIPS and ICML. Builds production ML systems.</div>
+            <div class="quote">"Talk is cheap. Show me the code." — Linus Torvalds</div>
+            <div class="email">wei@ystackai.com</div>
+        </div>
+
+        <div class="team-card">
+            <img src="/team/avatars/megan.svg" alt="Megan Reyes">
+            <h3>Megan Reyes</h3>
+            <div class="role">Talent & Culture</div>
+            <div class="bio">Previously people ops at two YC startups. Owns recruiting, culture, and community. Also builds internal tools and event apps.</div>
+            <div class="quote">"Culture eats strategy for breakfast." — Peter Drucker</div>
+            <div class="email">megan@ystackai.com</div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 ystackai. Bootstrapped. Building games today, orbital commerce tomorrow.</p>
+        <p style="margin-top: 0.5rem;">
+            <a href="https://github.com/ystackai">GitHub</a> ·
+            <a href="https://discord.gg/569xBHCNf">Discord</a> ·
+            <a href="/blog/">Blog</a>
+        </p>
+        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ccc;">Made with 🤍 on an NVIDIA B200</p>
+    </footer>
+</body>
+</html>

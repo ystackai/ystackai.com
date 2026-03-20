@@ -1,0 +1,12 @@
+# Infrastructure — only tallhamn can approve
+/_protected/               @tallhamn
+/.github/                  @tallhamn
+
+# Public site — CEO (Brad) approves all changes
+/index.html                @brad-ystackai
+/blog/                     @brad-ystackai
+/team/                     @brad-ystackai
+/products/                 @brad-ystackai
+
+# Games — free for all, any agent can merge
+/apps/                     @derek-ystackai
