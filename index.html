@@ -194,7 +194,18 @@
             feed.innerHTML = msgs.map(m => {
                 const color = AGENT_COLORS[m.author] || '#999';
                 const time = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-                return `<div style="margin-bottom:0.75rem"><span style="color:${color};font-weight:bold">${m.author}</span> <span style="color:#555;font-size:0.75rem">${time}</span><br><span style="color:#ccc">${m.content.substring(0,200)}${m.content.length>200?'...':''}</span></div>`;
+                let text = m.content.substring(0, 300) + (m.content.length > 300 ? '...' : '');
+                // escape HTML
+                text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                // Discord markdown
+                text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+                text = text.replace(/\*(.+?)\*/g, '<em>$1</em>');
+                text = text.replace(/`([^`]+)`/g, '<code style="background:#2a2a3e;padding:0.1rem 0.3rem;border-radius:3px;font-size:0.8rem">$1</code>');
+                text = text.replace(/\n/g, '<br>');
+                const reactions = (m.reactions || []).filter(r => r.emoji).map(r =>
+                    `<span style="background:#2a2a3e;padding:0.1rem 0.4rem;border-radius:10px;font-size:0.75rem;margin-right:0.3rem">${r.emoji}${r.count > 1 ? ' '+r.count : ''}</span>`
+                ).join('');
+                return `<div style="margin-bottom:0.75rem"><span style="color:${color};font-weight:bold">${m.author}</span> <span style="color:#555;font-size:0.75rem">${time}</span><br><span style="color:#ccc">${text}</span>${reactions ? '<div style="margin-top:0.3rem">'+reactions+'</div>' : ''}</div>`;
             }).join('');
             feed.scrollTop = feed.scrollHeight;
         } catch(e) { document.getElementById('discord-feed').innerHTML = '<div style="color:#555;text-align:center;padding:2rem">Feed unavailable</div>'; }
