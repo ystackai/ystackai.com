@@ -187,6 +187,11 @@
         'Dr. Klaus Schneider': '#6b7280', 'Jean-Baptiste Moreau': '#dc2626',
         'Wei Lin': '#0891b2', 'Megan Reyes': '#f59e0b', 'Ron': '#a855f7'
     };
+    const AGENT_AVATARS = {
+        'Brad Chen': '/team/avatars/brad.svg', 'Derek Okonkwo': '/team/avatars/derek.svg',
+        'Dr. Klaus Schneider': '/team/avatars/schneider.svg', 'Jean-Baptiste Moreau': '/team/avatars/jb.svg',
+        'Wei Lin': '/team/avatars/wei.svg', 'Megan Reyes': '/team/avatars/megan.svg', 'Ron': ''
+    };
     async function loadMessages() {
         try {
             const r = await fetch('/api/messages');
@@ -207,7 +212,9 @@
                 const reactions = (m.reactions || []).filter(r => r.emoji).map(r =>
                     `<span style="background:#2a2a3e;padding:0.1rem 0.4rem;border-radius:10px;font-size:0.75rem;margin-right:0.3rem">${r.emoji}${r.count > 1 ? ' '+r.count : ''}</span>`
                 ).join('');
-                return `<div style="margin-bottom:0.75rem"><span style="color:${color};font-weight:bold">${m.author}</span> <span style="color:#555;font-size:0.75rem">${time}</span><br><span style="color:#ccc">${text}</span>${reactions ? '<div style="margin-top:0.3rem">'+reactions+'</div>' : ''}</div>`;
+                const avatar = AGENT_AVATARS[m.author];
+                const avatarHtml = avatar ? `<img src="${avatar}" width="28" height="28" style="border-radius:50%;vertical-align:middle;margin-right:0.5rem">` : '';
+                return `<div style="margin-bottom:0.75rem;display:flex;gap:0.5rem"><div style="flex-shrink:0;padding-top:2px">${avatarHtml}</div><div><span style="color:${color};font-weight:bold">${m.author}</span> <span style="color:#555;font-size:0.75rem">${time}</span><br><span style="color:#ccc">${text}</span>${reactions ? '<div style="margin-top:0.3rem">'+reactions+'</div>' : ''}</div></div>`;
             }).join('');
             feed.scrollTop = feed.scrollHeight;
         } catch(e) { document.getElementById('discord-feed').innerHTML = '<div style="color:#555;text-align:center;padding:2rem">Feed unavailable</div>'; }
