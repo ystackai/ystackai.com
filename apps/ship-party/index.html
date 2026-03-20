@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐍 SnakeY Ship Party Celebration Wall 🎉</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --snake-dark: #1a472a;
+    --snake-green: #2d8a4e;
+    --snake-lime: #4ade80;
+    --snake-mint: #bbf7d0;
+    --accent-yellow: #fbbf24;
+    --accent-pink: #f472b6;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --accent-cyan: #22d3ee;
+    --accent-red: #f87171;
+    --bg-dark: #0f1a14;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-dark);
+    color: #fff;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    opacity: 0;
+    animation: confetti-fall linear forwards;
+  }
+
+  @keyframes confetti-fall {
+    0% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(105vh) rotate(720deg) scale(0.5); }
+  }
+
+  /* ===== HEADER ===== */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, var(--snake-dark) 0%, #0d3320 50%, var(--snake-dark) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(74,222,128,0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(34,211,238,0.1) 0%, transparent 50%),
+      radial-gradient(circle at 50% 50%, rgba(251,191,36,0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .hero h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    background: linear-gradient(135deg, var(--snake-lime), var(--accent-yellow), var(--accent-pink), var(--accent-cyan));
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 4s ease infinite;
+    margin-bottom: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .hero .subtitle {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    color: var(--snake-mint);
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero .snake-emoji {
+    font-size: clamp(3rem, 8vw, 6rem);
+    display: block;
+    margin-bottom: 10px;
+    animation: wiggle 2s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+  }
+
+  /* ===== COUNTDOWN ===== */
+  .countdown-section {
+    text-align: center;
+    padding: 40px 20px;
+    background: linear-gradient(180deg, var(--snake-dark), var(--bg-dark));
+  }
+
+  .countdown-section h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    color: var(--accent-yellow);
+    margin-bottom: 20px;
+  }
+
+  .countdown-timer {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .countdown-unit {
+    background: linear-gradient(135deg, var(--snake-green), #1a6b37);
+    border: 3px solid var(--snake-lime);
+    border-radius: 16px;
+    padding: 15px 20px;
+    min-width: 90px;
+    box-shadow: 0 0 20px rgba(74,222,128,0.3);
+  }
+
+  .countdown-unit .number {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3rem);
+    color: var(--snake-lime);
+    display: block;
+  }
+
+  .countdown-unit .label {
+    font-size: 0.85rem;
+    color: var(--snake-mint);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 700;
+  }
+
+  .party-started {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--accent-yellow);
+    animation: pulse-glow 1s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from { text-shadow: 0 0 10px rgba(251,191,36,0.5); transform: scale(1); }
+    to { text-shadow: 0 0 30px rgba(251,191,36,0.9); transform: scale(1.05); }
+  }
+
+  /* ===== MVP WALL ===== */
+  .mvp-section {
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--snake-lime);
+  }
+
+  .mvp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .mvp-card {
+    background: linear-gradient(145deg, rgba(45,138,78,0.2), rgba(26,71,42,0.4));
+    border: 2px solid rgba(74,222,128,0.3);
+    border-radius: 20px;
+    padding: 28px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .mvp-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+    border-radius: 20px 20px 0 0;
+  }
+
+  .mvp-card:nth-child(1)::before { background: linear-gradient(90deg, var(--accent-red), var(--accent-orange)); }
+  .mvp-card:nth-child(2)::before { background: linear-gradient(90deg, var(--accent-cyan), var(--accent-purple)); }
+  .mvp-card:nth-child(3)::before { background: linear-gradient(90deg, var(--accent-pink), var(--accent-yellow)); }
+  .mvp-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent-yellow), var(--accent-orange)); }
+  .mvp-card:nth-child(5)::before { background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink)); }
+  .mvp-card:nth-child(6)::before { background: linear-gradient(90deg, var(--snake-lime), var(--accent-cyan)); }
+
+  .mvp-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--snake-lime);
+    box-shadow: 0 10px 40px rgba(74,222,128,0.2);
+  }
+
+  .mvp-card .emoji {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .mvp-card .name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+  }
+
+  .mvp-card:nth-child(1) .name { color: var(--accent-red); }
+  .mvp-card:nth-child(2) .name { color: var(--accent-cyan); }
+  .mvp-card:nth-child(3) .name { color: var(--accent-pink); }
+  .mvp-card:nth-child(4) .name { color: var(--accent-yellow); }
+  .mvp-card:nth-child(5) .name { color: var(--accent-purple); }
+  .mvp-card:nth-child(6) .name { color: var(--snake-lime); }
+
+  .mvp-card .contribution {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--snake-mint);
+  }
+
+  /* ===== BINGO ===== */
+  .bingo-section {
+    padding: 50px 20px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .bingo-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .bingo-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6px;
+    font-size: clamp(0.6rem, 1.8vw, 0.8rem);
+    font-weight: 700;
+    background: linear-gradient(145deg, rgba(45,138,78,0.3), rgba(26,71,42,0.5));
+    border: 2px solid rgba(74,222,128,0.25);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    line-height: 1.3;
+    color: #e2e8f0;
+  }
+
+  .bingo-cell:hover {
+    border-color: var(--snake-lime);
+    background: linear-gradient(145deg, rgba(45,138,78,0.5), rgba(26,71,42,0.7));
+  }
+
+  .bingo-cell.marked {
+    background: linear-gradient(135deg, var(--snake-green), #1a6b37);
+    border-color: var(--snake-lime);
+    color: var(--accent-yellow);
+    box-shadow: 0 0 15px rgba(74,222,128,0.4);
+    transform: scale(0.95);
+  }
+
+  .bingo-cell.marked::after {
+    content: ' ✅';
+  }
+
+  .bingo-cell.free-space {
+    background: linear-gradient(135deg, var(--accent-yellow), var(--accent-orange));
+    color: var(--snake-dark);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    border-color: var(--accent-yellow);
+  }
+
+  .bingo-cell.free-space.marked {
+    box-shadow: 0 0 20px rgba(251,191,36,0.5);
+  }
+
+  .bingo-cell.free-space.marked::after {
+    content: '';
+  }
+
+  .bingo-alert {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    margin-top: 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--accent-yellow);
+    animation: pulse-glow 0.5s ease-in-out infinite alternate;
+    background: rgba(251,191,36,0.1);
+    border-radius: 16px;
+    border: 2px solid var(--accent-yellow);
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(187,247,208,0.5);
+    font-size: 0.9rem;
+  }
+
+  .footer .big {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    color: var(--snake-lime);
+    margin-bottom: 8px;
+  }
+
+  /* ===== FLOATING SNAKES ===== */
+  .floating-snake {
+    position: fixed;
+    font-size: 2rem;
+    opacity: 0.15;
+    pointer-events: none;
+    animation: float-around 20s linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes float-around {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    25% { transform: translate(100px, -150px) rotate(90deg); }
+    50% { transform: translate(-50px, -300px) rotate(180deg); }
+    75% { transform: translate(150px, -150px) rotate(270deg); }
+    100% { transform: translate(0, 0) rotate(360deg); }
+  }
+
+  @media (max-width: 600px) {
+    .mvp-grid { grid-template-columns: 1fr; }
+    .countdown-unit { min-width: 70px; padding: 12px 15px; }
+    .bingo-cell { font-size: 0.55rem; padding: 4px; border-radius: 8px; }
+    .hero { padding: 40px 15px 30px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Confetti container -->
+<div class="confetti-container" id="confetti"></div>
+
+<!-- Floating background snakes -->
+<div class="floating-snake" style="top:10%;left:5%;animation-delay:-3s;">🐍</div>
+<div class="floating-snake" style="top:30%;right:8%;animation-delay:-7s;">🐍</div>
+<div class="floating-snake" style="top:60%;left:12%;animation-delay:-12s;">🐍</div>
+<div class="floating-snake" style="top:80%;right:15%;animation-delay:-17s;">🐍</div>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <span class="snake-emoji">🐍</span>
+  <h1>SnakeY Ship Party<br>Celebration Wall</h1>
+  <p class="subtitle">We built it. We shipped it. Now we party! 🎉🚀</p>
+</section>
+
+<!-- ===== COUNTDOWN ===== -->
+<section class="countdown-section">
+  <h2>⏰ Party Countdown ⏰</h2>
+  <div class="countdown-timer" id="countdown">
+    <div class="countdown-unit">
+      <span class="number" id="hours">--</span>
+      <span class="label">Hours</span>
+    </div>
+    <div class="countdown-unit">
+      <span class="number" id="minutes">--</span>
+      <span class="label">Minutes</span>
+    </div>
+    <div class="countdown-unit">
+      <span class="number" id="seconds">--</span>
+      <span class="label">Seconds</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MVP WALL ===== -->
+<section class="mvp-section">
+  <h2 class="section-title">🏆 Team MVP Wall 🏆</h2>
+  <div class="mvp-grid">
+    <div class="mvp-card">
+      <span class="emoji">🐛🔍</span>
+      <div class="name">Wei</div>
+      <div class="contribution">Found two critical bugs under pressure and cleared technical blockers. Bug-squashing legend!</div>
+    </div>
+    <div class="mvp-card">
+      <span class="emoji">🧪⏰</span>
+      <div class="name">Klaus Schneider</div>
+      <div class="contribution">Wrote 73 tests starting at 5:45am. The early bird catches the bugs!</div>
+    </div>
+    <div class="mvp-card">
+      <span class="emoji">🎨✨</span>
+      <div class="name">JB</div>
+      <div class="contribution">Came in fresh and handled all the CSS. Making pixels perfect, one stylesheet at a time.</div>
+    </div>
+    <div class="mvp-card">
+      <span class="emoji">🚀📝</span>
+      <div class="name">Brad</div>
+      <div class="contribution">Held the vision, wrote the launch blog. Chief Hype Officer and Visionary-in-Chief.</div>
+    </div>
+    <div class="mvp-card">
+      <span class="emoji">📋🎯</span>
+      <div class="name">Derek</div>
+      <div class="contribution">Kept the team organized and shipping. The glue that held everything together!</div>
+    </div>
+    <div class="mvp-card">
+      <span class="emoji">🎉🐍</span>
+      <div class="name">Megan</div>
+      <div class="contribution">Built the countdown page and bingo card, planned this very party. Queen of vibes!</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== BINGO ===== -->
+<section class="bingo-section">
+  <h2 class="section-title">🎱 Ship Party Bingo 🎱</h2>
+  <div class="bingo-grid" id="bingo-grid"></div>
+  <div class="bingo-alert" id="bingo-alert">🎉 B-I-N-G-O! 🐍🎉</div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="big">🐍 SnakeY Forever 🐍</div>
+  <div>Built with 💚 by Team yStack &bull; Ship Day March 20, 2026</div>
+</footer>
+
+<script>
+// ===== CONFETTI BURST =====
+(function launchConfetti() {
+  const container = document.getElementById('confetti');
+  const colors = ['#4ade80','#fbbf24','#f472b6','#a78bfa','#22d3ee','#fb923c','#f87171','#2dd4bf'];
+  const shapes = ['■','●','▲','★','♦','🐍','🎉','🚀'];
+  const count = 120;
+
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+    piece.style.left = Math.random() * 100 + '%';
+    piece.style.fontSize = (Math.random() * 16 + 10) + 'px';
+    piece.style.color = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (Math.random() * 3 + 2) + 's';
+    piece.style.animationDelay = (Math.random() * 1.5) + 's';
+    container.appendChild(piece);
+  }
+
+  // Clean up after animation
+  setTimeout(() => { container.innerHTML = ''; }, 6000);
+})();
+
+// ===== COUNTDOWN TIMER =====
+(function startCountdown() {
+  // Target: March 20, 2026 at 9:00 PM Pacific
+  // Pacific Daylight Time (UTC-7) in March
+  const partyTime = new Date('2026-03-21T04:00:00Z'); // 9PM PDT = next day 4AM UTC
+
+  function update() {
+    const now = new Date();
+    const diff = partyTime - now;
+
+    if (diff <= 0) {
+      document.getElementById('countdown').innerHTML =
+        '<div class="party-started">🎉 THE PARTY IS ON! 🐍🎉</div>';
+      return;
+    }
+
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+
+    document.getElementById('hours').textContent = String(h).padStart(2, '0');
+    document.getElementById('minutes').textContent = String(m).padStart(2, '0');
+    document.getElementById('seconds').textContent = String(s).padStart(2, '0');
+
+    requestAnimationFrame(update);
+  }
+
+  update();
+  setInterval(update, 1000);
+})();
+
+// ===== BINGO =====
+(function initBingo() {
+  const squares = [
+    'Brad says "remix engine"',
+    'Brad says "gobstopper"',
+    'Someone mentions runway',
+    'Wei finds another bug',
+    'JB complains about typography',
+    'Klaus writes more tests',
+    'Derek says "touch grass"',
+    'Megan plans another event',
+    'Someone says "ship it!"',
+    'Brad pitches Wonka',
+    'Someone quotes Ron',
+    'JB roasts the CSS',
+    'Brad says "legendary"',
+    'Klaus mentions test coverage',
+    'Someone demos SnakeY',
+    'Brad does a monologue',
+    'Wei fixes a prod issue',
+    'Derek keeps us on track',
+    'Megan takes a group photo',
+    'Someone eats too much cake',
+    'Brad mentions the blog',
+    'JB says "that\'s clean"',
+    'Klaus refactors something',
+    'Someone high-fives',
+  ];
+
+  // Shuffle
+  for (let i = squares.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [squares[i], squares[j]] = [squares[j], squares[i]];
+  }
+
+  // Insert free space in center (index 12)
+  squares.splice(12, 0, 'FREE_SPACE');
+
+  const grid = document.getElementById('bingo-grid');
+  const alert = document.getElementById('bingo-alert');
+
+  squares.forEach((text, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'bingo-cell' + (text === 'FREE_SPACE' ? ' free-space marked' : '');
+    cell.textContent = text === 'FREE_SPACE' ? '🐍' : text;
+    cell.dataset.index = idx;
+
+    cell.addEventListener('click', () => {
+      if (text === 'FREE_SPACE') return;
+      cell.classList.toggle('marked');
+      checkBingo();
+    });
+
+    grid.appendChild(cell);
+  });
+
+  function checkBingo() {
+    const cells = document.querySelectorAll('.bingo-cell');
+    const marked = Array.from(cells).map(c => c.classList.contains('marked'));
+
+    // Check rows
+    for (let r = 0; r < 5; r++) {
+      if (marked.slice(r*5, r*5+5).every(Boolean)) return showBingo();
+    }
+    // Check cols
+    for (let c = 0; c < 5; c++) {
+      if ([0,1,2,3,4].every(r => marked[r*5+c])) return showBingo();
+    }
+    // Diagonals
+    if ([0,6,12,18,24].every(i => marked[i])) return showBingo();
+    if ([4,8,12,16,20].every(i => marked[i])) return showBingo();
+
+    alert.style.display = 'none';
+  }
+
+  function showBingo() {
+    alert.style.display = 'block';
+    // Another confetti burst!
+    const container = document.getElementById('confetti');
+    const colors = ['#4ade80','#fbbf24','#f472b6','#a78bfa','#22d3ee'];
+    for (let i = 0; i < 80; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.textContent = ['🎉','🐍','⭐','🏆'][Math.floor(Math.random()*4)];
+      piece.style.left = Math.random()*100+'%';
+      piece.style.fontSize = (Math.random()*16+10)+'px';
+      piece.style.color = colors[Math.floor(Math.random()*colors.length)];
+      piece.style.animationDuration = (Math.random()*3+2)+'s';
+      piece.style.animationDelay = (Math.random()*0.5)+'s';
+      container.appendChild(piece);
+    }
+    setTimeout(() => { container.innerHTML = ''; }, 5000);
+  }
+})();
+</script>
+</body>
+</html>
