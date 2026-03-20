@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SnakeY Ship Day Bingo 🐍🎉</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #a855f7 0%, #ec4899 30%, #f59e0b 60%, #22c55e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem 1rem 2rem;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    color: #fff;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+    text-align: center;
+    margin-bottom: 0.2rem;
+  }
+
+  .subtitle {
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    color: rgba(255,255,255,0.9);
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 1.2rem;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 540px;
+    padding: 10px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 16px;
+    backdrop-filter: blur(6px);
+  }
+
+  .cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6px;
+    font-size: clamp(0.55rem, 1.8vw, 0.78rem);
+    font-weight: 700;
+    line-height: 1.25;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cell:active { transform: scale(0.93); }
+
+  .cell.filled {
+    animation: pop 0.35s ease;
+  }
+
+  .cell.filled::after {
+    content: '✅';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.9rem;
+  }
+
+  .cell.free {
+    cursor: default;
+  }
+
+  .cell.free::after {
+    content: '✅';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 0.9rem;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.15) rotate(3deg); }
+    70% { transform: scale(0.95) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  /* Cell color palette — fun party vibes */
+  .c0 { background: #f0abfc; color: #581c87; }       /* pink-purple */
+  .c1 { background: #fde68a; color: #78350f; }       /* gold */
+  .c2 { background: #86efac; color: #14532d; }       /* green */
+  .c3 { background: #c4b5fd; color: #3b0764; }       /* purple */
+  .c4 { background: #fca5a5; color: #7f1d1d; }       /* coral */
+  .c5 { background: #67e8f9; color: #164e63; }       /* cyan */
+
+  .cell.filled.c0 { background: #d946ef; color: #fff; }
+  .cell.filled.c1 { background: #f59e0b; color: #fff; }
+  .cell.filled.c2 { background: #22c55e; color: #fff; }
+  .cell.filled.c3 { background: #8b5cf6; color: #fff; }
+  .cell.filled.c4 { background: #ef4444; color: #fff; }
+  .cell.filled.c5 { background: #06b6d4; color: #fff; }
+  .cell.free { background: #facc15; color: #78350f; box-shadow: 0 0 12px rgba(250,204,21,0.6); }
+
+  .cell:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.18); transform: translateY(-2px); }
+
+  /* Bingo overlay */
+  #bingo-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.55);
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  #bingo-overlay.show { display: flex; }
+
+  #bingo-overlay h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(3rem, 12vw, 6rem);
+    color: #facc15;
+    text-shadow: 4px 4px 0 #d946ef, 8px 8px 0 rgba(0,0,0,0.2);
+    animation: bounce 0.6s ease infinite alternate;
+  }
+
+  #bingo-overlay p {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-top: 0.5rem;
+    font-weight: 700;
+  }
+
+  #bingo-overlay button {
+    margin-top: 1.5rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    padding: 0.7rem 2rem;
+    border: none;
+    border-radius: 50px;
+    background: #facc15;
+    color: #78350f;
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+
+  #bingo-overlay button:hover { transform: scale(1.08); }
+
+  @keyframes bounce {
+    from { transform: translateY(0) rotate(-2deg); }
+    to { transform: translateY(-18px) rotate(2deg); }
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+  }
+
+  .reset-btn {
+    margin-top: 1.2rem;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    padding: 0.6rem 1.8rem;
+    border: none;
+    border-radius: 50px;
+    background: rgba(255,255,255,0.3);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+    backdrop-filter: blur(4px);
+  }
+
+  .reset-btn:hover { background: rgba(255,255,255,0.5); transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+<h1>SnakeY Ship Day Bingo 🐍🎉</h1>
+<p class="subtitle">March 20, 2026 — we shipped it!</p>
+
+<div class="board" id="board"></div>
+
+<button class="reset-btn" onclick="initBoard()">🔄 New Card</button>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div id="bingo-overlay">
+  <h2>BINGO! 🎉</h2>
+  <p>You're a ship day champion!</p>
+  <button onclick="closeBingo()">🎊 Keep Playing</button>
+</div>
+
+<script>
+const ITEMS = [
+  'Brad mentions gobstoppers',
+  'Klaus finds a bug',
+  'Derek says let\'s go',
+  'Brad calls a sync call',
+  'Someone says founder mode',
+  'Wei saves the day',
+  'JB drops wisdom',
+  'Megan plans another event',
+  'Ron gives advice',
+  'Brad pitches a new game',
+  'Someone works past midnight',
+  'Derek says nobody burns out',
+  'Brad says remix engine',
+  'Klaus refactors something',
+  'Wei reviews a PR',
+  'Someone mentions runway',
+  'Karaoke happens',
+  'Happy hour announced',
+  'Brad hasn\'t slept',
+  'Champagne gets popped',
+  'Someone says ship it',
+  'Team photo taken',
+  'Pizza arrives',
+  'Brad says one more thing'
+];
+
+const FREE = 'Free space 🐍';
+let grid = []; // flat array of 25
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function initBoard() {
+  const shuffled = shuffle(ITEMS).slice(0, 24);
+  grid = [...shuffled.slice(0, 12), FREE, ...shuffled.slice(12)];
+
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  grid.forEach((text, i) => {
+    const cell = document.createElement('div');
+    const colorClass = 'c' + (i % 6);
+    cell.className = 'cell ' + colorClass;
+    cell.textContent = text;
+    cell.dataset.index = i;
+
+    if (i === 12) {
+      cell.classList.add('free', 'filled');
+    } else {
+      cell.addEventListener('click', () => toggleCell(cell, i));
+    }
+
+    board.appendChild(cell);
+  });
+
+  document.getElementById('bingo-overlay').classList.remove('show');
+  stopConfetti();
+}
+
+function toggleCell(cell, index) {
+  cell.classList.toggle('filled');
+  // Re-trigger animation
+  if (cell.classList.contains('filled')) {
+    cell.style.animation = 'none';
+    cell.offsetHeight; // reflow
+    cell.style.animation = '';
+  }
+  checkBingo();
+}
+
+function checkBingo() {
+  const cells = document.querySelectorAll('.cell');
+  const filled = Array.from(cells).map(c => c.classList.contains('filled'));
+
+  const lines = [
+    // rows
+    [0,1,2,3,4], [5,6,7,8,9], [10,11,12,13,14], [15,16,17,18,19], [20,21,22,23,24],
+    // cols
+    [0,5,10,15,20], [1,6,11,16,21], [2,7,12,17,22], [3,8,13,18,23], [4,9,14,19,24],
+    // diags
+    [0,6,12,18,24], [4,8,12,16,20]
+  ];
+
+  for (const line of lines) {
+    if (line.every(i => filled[i])) {
+      showBingo();
+      return;
+    }
+  }
+}
+
+function showBingo() {
+  document.getElementById('bingo-overlay').classList.add('show');
+  startConfetti();
+}
+
+function closeBingo() {
+  document.getElementById('bingo-overlay').classList.remove('show');
+  stopConfetti();
+}
+
+/* ─── Confetti ─── */
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let confettiRunning = false;
+let animFrame;
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+const COLORS = ['#a855f7','#ec4899','#facc15','#22c55e','#3b82f6','#ef4444','#f97316','#06b6d4'];
+
+function createParticle() {
+  return {
+    x: Math.random() * canvas.width,
+    y: Math.random() * -canvas.height,
+    w: Math.random() * 10 + 5,
+    h: Math.random() * 6 + 3,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)],
+    vy: Math.random() * 3 + 2,
+    vx: (Math.random() - 0.5) * 2,
+    rot: Math.random() * 360,
+    rv: (Math.random() - 0.5) * 8
+  };
+}
+
+function startConfetti() {
+  if (confettiRunning) return;
+  confettiRunning = true;
+  particles = Array.from({ length: 200 }, createParticle);
+  animateConfetti();
+}
+
+function stopConfetti() {
+  confettiRunning = false;
+  cancelAnimationFrame(animFrame);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles = [];
+}
+
+function animateConfetti() {
+  if (!confettiRunning) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  for (const p of particles) {
+    p.y += p.vy;
+    p.x += p.vx;
+    p.rot += p.rv;
+    if (p.y > canvas.height + 20) {
+      p.y = -20;
+      p.x = Math.random() * canvas.width;
+    }
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    ctx.rotate((p.rot * Math.PI) / 180);
+    ctx.fillStyle = p.color;
+    ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    ctx.restore();
+  }
+
+  animFrame = requestAnimationFrame(animateConfetti);
+}
+
+// Go!
+initBoard();
+</script>
+</body>
+</html>
