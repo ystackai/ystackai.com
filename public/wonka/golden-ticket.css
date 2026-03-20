@@ -1,0 +1,115 @@
+/* ============================================================
+   StackY × Wonka — Golden Ticket Floating Animation
+   Every ticket finds its own path down. Pure magic.
+   ============================================================ */
+
+.golden-ticket-canvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.golden-ticket-particle {
+  position: absolute;
+  top: -60px;
+  font-size: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: ticket-fall linear forwards;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.4));
+}
+
+/* --- main fall: top → bottom with gentle sway --- */
+@keyframes ticket-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0) rotate(0deg) scale(0.6);
+  }
+  5% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(110vh) translateX(var(--drift-x, 40px)) rotate(var(--spin, 360deg)) scale(1);
+  }
+}
+
+/* --- trail shimmer left behind each ticket --- */
+.golden-ticket-trail {
+  position: absolute;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to bottom,
+    rgba(212, 175, 55, 0.5),
+    rgba(245, 208, 96, 0.15),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+  will-change: opacity, height;
+  animation: trail-glow ease-out forwards;
+}
+
+@keyframes trail-glow {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.3;
+    height: var(--trail-len, 80px);
+  }
+  100% {
+    opacity: 0;
+    height: var(--trail-len, 80px);
+  }
+}
+
+/* --- sparkle burst when a ticket first appears --- */
+.golden-ticket-sparkle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f5d060;
+  pointer-events: none;
+  opacity: 0;
+  animation: sparkle-pop 0.6s ease-out forwards;
+}
+
+@keyframes sparkle-pop {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--spark-x, 20px), var(--spark-y, -20px)) scale(0);
+  }
+}
+
+/* --- size variants for visual depth --- */
+.golden-ticket-particle.size-sm { font-size: 1.2rem; }
+.golden-ticket-particle.size-md { font-size: 2rem; }
+.golden-ticket-particle.size-lg { font-size: 3rem; }
+
+/* --- reduced motion: respect the user, always --- */
+@media (prefers-reduced-motion: reduce) {
+  .golden-ticket-particle,
+  .golden-ticket-trail,
+  .golden-ticket-sparkle {
+    animation: none !important;
+    opacity: 0.06 !important;
+    transform: none !important;
+  }
+}
