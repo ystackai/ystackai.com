@@ -341,6 +341,10 @@
       <span class="score-label">Best</span>
       <span class="score-value high" id="hi-display">0</span>
     </div>
+    <div class="score-item">
+      <span class="score-label">Speed</span>
+      <span class="score-value" id="speed-display" style="color:#34d399;">1x</span>
+    </div>
   </div>
 
   <!-- Canvas + overlays -->
@@ -432,8 +436,12 @@
   const CELL = 24;
   /** Canvas logical size in CSS pixels. */
   const CANVAS_PX = 480;
-  /** Milliseconds per game logic tick — constant regardless of display Hz. */
-  const TICK_MS = 150;
+  /** Base milliseconds per game logic tick — decreases as score rises. */
+  const TICK_MS_BASE = 150;
+  /** Minimum tick interval at high scores (floor). */
+  const TICK_MS_MIN  = 70;
+  /** Score at which tick interval reaches the floor. */
+  const SPEED_CAP_SCORE = 30;
   /** Faster tick for Light Cycle mode — more intensity. */
   const TRON_TICK_MS = 100;
   /** localStorage key for the persisted hi-score. */
@@ -456,6 +464,44 @@
     ArrowLeft:  'ArrowRight',
     ArrowRight: 'ArrowLeft',
   });
+
+  /** Current tick interval — lerps from TICK_MS_BASE to TICK_MS_MIN as score rises. */
+  function currentTickMs() {
+    const t = Math.min(state.score / SPEED_CAP_SCORE, 1);
+    return TICK_MS_BASE - (TICK_MS_BASE - TICK_MS_MIN) * t;
+  }
+
+  // ── Particle effects ───────────────────────────────────────────────────
+
+  /**
+   * Floating "+N" particles spawned on food pickup.
+   * @type {{ x: number, y: number, text: string, born: number, dur: number }[]}
+   */
+  const particles = [];
+
+  /** Spawn a floating score particle at grid cell (gx, gy). */
+  function spawnParticle(gx, gy, text) {
+    particles.push({
+      x: gx * CELL + CELL / 2,
+      y: gy * CELL + CELL / 2,
+      text,
+      born: performance.now(),
+      dur: 600,
+    });
+  }
+
+  // ── Screen shake ──────────────────────────────────────────────────────
+
+  let shakeUntil = 0;
+  const SHAKE_DUR = 250;
+  const SHAKE_AMP = 4;
+
+  function triggerShake() { shakeUntil = performance.now() + SHAKE_DUR; }
+
+  // ── Death flash ───────────────────────────────────────────────────────
+
+  let deathFlashUntil = 0;
+  const DEATH_FLASH_DUR = 300;
 
   // ── localStorage hi-score ────────────────────────────────────────────────
 
@@ -624,6 +670,7 @@
   const gameoverEl = /** @type {HTMLElement} */ (document.getElementById('overlay-gameover'));
   const goScoreEl  = /** @type {HTMLElement} */ (document.getElementById('go-score'));
   const goHiEl     = /** @type {HTMLElement} */ (document.getElementById('go-hi'));
+  const speedEl    = /** @type {HTMLElement} */ (document.getElementById('speed-display'));
 
   // Populate hi-score from localStorage on page load.
   hiEl.textContent = String(state.hi);
@@ -691,10 +738,12 @@
 
   // ── Score UI ─────────────────────────────────────────────────────────────
 
-  /** Sync score and hi-score DOM elements with current state. */
+  /** Sync score, hi-score, and speed DOM elements with current state. */
   function updateScoreUI() {
     scoreEl.textContent = String(state.score);
     hiEl.textContent    = String(state.hi);
+    const speedMult     = TICK_MS_BASE / currentTickMs();
+    speedEl.textContent = speedMult.toFixed(1) + 'x';
   }
 
   // ── Food placement ───────────────────────────────────────────────────────
@@ -729,9 +778,10 @@
       { x:  9, y: 10 },
       { x:  8, y: 10 },
     ];
-    state.dir       = 'ArrowRight';
-    state.score     = 0;
-    dirQueue.length = 0;
+    state.dir        = 'ArrowRight';
+    state.score      = 0;
+    dirQueue.length  = 0;
+    particles.length = 0;
     if (!tronMode) placeFood();
     updateScoreUI();
     syncGameState();
@@ -766,9 +816,9 @@
     if (lastTs !== null) accumulated += Math.min(ts - lastTs, 250);
     lastTs = ts;
 
-    const tickInterval = tronMode ? TRON_TICK_MS : TICK_MS;
-    while (accumulated >= tickInterval) {
-      accumulated -= tickInterval;
+    const tickMs = tronMode ? TRON_TICK_MS : currentTickMs();
+    while (accumulated >= tickMs) {
+      accumulated -= tickMs;
       tick();
       if (state.phase !== 'playing') break; // die() or pause fired — stop ticking
     }
@@ -862,6 +912,7 @@
           saveHi(state.hi);
         }
         updateScoreUI();
+        spawnParticle(newHead.x, newHead.y, '+' + state.score);
         placeFood();
       }
     }
@@ -872,7 +923,10 @@
   const goEmojiEl = document.querySelector('#overlay-gameover .overlay-emoji');
   const goTitleEl = document.querySelector('#overlay-gameover .overlay-title');
 
-  /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
+  /**
+   * Transition to 'dead' phase, persist hi-score.
+   * Triggers screen shake + death flash, then shows game-over overlay after delay.
+   */
   function die() {
     state.phase = 'dead';
     // Update game-over overlay for mode
@@ -887,14 +941,29 @@
       state.hi = state.score;
       saveHi(state.hi);
     }
-    goScoreEl.textContent = String(state.score);
-    goHiEl.textContent    = String(state.hi);
-    hiEl.textContent      = String(state.hi);
-    // Update score label for mode
-    const goScoreLabelEl = document.querySelector('#overlay-gameover .overlay-score-label');
-    if (goScoreLabelEl) goScoreLabelEl.textContent = tronMode ? 'Survived' : 'Score';
-    gameoverEl.classList.remove('hidden');
-    syncGameState();
+    hiEl.textContent = String(state.hi);
+
+    // Visual feedback
+    triggerShake();
+    deathFlashUntil = performance.now() + DEATH_FLASH_DUR;
+
+    // Keep drawing during the flash, then show the overlay
+    function deathDraw(ts) {
+      draw(ts);
+      if (performance.now() < deathFlashUntil) {
+        requestAnimationFrame(deathDraw);
+      } else {
+        draw(ts); // final clean frame
+        goScoreEl.textContent = String(state.score);
+        goHiEl.textContent    = String(state.hi);
+        // Update score label for mode
+        const goScoreLabelEl = document.querySelector('#overlay-gameover .overlay-score-label');
+        if (goScoreLabelEl) goScoreLabelEl.textContent = tronMode ? 'Survived' : 'Score';
+        gameoverEl.classList.remove('hidden');
+        syncGameState();
+      }
+    }
+    requestAnimationFrame(deathDraw);
   }
 
   // ── State transitions ────────────────────────────────────────────────────
@@ -936,10 +1005,30 @@
    * @param {DOMHighResTimeStamp} ts - Forwarded to drawFood for pulsing animation
    */
   function draw(ts) {
+    // Screen shake offset
+    const now = performance.now();
+    if (now < shakeUntil) {
+      const intensity = (shakeUntil - now) / SHAKE_DUR; // 1→0
+      const sx = (Math.random() - 0.5) * 2 * SHAKE_AMP * intensity;
+      const sy = (Math.random() - 0.5) * 2 * SHAKE_AMP * intensity;
+      ctx.save();
+      ctx.translate(sx, sy);
+    }
+
     drawBg();
     if (!tronMode) drawFood(ts);
     drawSnake();
+    drawParticles(ts);
     if (state.phase === 'paused') drawPauseOverlay();
+
+    // Death flash overlay — translucent red pulse
+    if (now < deathFlashUntil) {
+      const flashT = (deathFlashUntil - now) / DEATH_FLASH_DUR;
+      ctx.fillStyle = `rgba(239,68,68,${0.25 * flashT})`;
+      ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+    }
+
+    if (now < shakeUntil) ctx.restore();
   }
 
   /** Solid background + grid lines. Tron mode: neon cyan grid on dark arena. */
@@ -1052,15 +1141,26 @@
     }
   }
 
+  /** Compute fill color for snake segment at index i of length len. */
+  function snakeColor(i, len) {
+    if (i === 0) return '#818cf8';
+    const t = len > 1 ? i / (len - 1) : 0;
+    const r = Math.round(99  + (49  - 99)  * t);
+    const g = Math.round(102 + (46  - 102) * t);
+    const b = Math.round(241 + (129 - 241) * t);
+    return `rgb(${r},${g},${b})`;
+  }
+
   /**
    * Snake segments — head in #818cf8, body interpolated #6366f1 → #312e81.
    * Tron mode: cyan light cycle with glowing trail.
-   * Drawn tail-first so the head always renders on top.
+   * Classic mode: draws connectors between adjacent segments to eliminate visible gaps,
+   * then draws rounded-rect segments tail-first so the head renders on top.
    */
   function drawSnake() {
     const { snake, dir } = state;
     const len  = snake.length;
-    const pad  = 1;           // inset (px) — creates visible gap between segments
+    const pad  = 1;
     const size = CELL - pad * 2;
 
     if (tronMode) {
@@ -1108,27 +1208,35 @@
         ctx.fill();
       }
     } else {
+      // Pass 1: fill connectors between adjacent segments (no gap)
+      for (let i = 0; i < len - 1; i++) {
+        const a = snake[i];
+        const b = snake[i + 1];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        if (Math.abs(dx) + Math.abs(dy) !== 1) continue;
+
+        ctx.fillStyle = snakeColor(i, len);
+        if (dx !== 0) {
+          const cx = Math.min(a.x, b.x) * CELL + CELL - pad;
+          ctx.fillRect(cx - pad, Math.min(a.y, b.y) * CELL + pad, pad * 2, size);
+        } else {
+          const cy = Math.min(a.y, b.y) * CELL + CELL - pad;
+          ctx.fillRect(Math.min(a.x, b.x) * CELL + pad, cy - pad, size, pad * 2);
+        }
+      }
+
+      // Pass 2: draw segments tail-first
       for (let i = len - 1; i >= 0; i--) {
         const seg = snake[i];
         const px  = seg.x * CELL + pad;
         const py  = seg.y * CELL + pad;
-        const t   = len > 1 ? i / (len - 1) : 0; // 0 = head, 1 = tail end
 
-        if (i === 0) {
-          ctx.fillStyle = '#818cf8';
-        } else {
-          // Lerp #6366f1 (99,102,241) → #312e81 (49,46,129)
-          const r = Math.round(99  + (49  - 99)  * t);
-          const g = Math.round(102 + (46  - 102) * t);
-          const b = Math.round(241 + (129 - 241) * t);
-          ctx.fillStyle = `rgb(${r},${g},${b})`;
-        }
-
+        ctx.fillStyle = snakeColor(i, len);
         roundRect(px, py, size, size, i === 0 ? 5 : 3);
         ctx.fill();
 
         if (i === 0) {
-          // Highlight ring around head
           ctx.strokeStyle = '#a5b4fc';
           ctx.lineWidth   = 1;
           roundRect(px, py, size, size, 5);
@@ -1191,6 +1299,31 @@
     ctx.fillStyle = '#64748b';
     ctx.font      = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     ctx.fillText('Press P or Space to resume', CANVAS_PX / 2, CANVAS_PX / 2 + 34);
+  }
+
+  /**
+   * Draw floating score particles and prune expired ones.
+   * @param {DOMHighResTimeStamp} ts
+   */
+  function drawParticles(ts) {
+    const now = performance.now();
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      const elapsed = now - p.born;
+      if (elapsed > p.dur) { particles.splice(i, 1); continue; }
+      const t = elapsed / p.dur; // 0→1
+      const alpha = 1 - t;
+      const yOff  = -20 * t;     // float upward
+
+      ctx.save();
+      ctx.globalAlpha  = alpha;
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font         = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+      ctx.fillStyle    = '#fbbf24';
+      ctx.fillText(p.text, p.x, p.y + yOff);
+      ctx.restore();
+    }
   }
 
   /**
