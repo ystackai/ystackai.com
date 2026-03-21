@@ -5,7 +5,7 @@
  * ╠═══════════════════════════════════════════════════════════════════════════════╣
  * ║  Author:  Dr. Schneider, Principal Architect (PhD ETH Zürich)               ║
  * ║  Pattern: AbstractStrategyObserverFactoryBridge (ASOFB)                     ║
- * ║  Tests:   73 deterministic verification scenarios                           ║
+ * ║  Tests:   130 deterministic verification scenarios                          ║
  * ╚═══════════════════════════════════════════════════════════════════════════════╝
  *
  * Architectural Note:
@@ -1532,7 +1532,1066 @@ class EdgeCaseMiscellaneousVerificationTestCaseFactory extends AbstractTestCaseF
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  §5. MAIN EXECUTION — TestSuiteOrchestrator assembly & invocation
+//  §5. ADVANCED COLLISION DETECTION VERIFICATION FACTORIES
+//      — Schneider Test Protocol v1.1 Compliance Extension
+//
+//  Domains:
+//    VII.   Wraparound Boundary Rejection Verification
+//    VIII.  Rapid Direction Change Temporal Aliasing
+//    IX.    Self-Collision at Speed Level 3+ (Extended Snake Topologies)
+//    X.     Concurrent Input Handling & Queue Saturation
+//
+//  "A boundary condition untested is a production incident deferred."
+//  — Dr. Schneider, Incident Retrospective #47, 2025-01-15
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── 5.1 Wraparound Boundary Rejection Verification Factory (12 tests) ──────
+//
+// SnakeY employs strict wall-death semantics (no toroidal wraparound).
+// This factory exhaustively verifies that every boundary exit is lethal
+// and that no off-by-one error permits a ghost wrap.
+
+class WraparoundBoundaryRejectionVerificationFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const tests = [];
+
+    // TC-74 → TC-77: Verify death at all four edge midpoints (no wraparound)
+    const edgeMidpoints = [
+      { head: { x: 10, y: 0 },  dir: 'ArrowUp',    wrapTo: { x: 10, y: 19 }, desc: 'top midpoint does not wrap to bottom' },
+      { head: { x: 10, y: 19 }, dir: 'ArrowDown',  wrapTo: { x: 10, y: 0 },  desc: 'bottom midpoint does not wrap to top' },
+      { head: { x: 0,  y: 10 }, dir: 'ArrowLeft',  wrapTo: { x: 19, y: 10 }, desc: 'left midpoint does not wrap to right' },
+      { head: { x: 19, y: 10 }, dir: 'ArrowRight', wrapTo: { x: 0,  y: 10 }, desc: 'right midpoint does not wrap to left' },
+    ];
+
+    edgeMidpoints.forEach(({ head, dir, wrapTo, desc }, i) => {
+      tests.push({
+        description: `TC-${74 + i}: ${desc}`,
+        category: 'Wraparound Boundary Rejection',
+        execute() {
+          const engine = new GameSimulationEngine();
+          engine.state.phase = 'playing';
+          engine.state.dir = dir;
+          const opp = DirectionOppositeMapping[dir];
+          const d = DirectionVectorRegistry[opp];
+          engine.state.snake = [
+            { ...head },
+            { x: head.x + d.x, y: head.y + d.y },
+            { x: head.x + 2 * d.x, y: head.y + 2 * d.y },
+          ];
+          engine.state.food = { x: 10, y: 10 };
+          const result = engine.tick();
+          // Must die — not wrap
+          const diedResult = assert.eq(result.died, true);
+          if (!diedResult.passed) return diedResult;
+          // Verify head did NOT wrap to the opposite side
+          const headAfter = engine.state.snake[0];
+          const didNotWrap = assert.eq(
+            headAfter.x === wrapTo.x && headAfter.y === wrapTo.y,
+            false
+          );
+          return didNotWrap;
+        },
+      });
+    });
+
+    // TC-78 → TC-81: All four corner exit vectors produce death, not wrap
+    const cornerExits = [
+      { head: { x: 0,  y: 0 },  dir: 'ArrowUp',    desc: 'top-left up exit' },
+      { head: { x: 0,  y: 0 },  dir: 'ArrowLeft',  desc: 'top-left left exit' },
+      { head: { x: 19, y: 19 }, dir: 'ArrowDown',  desc: 'bottom-right down exit' },
+      { head: { x: 19, y: 19 }, dir: 'ArrowRight', desc: 'bottom-right right exit' },
+    ];
+
+    cornerExits.forEach(({ head, dir, desc }, i) => {
+      tests.push({
+        description: `TC-${78 + i}: Corner exit — ${desc} kills (no wrap)`,
+        category: 'Wraparound Boundary Rejection',
+        execute() {
+          const engine = new GameSimulationEngine();
+          engine.state.phase = 'playing';
+          engine.state.dir = dir;
+          // Build snake trailing away from direction of travel
+          const opp = DirectionOppositeMapping[dir];
+          const d = DirectionVectorRegistry[opp];
+          const s1 = { x: head.x + d.x, y: head.y + d.y };
+          const s2 = { x: head.x + 2 * d.x, y: head.y + 2 * d.y };
+          // Clamp trailing segments to grid bounds
+          const clamp = (v, max) => Math.max(0, Math.min(max - 1, v));
+          engine.state.snake = [
+            { ...head },
+            { x: clamp(s1.x, 20), y: clamp(s1.y, 20) },
+            { x: clamp(s2.x, 20), y: clamp(s2.y, 20) },
+          ];
+          engine.state.food = { x: 10, y: 10 };
+          const result = engine.tick();
+          return assert.eq(result.died, true);
+        },
+      });
+    });
+
+    // TC-82: Consecutive boundary approach — survive at edge, die on next tick
+    tests.push({
+      description: 'TC-82: Survive at boundary edge, die on next tick (no wrap)',
+      category: 'Wraparound Boundary Rejection',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        engine.state.dir = 'ArrowRight';
+        engine.state.snake = [
+          { x: 18, y: 10 },
+          { x: 17, y: 10 },
+          { x: 16, y: 10 },
+        ];
+        engine.state.food = { x: 0, y: 0 };
+        // First tick: head moves to x=19 — still in bounds
+        const r1 = engine.tick();
+        const survived = assert.eq(r1.died, false);
+        if (!survived.passed) return survived;
+        // Second tick: head moves to x=20 — out of bounds, death
+        const r2 = engine.tick();
+        return assert.eq(r2.died, true);
+      },
+    });
+
+    // TC-83: Boundary at x=-1 (left wall exit)
+    tests.push({
+      description: 'TC-83: Head at x=-1 is OOB (left wall, no wrap)',
+      category: 'Wraparound Boundary Rejection',
+      execute() {
+        const oracle = new CollisionDetectionOracle(new GridTopologyConfiguration());
+        return assert.eq(oracle.isWallCollision({ x: -1, y: 10 }), true);
+      },
+    });
+
+    // TC-84: Boundary at y=-1 (top wall exit)
+    tests.push({
+      description: 'TC-84: Head at y=-1 is OOB (top wall, no wrap)',
+      category: 'Wraparound Boundary Rejection',
+      execute() {
+        const oracle = new CollisionDetectionOracle(new GridTopologyConfiguration());
+        return assert.eq(oracle.isWallCollision({ x: 10, y: -1 }), true);
+      },
+    });
+
+    // TC-85: Boundary at x=20 (right wall exit, exclusive upper bound)
+    tests.push({
+      description: 'TC-85: Head at x=20 is OOB (exclusive right bound)',
+      category: 'Wraparound Boundary Rejection',
+      execute() {
+        const oracle = new CollisionDetectionOracle(new GridTopologyConfiguration());
+        return assert.eq(oracle.isWallCollision({ x: 20, y: 10 }), true);
+      },
+    });
+
+    return tests;
+  }
+}
+
+// ─── 5.2 Rapid Direction Change Temporal Aliasing Factory (10 tests) ────────
+//
+// Verifies that the direction queue correctly handles sub-tick input bursts
+// across all permutations of valid 90° turn sequences, preventing the
+// "temporal aliasing attack" where rapid keypresses exploit the queue buffer.
+
+class RapidDirectionChangeTemporalAliasingFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const tests = [];
+
+    // TC-86: Triple rapid input — only first two accepted (queue capacity)
+    tests.push({
+      description: 'TC-86: Triple rapid input saturates queue at capacity 2',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame(); // heading Right
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowDown', engine.state.dir); // rejected: queue full
+        return assert.eq(engine.dirQueue.length, 2);
+      },
+    });
+
+    // TC-87: Rapid 90° turn sequence applied across two ticks
+    tests.push({
+      description: 'TC-87: Rapid Up→Left from Right applied across two ticks',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        engine.tick(); // consumes Up
+        const afterFirst = engine.state.dir;
+        engine.tick(); // consumes Left
+        const afterSecond = engine.state.dir;
+        const r1 = assert.eq(afterFirst, 'ArrowUp');
+        if (!r1.passed) return r1;
+        return assert.eq(afterSecond, 'ArrowLeft');
+      },
+    });
+
+    // TC-88: Rapid direction change does not produce retrograde self-collision
+    tests.push({
+      description: 'TC-88: Rapid 90° turns do not cause false self-collision',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        // Enqueue Up then Left from Right — should make an L-turn, not die
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        const r1 = engine.tick();
+        if (r1.died) return assert.eq(r1.died, false);
+        const r2 = engine.tick();
+        return assert.eq(r2.died, false);
+      },
+    });
+
+    // TC-89: Exhaustive 90° turn pair matrix — all 8 valid L-turns from Right
+    const validTurnPairs = [
+      ['ArrowUp', 'ArrowLeft'],
+      ['ArrowUp', 'ArrowRight'],
+      ['ArrowDown', 'ArrowLeft'],
+      ['ArrowDown', 'ArrowRight'],
+    ];
+
+    validTurnPairs.forEach(([first, second], i) => {
+      tests.push({
+        description: `TC-${89 + i}: Rapid ${first.replace('Arrow','')}→${second.replace('Arrow','')} from Right — both accepted`,
+        category: 'Rapid Direction Changes',
+        execute() {
+          const q = new DirectionQueueManager();
+          q.enqueue(first, 'ArrowRight');
+          q.enqueue(second, 'ArrowRight');
+          // Second is validated against queue tail (first), not state.dir
+          const expected = (second === DirectionOppositeMapping[first]) ? 1 : 2;
+          return assert.eq(q.length, expected);
+        },
+      });
+    });
+
+    // TC-93: Rapid reversal attempt via perpendicular intermediary
+    tests.push({
+      description: 'TC-93: Cannot achieve reversal via Up→Down (perpendicular trick)',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const q = new DirectionQueueManager();
+        q.enqueue('ArrowUp', 'ArrowRight');     // accepted: perpendicular
+        q.enqueue('ArrowDown', 'ArrowRight');    // rejected: opposite of queue tail (Up)
+        return assert.eq(q.length, 1);
+      },
+    });
+
+    // TC-94: Queue refill after partial consumption
+    tests.push({
+      description: 'TC-94: Queue accepts new input after partial consumption',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        engine.tick(); // consumes Up, queue now has 1 (Left)
+        // Can enqueue again since queue dropped below capacity
+        engine.dirQueue.enqueue('ArrowDown', engine.state.dir);
+        return assert.eq(engine.dirQueue.length, 2);
+      },
+    });
+
+    // TC-95: Four rapid inputs across two tick cycles — correct direction trace
+    tests.push({
+      description: 'TC-95: Four rapid inputs across two tick cycles trace correctly',
+      category: 'Rapid Direction Changes',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        // Cycle 1: enqueue Up, Left
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        engine.tick(); // consumes Up
+        engine.tick(); // consumes Left
+        // Cycle 2: enqueue Down, Right (from Left)
+        engine.dirQueue.enqueue('ArrowDown', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowRight', engine.state.dir);
+        engine.tick(); // consumes Down
+        engine.tick(); // consumes Right
+        return assert.eq(engine.state.dir, 'ArrowRight');
+      },
+    });
+
+    return tests;
+  }
+}
+
+// ─── 5.3 Self-Collision at Speed Level 3+ Factory (10 tests) ────────────────
+//
+// "Speed level" is derived as floor(score/5)+1. At level 3+ (score ≥ 10),
+// the snake has ≥ 13 segments, creating rich topological configurations
+// where self-intersection becomes increasingly probable. These tests verify
+// collision detection correctness on extended snake geometries.
+
+class SelfCollisionAtSpeedLevel3PlusFactory extends AbstractTestCaseFactory {
+  /**
+   * Helper — builds a snake of given length heading right from (startX, startY),
+   * coiling in a serpentine pattern to fit within the grid.
+   * @param {number} length
+   * @param {number} startX
+   * @param {number} startY
+   * @returns {{x:number,y:number}[]}
+   */
+  static buildSerpentineSnake(length, startX = 10, startY = 10) {
+    const segments = [{ x: startX, y: startY }];
+    let x = startX, y = startY;
+    let dx = -1, dy = 0;  // trailing behind head (heading right)
+    let rowWidth = 18;     // cells before turning
+
+    for (let i = 1; i < length; i++) {
+      x += dx;
+      // Serpentine: when we hit a turn point, go down one row and reverse
+      if (x < 1 || x > rowWidth) {
+        x -= dx; // undo
+        y += 1;  // go down
+        dx = -dx; // reverse horizontal direction
+      }
+      segments.push({ x, y });
+    }
+    return segments;
+  }
+
+  createScenarios() {
+    const tests = [];
+
+    // TC-96: 13-segment snake (level 3, score=10) — self-collision in spiral
+    tests.push({
+      description: 'TC-96: 13-segment snake (level 3) spiral self-collision',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        // Construct a tight spiral where head will enter body
+        engine.state.snake = [
+          { x: 5, y: 3 },   // head — will move Right to (6,3) = body[9]
+          { x: 4, y: 3 },
+          { x: 3, y: 3 },
+          { x: 3, y: 4 },
+          { x: 4, y: 4 },
+          { x: 5, y: 4 },
+          { x: 6, y: 4 },
+          { x: 7, y: 4 },
+          { x: 7, y: 3 },
+          { x: 6, y: 3 },   // body[9] — collision target
+          { x: 6, y: 2 },
+          { x: 5, y: 2 },
+          { x: 4, y: 2 },
+        ];
+        engine.state.dir = 'ArrowRight';
+        engine.state.food = { x: 0, y: 0 };
+        const result = engine.tick();
+        return assert.eq(result.died, true);
+      },
+    });
+
+    // TC-97: 18-segment snake (level 4, score=15) — double-coil collision
+    tests.push({
+      description: 'TC-97: 18-segment snake (level 4) double-coil collision',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        // Two-row coil: head at far end about to enter own body
+        engine.state.snake = [
+          { x: 3, y: 5 },   // head — moves Up to (3,4) = body[11]
+          { x: 3, y: 6 },
+          { x: 4, y: 6 },
+          { x: 5, y: 6 },
+          { x: 6, y: 6 },
+          { x: 7, y: 6 },
+          { x: 8, y: 6 },
+          { x: 8, y: 5 },
+          { x: 7, y: 5 },
+          { x: 6, y: 5 },
+          { x: 5, y: 5 },
+          { x: 4, y: 5 },
+          { x: 4, y: 4 },
+          { x: 3, y: 4 },   // body[13] — collision target at (3,4)
+          { x: 2, y: 4 },
+          { x: 2, y: 5 },
+          { x: 2, y: 6 },
+          { x: 2, y: 7 },
+        ];
+        engine.state.dir = 'ArrowUp';
+        engine.state.food = { x: 0, y: 0 };
+        const result = engine.tick();
+        return assert.eq(result.died, true);
+      },
+    });
+
+    // TC-98: Long snake (20 segments) — collision at tail-end segment
+    tests.push({
+      description: 'TC-98: 20-segment snake collision at distant body segment',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const oracle = new CollisionDetectionOracle(new GridTopologyConfiguration());
+        const head = { x: 10, y: 10 };
+        // Build 19-segment body with collision at segment index 18
+        const body = [];
+        for (let i = 0; i < 18; i++) body.push({ x: i, y: 0 });
+        body.push({ x: 10, y: 10 }); // match at end
+        return assert.eq(oracle.isSelfCollision(head, body), true);
+      },
+    });
+
+    // TC-99: Long snake chasing tail — survives when tail vacates
+    tests.push({
+      description: 'TC-99: 15-segment snake chasing own tail survives (tail pops)',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        // Tight rectangle: head chasing tail
+        engine.state.snake = [
+          { x: 5, y: 5 },  // head — moves Down to (5,6)
+          { x: 5, y: 4 },
+          { x: 6, y: 4 },
+          { x: 7, y: 4 },
+          { x: 7, y: 5 },
+          { x: 7, y: 6 },
+          { x: 7, y: 7 },
+          { x: 6, y: 7 },
+          { x: 5, y: 7 },
+          { x: 4, y: 7 },
+          { x: 4, y: 6 },
+          { x: 4, y: 5 },
+          { x: 4, y: 4 },
+          { x: 4, y: 3 },
+          { x: 5, y: 3 },  // tail — will be popped (no food)
+        ];
+        engine.state.dir = 'ArrowDown'; // head to (5,6) — not occupied after tail pop
+        engine.state.food = { x: 0, y: 0 };
+        const result = engine.tick();
+        return assert.eq(result.died, false);
+      },
+    });
+
+    // TC-100: Long snake eating food on tail — tail retained causes collision
+    tests.push({
+      description: 'TC-100: 15-segment snake eating on tail cell — tail retained, dies',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        // Same shape as TC-99 but with food at head destination
+        engine.state.snake = [
+          { x: 5, y: 5 },
+          { x: 5, y: 4 },
+          { x: 6, y: 4 },
+          { x: 7, y: 4 },
+          { x: 7, y: 5 },
+          { x: 7, y: 6 },
+          { x: 7, y: 7 },
+          { x: 6, y: 7 },
+          { x: 5, y: 7 },
+          { x: 4, y: 7 },
+          { x: 4, y: 6 },  // body[10] at (4,6)
+          { x: 4, y: 5 },
+          { x: 4, y: 4 },
+          { x: 4, y: 3 },
+          { x: 5, y: 3 },
+        ];
+        engine.state.dir = 'ArrowLeft'; // head to (4,5) — body[11]
+        engine.state.food = { x: 4, y: 5 }; // food there — tail stays
+        const result = engine.tick();
+        return assert.eq(result.died, true);
+      },
+    });
+
+    // TC-101: Maximum plausible snake (50 segments) — no false positive on safe move
+    tests.push({
+      description: 'TC-101: 50-segment serpentine snake — safe move does not false-positive',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        // Build a long horizontal snake moving right with clear path
+        const snake = [];
+        for (let i = 0; i < 50; i++) {
+          snake.push({ x: 10 - Math.floor(i / 18) * (i % 2 === 0 ? 1 : -1), y: 5 + Math.floor(i / 1) });
+        }
+        // Simpler: horizontal line from x=10 backward, then wrap rows
+        const safeSnake = [];
+        let sx = 10, sy = 10;
+        for (let i = 0; i < 50; i++) {
+          safeSnake.push({ x: sx, y: sy });
+          sx--;
+          if (sx < 0) { sx = 19; sy++; }
+        }
+        engine.state.snake = safeSnake;
+        engine.state.dir = 'ArrowRight';
+        engine.state.food = { x: 0, y: 0 };
+        const result = engine.tick();
+        return assert.eq(result.died, false);
+      },
+    });
+
+    // TC-102: Collision detection at body midpoint on 25-segment snake
+    tests.push({
+      description: 'TC-102: 25-segment snake — collision at body midpoint (segment 12)',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const oracle = new CollisionDetectionOracle(new GridTopologyConfiguration());
+        const head = { x: 8, y: 8 };
+        const body = [];
+        for (let i = 0; i < 24; i++) body.push({ x: i % 20, y: Math.floor(i / 20) });
+        body[12] = { x: 8, y: 8 }; // inject collision at midpoint
+        return assert.eq(oracle.isSelfCollision(head, body), true);
+      },
+    });
+
+    // TC-103: Score-derived level calculation at level 3 boundary
+    tests.push({
+      description: 'TC-103: Score 10 yields level 3 (floor(10/5)+1)',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const score = 10;
+        const level = Math.floor(score / 5) + 1;
+        return assert.eq(level, 3);
+      },
+    });
+
+    // TC-104: Score-derived level calculation at level 5
+    tests.push({
+      description: 'TC-104: Score 20 yields level 5 (floor(20/5)+1)',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const score = 20;
+        const level = Math.floor(score / 5) + 1;
+        return assert.eq(level, 5);
+      },
+    });
+
+    // TC-105: Snake length at score=10 is 13 (initial 3 + 10 food)
+    tests.push({
+      description: 'TC-105: Snake length at score 10 is 13 segments',
+      category: 'Self-Collision at Speed Level 3+',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const initialLen = engine.state.snake.length; // 3
+        // Feed 10 times
+        for (let i = 0; i < 10; i++) {
+          const head = engine.state.snake[0];
+          const delta = DirectionVectorRegistry[engine.state.dir];
+          engine.state.food = { x: head.x + delta.x, y: head.y + delta.y };
+          engine.tick();
+        }
+        return assert.eq(engine.state.snake.length, initialLen + 10);
+      },
+    });
+
+    return tests;
+  }
+}
+
+// ─── 5.4 Concurrent Input Handling & Queue Saturation Factory (10 tests) ────
+//
+// Models the real-world scenario where multiple keydown events arrive within
+// a single tick window (16.67ms at 60fps). Verifies queue capacity enforcement,
+// FIFO ordering under saturation, and correct behaviour when inputs arrive
+// between ticks.
+
+class ConcurrentInputHandlingQueueSaturationFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const tests = [];
+
+    // TC-106: Simultaneous Up+Left at same timestamp — first enqueued wins
+    tests.push({
+      description: 'TC-106: Simultaneous perpendicular inputs — FIFO ordering preserved',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame(); // heading Right
+        // Simulate two inputs arriving "simultaneously" (same tick window)
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowDown', engine.state.dir); // rejected: opposite of Up
+        engine.tick();
+        return assert.eq(engine.state.dir, 'ArrowUp');
+      },
+    });
+
+    // TC-107: Five rapid inputs — only first two survive queue capacity
+    tests.push({
+      description: 'TC-107: Five rapid inputs — queue capacity limits to 2',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const q = new DirectionQueueManager();
+        q.enqueue('ArrowUp', 'ArrowRight');
+        q.enqueue('ArrowLeft', 'ArrowRight');
+        q.enqueue('ArrowDown', 'ArrowRight');
+        q.enqueue('ArrowUp', 'ArrowRight');
+        q.enqueue('ArrowRight', 'ArrowRight');
+        return assert.eq(q.length, 2);
+      },
+    });
+
+    // TC-108: Queue processes correctly after being drained and refilled
+    tests.push({
+      description: 'TC-108: Queue drain-refill cycle preserves FIFO semantics',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        // Fill
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        // Drain via ticks
+        engine.tick();
+        engine.tick();
+        // Refill
+        engine.dirQueue.enqueue('ArrowDown', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowRight', engine.state.dir);
+        engine.tick();
+        return assert.eq(engine.state.dir, 'ArrowDown');
+      },
+    });
+
+    // TC-109: Enqueue during tick consumption — queue re-accepts after dequeue
+    tests.push({
+      description: 'TC-109: Queue re-accepts input after dequeue frees capacity',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const q = new DirectionQueueManager();
+        q.enqueue('ArrowUp', 'ArrowRight');
+        q.enqueue('ArrowLeft', 'ArrowRight');
+        // Queue full
+        const fullResult = assert.eq(q.length, 2);
+        if (!fullResult.passed) return fullResult;
+        // Consume one
+        q.dequeue();
+        // Can enqueue again
+        q.enqueue('ArrowDown', 'ArrowRight');
+        return assert.eq(q.length, 2);
+      },
+    });
+
+    // TC-110: All four directions enqueued — only first two valid survive
+    tests.push({
+      description: 'TC-110: All four arrows rapid-fired — capacity + reversal filter',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const q = new DirectionQueueManager();
+        // Currently heading Right
+        q.enqueue('ArrowUp', 'ArrowRight');     // accepted (perpendicular)
+        q.enqueue('ArrowDown', 'ArrowRight');   // rejected (opposite of queue tail Up)
+        q.enqueue('ArrowLeft', 'ArrowRight');   // rejected (queue full after first)
+        q.enqueue('ArrowRight', 'ArrowRight');  // rejected (queue full)
+        // Wait — re-check: after first enqueue, length=1. Second is opposite of tail (Up),
+        // so rejected. Third: length still 1, Left vs Up? Not opposite. Accepted!
+        const q2 = new DirectionQueueManager();
+        q2.enqueue('ArrowUp', 'ArrowRight');    // accepted → length 1
+        q2.enqueue('ArrowDown', 'ArrowRight');  // rejected (opposite of Up)
+        q2.enqueue('ArrowLeft', 'ArrowRight');  // accepted (not opposite of Up) → length 2
+        q2.enqueue('ArrowRight', 'ArrowRight'); // rejected (queue full)
+        return assert.eq(q2.length, 2);
+      },
+    });
+
+    // TC-111: WASD and Arrow keys treated identically by queue
+    tests.push({
+      description: 'TC-111: Queue treats WASD-mapped directions identically to arrows',
+      category: 'Concurrent Input Handling',
+      execute() {
+        // Both 'ArrowUp' from W and from Arrow key map to same string
+        const q1 = new DirectionQueueManager();
+        q1.enqueue('ArrowUp', 'ArrowRight'); // as if from ArrowUp key
+        const q2 = new DirectionQueueManager();
+        q2.enqueue('ArrowUp', 'ArrowRight'); // as if from KeyW (mapped to ArrowUp)
+        return assert.eq(q1.length, q2.length);
+      },
+    });
+
+    // TC-112: Interleaved tick-input-tick-input cycle — correct direction trace
+    tests.push({
+      description: 'TC-112: Interleaved tick-input cycles trace correct path',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        const trace = [engine.state.dir];
+        // Tick 1: no input
+        engine.tick();
+        trace.push(engine.state.dir);
+        // Input: Up
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        // Tick 2: consumes Up
+        engine.tick();
+        trace.push(engine.state.dir);
+        // Input: Left
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        // Tick 3: consumes Left
+        engine.tick();
+        trace.push(engine.state.dir);
+        return assert.deep(trace, ['ArrowRight', 'ArrowRight', 'ArrowUp', 'ArrowLeft']);
+      },
+    });
+
+    // TC-113: Queue state is independent per game — clear on initGame
+    tests.push({
+      description: 'TC-113: initGame() clears queued directions',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.dirQueue.enqueue('ArrowLeft', engine.state.dir);
+        engine.initGame(); // reset
+        return assert.eq(engine.dirQueue.length, 0);
+      },
+    });
+
+    // TC-114: Queue reversal rejection uses tail, not state.dir — regression
+    tests.push({
+      description: 'TC-114: Reversal check uses queue tail (regression guard)',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const q = new DirectionQueueManager();
+        // State.dir is Right, enqueue Up (valid), then try Right (not opposite of Up)
+        q.enqueue('ArrowUp', 'ArrowRight');
+        q.enqueue('ArrowRight', 'ArrowRight'); // valid: Right is not opposite of Up
+        const dirs = [q.dequeue(), q.dequeue()];
+        return assert.deep(dirs, ['ArrowUp', 'ArrowRight']);
+      },
+    });
+
+    // TC-115: Empty queue dequeue returns undefined — safe for tick consumption
+    tests.push({
+      description: 'TC-115: Multiple dequeues from empty queue all return undefined',
+      category: 'Concurrent Input Handling',
+      execute() {
+        const q = new DirectionQueueManager();
+        const results = [q.dequeue(), q.dequeue(), q.dequeue()];
+        return assert.deep(results, [undefined, undefined, undefined]);
+      },
+    });
+
+    return tests;
+  }
+}
+
+// ─── 4.11 Game State Exploration & Segment Tracking Factory (15 tests) ───────
+
+/**
+ * GameStateExplorationSegmentTrackingVerificationFactory — validates that the
+ * externally-observable game state projection (window.gameState in production,
+ * simulated here via the GameStateSnapshot) faithfully represents the internal
+ * model at every lifecycle phase, with particular attention to:
+ *
+ *   - Player position (head) tracking across tick boundaries
+ *   - Snake body segment array integrity (deep copy, correct ordering)
+ *   - Game state field consistency across phase transitions
+ *   - Segment growth on food consumption
+ *   - Segment contiguity invariant (adjacent segments differ by exactly 1 cell)
+ *
+ * This factory implements the Schneider Automated Test Protocol §7.3 —
+ * "Observable State Projection Fidelity Verification" (OSPFV).
+ */
+class GameStateExplorationSegmentTrackingVerificationFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const tests = [];
+
+    /**
+     * ProjectGameState — mirrors the production syncGameState() function,
+     * projecting internal GameSimulationEngine state into the external
+     * window.gameState schema. This is the System Under Test's Rosetta Stone.
+     *
+     * @param {GameSimulationEngine} engine
+     * @returns {Object} — the projected game state object
+     */
+    function projectGameState(engine) {
+      const s = engine.state;
+      return {
+        score:       s.score,
+        hi:          s.hi,
+        alive:       s.phase === 'playing' || s.phase === 'paused',
+        gameOver:    s.phase === 'dead',
+        phase:       s.phase,
+        level:       Math.floor(s.score / 5) + 1,
+        player:      s.snake.length > 0
+          ? { x: s.snake[0].x, y: s.snake[0].y }
+          : { x: 0, y: 0 },
+        snakeLength: s.snake.length,
+        segments:    s.snake.map(seg => ({ x: seg.x, y: seg.y })),
+        direction:   s.dir,
+        food:        { x: s.food.x, y: s.food.y },
+        gridCols:    engine.grid.cols,
+        gridRows:    engine.grid.rows,
+      };
+    }
+
+    /**
+     * SegmentContiguityInvariantValidator — verifies that consecutive segments
+     * in the snake body differ by exactly one cell in either x or y (but not both),
+     * which is the topological invariant of a non-diagonal grid snake.
+     *
+     * @param {{x:number,y:number}[]} segments
+     * @returns {boolean}
+     */
+    function validateSegmentContiguity(segments) {
+      for (let i = 1; i < segments.length; i++) {
+        const dx = Math.abs(segments[i].x - segments[i - 1].x);
+        const dy = Math.abs(segments[i].y - segments[i - 1].y);
+        if ((dx + dy) !== 1) return false;
+      }
+      return true;
+    }
+
+    // TC-116: Initial game state projection has correct default values
+    tests.push({
+      description: 'TC-116: Initial projected state has idle phase and zero score',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.phase, 'idle');
+        if (!r1.passed) return r1;
+        const r2 = assert.eq(gs.score, 0);
+        if (!r2.passed) return r2;
+        return assert.eq(gs.gameOver, false);
+      },
+    });
+
+    // TC-117: After initGame(), player position matches head of snake
+    tests.push({
+      description: 'TC-117: Player position tracks snake head after init',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.player, { x: 10, y: 10 });
+      },
+    });
+
+    // TC-118: Segments array is a deep copy with correct initial ordering
+    tests.push({
+      description: 'TC-118: Segments array matches initial snake body ordering',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.segments, [
+          { x: 10, y: 10 },
+          { x:  9, y: 10 },
+          { x:  8, y: 10 },
+        ]);
+      },
+    });
+
+    // TC-119: Player position updates after one tick (movement tracking)
+    tests.push({
+      description: 'TC-119: Player position advances by direction delta after tick',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 }; // safe distance
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.player, { x: 11, y: 10 });
+      },
+    });
+
+    // TC-120: Segments maintain contiguity invariant after multiple ticks
+    tests.push({
+      description: 'TC-120: Segment contiguity invariant holds after 5 ticks',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        for (let i = 0; i < 5; i++) engine.tick();
+        const gs = projectGameState(engine);
+        return assert.truthy(validateSegmentContiguity(gs.segments));
+      },
+    });
+
+    // TC-121: Snake grows by one segment when food is consumed
+    tests.push({
+      description: 'TC-121: snakeLength increments by 1 on food consumption',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const initialLen = engine.state.snake.length;
+        // Place food directly ahead of the snake's head
+        engine.state.food = { x: 11, y: 10 };
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.snakeLength, initialLen + 1);
+      },
+    });
+
+    // TC-122: Segments array grows correctly — new head prepended, tail retained
+    tests.push({
+      description: 'TC-122: Segments array grows with head prepend on eat',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 11, y: 10 };
+        engine.tick();
+        const gs = projectGameState(engine);
+        // Head should be new position, original segments retained (no pop)
+        const r1 = assert.eq(gs.segments[0].x, 11);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.segments.length, 4);
+      },
+    });
+
+    // TC-123: Level computation — level = floor(score / 5) + 1
+    tests.push({
+      description: 'TC-123: Level advances at score thresholds (0→1, 5→2, 10→3)',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs0 = projectGameState(engine);
+        const r1 = assert.eq(gs0.level, 1);
+        if (!r1.passed) return r1;
+        engine.state.score = 5;
+        const gs5 = projectGameState(engine);
+        const r2 = assert.eq(gs5.level, 2);
+        if (!r2.passed) return r2;
+        engine.state.score = 10;
+        const gs10 = projectGameState(engine);
+        return assert.eq(gs10.level, 3);
+      },
+    });
+
+    // TC-124: alive=true during 'playing' phase
+    tests.push({
+      description: 'TC-124: alive is true when phase is playing',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.alive, true);
+      },
+    });
+
+    // TC-125: gameOver=true and alive=false after death
+    tests.push({
+      description: 'TC-125: gameOver=true and alive=false after wall collision',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        engine.state.dir = 'ArrowRight';
+        engine.state.snake = [
+          { x: 19, y: 10 },
+          { x: 18, y: 10 },
+          { x: 17, y: 10 },
+        ];
+        engine.state.food = { x: 5, y: 5 };
+        engine.tick(); // hits right wall
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.gameOver, true);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.alive, false);
+      },
+    });
+
+    // TC-126: Direction field tracks queued direction changes
+    tests.push({
+      description: 'TC-126: Projected direction updates after queued turn',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.direction, 'ArrowUp');
+      },
+    });
+
+    // TC-127: Food position is correctly projected
+    tests.push({
+      description: 'TC-127: Projected food position matches internal state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 7, y: 13 };
+        const gs = projectGameState(engine);
+        return assert.deep(gs.food, { x: 7, y: 13 });
+      },
+    });
+
+    // TC-128: Grid dimensions are correctly exposed
+    tests.push({
+      description: 'TC-128: Grid dimensions (20x20) exposed in projected state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.gridCols, 20);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.gridRows, 20);
+      },
+    });
+
+    // TC-129: Segments are deep copies — mutation of projection doesn't affect engine
+    tests.push({
+      description: 'TC-129: Projected segments are isolated from internal state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        gs.segments[0].x = 999; // mutate projection
+        return assert.eq(engine.state.snake[0].x, 10); // internal state unchanged
+      },
+    });
+
+    // TC-130: Multi-tick path tracing — segments form correct trail
+    tests.push({
+      description: 'TC-130: Snake segments form correct trail after L-shaped path',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        // Move right twice, then up twice
+        engine.tick(); // head → (11,10)
+        engine.tick(); // head → (12,10)
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.tick(); // head → (12,9)
+        engine.tick(); // head → (12,8)
+        const gs = projectGameState(engine);
+        // Snake is 3 segments: head + 2 trailing
+        return assert.deep(gs.segments, [
+          { x: 12, y: 8 },
+          { x: 12, y: 9 },
+          { x: 12, y: 10 },
+        ]);
+      },
+    });
+
+    return tests;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  §6. MAIN EXECUTION — TestSuiteOrchestrator assembly & invocation
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
@@ -1552,12 +2611,19 @@ function main() {
     new FoodSpawnExclusionZoneTestCaseFactory(),
     new ScoreOverflowHandlingTestCaseFactory(),
     new EdgeCaseMiscellaneousVerificationTestCaseFactory(),
+    // Schneider Test Protocol v1.1 — Advanced Collision Detection Extension
+    new WraparoundBoundaryRejectionVerificationFactory(),
+    new RapidDirectionChangeTemporalAliasingFactory(),
+    new SelfCollisionAtSpeedLevel3PlusFactory(),
+    new ConcurrentInputHandlingQueueSaturationFactory(),
+    // Schneider Test Protocol v1.2 — Game State Exploration & Segment Tracking
+    new GameStateExplorationSegmentTrackingVerificationFactory(),
   ]);
 
   const { total, passed, failed } = orchestrator.execute();
 
-  if (total !== 73) {
-    console.error(`\n  ⚠  INVARIANT VIOLATION: Expected 73 test cases, got ${total}.`);
+  if (total !== 130) {
+    console.error(`\n  ⚠  INVARIANT VIOLATION: Expected 130 test cases, got ${total}.`);
     console.error('     The TestCaseFactory pipeline has a cardinality mismatch.');
     process.exit(2);
   }

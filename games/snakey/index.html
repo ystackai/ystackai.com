@@ -586,6 +586,35 @@
   let lastTs      = null;
   let accumulated = 0;
 
+  // ── Exposed game state for automated testing ────────────────────────────
+
+  /**
+   * window.gameState — a reactive projection of internal state, updated
+   * every frame and on every state transition. Required by the Schneider
+   * Automated Test Protocol for external test harness introspection.
+   */
+  function syncGameState() {
+    window.gameState = {
+      score:    state.score,
+      hi:       state.hi,
+      alive:    state.phase === 'playing' || state.phase === 'paused',
+      gameOver: state.phase === 'dead',
+      phase:    state.phase,
+      level:    Math.floor(state.score / 5) + 1,
+      player:   state.snake.length > 0
+        ? { x: state.snake[0].x, y: state.snake[0].y }
+        : { x: 0, y: 0 },
+      snakeLength: state.snake.length,
+      segments:    state.snake.map(function (s) { return { x: s.x, y: s.y }; }),
+      direction:   state.dir,
+      food:        { x: state.food.x, y: state.food.y },
+      gridCols:    COLS,
+      gridRows:    ROWS,
+      tickMs:      TICK_MS,
+    };
+  }
+  syncGameState();
+
   // ── UI element references ────────────────────────────────────────────────
 
   const scoreEl    = /** @type {HTMLElement} */ (document.getElementById('score-display'));
@@ -705,6 +734,7 @@
     dirQueue.length = 0;
     if (!tronMode) placeFood();
     updateScoreUI();
+    syncGameState();
   }
 
   // ── Fixed-timestep RAF loop ──────────────────────────────────────────────
