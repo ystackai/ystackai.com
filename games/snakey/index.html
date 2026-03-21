@@ -505,8 +505,12 @@
         ? { x: state.snake[0].x, y: state.snake[0].y }
         : { x: 0, y: 0 },
       snakeLength: state.snake.length,
+      segments:    state.snake.map(function (s) { return { x: s.x, y: s.y }; }),
       direction:   state.dir,
       food:        { x: state.food.x, y: state.food.y },
+      gridCols:    COLS,
+      gridRows:    ROWS,
+      tickMs:      TICK_MS,
     };
   }
   syncGameState();

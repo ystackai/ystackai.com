@@ -5,7 +5,7 @@
  * ╠═══════════════════════════════════════════════════════════════════════════════╣
  * ║  Author:  Dr. Schneider, Principal Architect (PhD ETH Zürich)               ║
  * ║  Pattern: AbstractStrategyObserverFactoryBridge (ASOFB)                     ║
- * ║  Tests:   115 deterministic verification scenarios                          ║
+ * ║  Tests:   130 deterministic verification scenarios                          ║
  * ╚═══════════════════════════════════════════════════════════════════════════════╝
  *
  * Architectural Note:
@@ -2283,6 +2283,313 @@ class ConcurrentInputHandlingQueueSaturationFactory extends AbstractTestCaseFact
   }
 }
 
+// ─── 4.11 Game State Exploration & Segment Tracking Factory (15 tests) ───────
+
+/**
+ * GameStateExplorationSegmentTrackingVerificationFactory — validates that the
+ * externally-observable game state projection (window.gameState in production,
+ * simulated here via the GameStateSnapshot) faithfully represents the internal
+ * model at every lifecycle phase, with particular attention to:
+ *
+ *   - Player position (head) tracking across tick boundaries
+ *   - Snake body segment array integrity (deep copy, correct ordering)
+ *   - Game state field consistency across phase transitions
+ *   - Segment growth on food consumption
+ *   - Segment contiguity invariant (adjacent segments differ by exactly 1 cell)
+ *
+ * This factory implements the Schneider Automated Test Protocol §7.3 —
+ * "Observable State Projection Fidelity Verification" (OSPFV).
+ */
+class GameStateExplorationSegmentTrackingVerificationFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const tests = [];
+
+    /**
+     * ProjectGameState — mirrors the production syncGameState() function,
+     * projecting internal GameSimulationEngine state into the external
+     * window.gameState schema. This is the System Under Test's Rosetta Stone.
+     *
+     * @param {GameSimulationEngine} engine
+     * @returns {Object} — the projected game state object
+     */
+    function projectGameState(engine) {
+      const s = engine.state;
+      return {
+        score:       s.score,
+        hi:          s.hi,
+        alive:       s.phase === 'playing' || s.phase === 'paused',
+        gameOver:    s.phase === 'dead',
+        phase:       s.phase,
+        level:       Math.floor(s.score / 5) + 1,
+        player:      s.snake.length > 0
+          ? { x: s.snake[0].x, y: s.snake[0].y }
+          : { x: 0, y: 0 },
+        snakeLength: s.snake.length,
+        segments:    s.snake.map(seg => ({ x: seg.x, y: seg.y })),
+        direction:   s.dir,
+        food:        { x: s.food.x, y: s.food.y },
+        gridCols:    engine.grid.cols,
+        gridRows:    engine.grid.rows,
+      };
+    }
+
+    /**
+     * SegmentContiguityInvariantValidator — verifies that consecutive segments
+     * in the snake body differ by exactly one cell in either x or y (but not both),
+     * which is the topological invariant of a non-diagonal grid snake.
+     *
+     * @param {{x:number,y:number}[]} segments
+     * @returns {boolean}
+     */
+    function validateSegmentContiguity(segments) {
+      for (let i = 1; i < segments.length; i++) {
+        const dx = Math.abs(segments[i].x - segments[i - 1].x);
+        const dy = Math.abs(segments[i].y - segments[i - 1].y);
+        if ((dx + dy) !== 1) return false;
+      }
+      return true;
+    }
+
+    // TC-116: Initial game state projection has correct default values
+    tests.push({
+      description: 'TC-116: Initial projected state has idle phase and zero score',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.phase, 'idle');
+        if (!r1.passed) return r1;
+        const r2 = assert.eq(gs.score, 0);
+        if (!r2.passed) return r2;
+        return assert.eq(gs.gameOver, false);
+      },
+    });
+
+    // TC-117: After initGame(), player position matches head of snake
+    tests.push({
+      description: 'TC-117: Player position tracks snake head after init',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.player, { x: 10, y: 10 });
+      },
+    });
+
+    // TC-118: Segments array is a deep copy with correct initial ordering
+    tests.push({
+      description: 'TC-118: Segments array matches initial snake body ordering',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.segments, [
+          { x: 10, y: 10 },
+          { x:  9, y: 10 },
+          { x:  8, y: 10 },
+        ]);
+      },
+    });
+
+    // TC-119: Player position updates after one tick (movement tracking)
+    tests.push({
+      description: 'TC-119: Player position advances by direction delta after tick',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 }; // safe distance
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.deep(gs.player, { x: 11, y: 10 });
+      },
+    });
+
+    // TC-120: Segments maintain contiguity invariant after multiple ticks
+    tests.push({
+      description: 'TC-120: Segment contiguity invariant holds after 5 ticks',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        for (let i = 0; i < 5; i++) engine.tick();
+        const gs = projectGameState(engine);
+        return assert.truthy(validateSegmentContiguity(gs.segments));
+      },
+    });
+
+    // TC-121: Snake grows by one segment when food is consumed
+    tests.push({
+      description: 'TC-121: snakeLength increments by 1 on food consumption',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const initialLen = engine.state.snake.length;
+        // Place food directly ahead of the snake's head
+        engine.state.food = { x: 11, y: 10 };
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.snakeLength, initialLen + 1);
+      },
+    });
+
+    // TC-122: Segments array grows correctly — new head prepended, tail retained
+    tests.push({
+      description: 'TC-122: Segments array grows with head prepend on eat',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 11, y: 10 };
+        engine.tick();
+        const gs = projectGameState(engine);
+        // Head should be new position, original segments retained (no pop)
+        const r1 = assert.eq(gs.segments[0].x, 11);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.segments.length, 4);
+      },
+    });
+
+    // TC-123: Level computation — level = floor(score / 5) + 1
+    tests.push({
+      description: 'TC-123: Level advances at score thresholds (0→1, 5→2, 10→3)',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs0 = projectGameState(engine);
+        const r1 = assert.eq(gs0.level, 1);
+        if (!r1.passed) return r1;
+        engine.state.score = 5;
+        const gs5 = projectGameState(engine);
+        const r2 = assert.eq(gs5.level, 2);
+        if (!r2.passed) return r2;
+        engine.state.score = 10;
+        const gs10 = projectGameState(engine);
+        return assert.eq(gs10.level, 3);
+      },
+    });
+
+    // TC-124: alive=true during 'playing' phase
+    tests.push({
+      description: 'TC-124: alive is true when phase is playing',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.alive, true);
+      },
+    });
+
+    // TC-125: gameOver=true and alive=false after death
+    tests.push({
+      description: 'TC-125: gameOver=true and alive=false after wall collision',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.state.phase = 'playing';
+        engine.state.dir = 'ArrowRight';
+        engine.state.snake = [
+          { x: 19, y: 10 },
+          { x: 18, y: 10 },
+          { x: 17, y: 10 },
+        ];
+        engine.state.food = { x: 5, y: 5 };
+        engine.tick(); // hits right wall
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.gameOver, true);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.alive, false);
+      },
+    });
+
+    // TC-126: Direction field tracks queued direction changes
+    tests.push({
+      description: 'TC-126: Projected direction updates after queued turn',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.tick();
+        const gs = projectGameState(engine);
+        return assert.eq(gs.direction, 'ArrowUp');
+      },
+    });
+
+    // TC-127: Food position is correctly projected
+    tests.push({
+      description: 'TC-127: Projected food position matches internal state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 7, y: 13 };
+        const gs = projectGameState(engine);
+        return assert.deep(gs.food, { x: 7, y: 13 });
+      },
+    });
+
+    // TC-128: Grid dimensions are correctly exposed
+    tests.push({
+      description: 'TC-128: Grid dimensions (20x20) exposed in projected state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        const gs = projectGameState(engine);
+        const r1 = assert.eq(gs.gridCols, 20);
+        if (!r1.passed) return r1;
+        return assert.eq(gs.gridRows, 20);
+      },
+    });
+
+    // TC-129: Segments are deep copies — mutation of projection doesn't affect engine
+    tests.push({
+      description: 'TC-129: Projected segments are isolated from internal state',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        const gs = projectGameState(engine);
+        gs.segments[0].x = 999; // mutate projection
+        return assert.eq(engine.state.snake[0].x, 10); // internal state unchanged
+      },
+    });
+
+    // TC-130: Multi-tick path tracing — segments form correct trail
+    tests.push({
+      description: 'TC-130: Snake segments form correct trail after L-shaped path',
+      category: 'Game State Exploration',
+      execute() {
+        const engine = new GameSimulationEngine();
+        engine.initGame();
+        engine.state.food = { x: 0, y: 0 };
+        // Move right twice, then up twice
+        engine.tick(); // head → (11,10)
+        engine.tick(); // head → (12,10)
+        engine.dirQueue.enqueue('ArrowUp', engine.state.dir);
+        engine.tick(); // head → (12,9)
+        engine.tick(); // head → (12,8)
+        const gs = projectGameState(engine);
+        // Snake is 3 segments: head + 2 trailing
+        return assert.deep(gs.segments, [
+          { x: 12, y: 8 },
+          { x: 12, y: 9 },
+          { x: 12, y: 10 },
+        ]);
+      },
+    });
+
+    return tests;
+  }
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 //  §6. MAIN EXECUTION — TestSuiteOrchestrator assembly & invocation
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2309,12 +2616,14 @@ function main() {
     new RapidDirectionChangeTemporalAliasingFactory(),
     new SelfCollisionAtSpeedLevel3PlusFactory(),
     new ConcurrentInputHandlingQueueSaturationFactory(),
+    // Schneider Test Protocol v1.2 — Game State Exploration & Segment Tracking
+    new GameStateExplorationSegmentTrackingVerificationFactory(),
   ]);
 
   const { total, passed, failed } = orchestrator.execute();
 
-  if (total !== 115) {
-    console.error(`\n  ⚠  INVARIANT VIOLATION: Expected 115 test cases, got ${total}.`);
+  if (total !== 130) {
+    console.error(`\n  ⚠  INVARIANT VIOLATION: Expected 130 test cases, got ${total}.`);
     console.error('     The TestCaseFactory pipeline has a cardinality mismatch.');
     process.exit(2);
   }
