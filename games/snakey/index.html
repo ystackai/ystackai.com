@@ -615,12 +615,14 @@
    */
   window.gameState = {
     score: 0,
+    highScore: state.hi,
     alive: true,
     gameOver: false,
     phase: 'idle',
     level: 1,
     player: { x: 10, y: 10 },
     snake: [],
+    snakeLength: 0,
     food: { x: 0, y: 0 },
     dir: 'ArrowRight',
     gridCols: COLS,
@@ -640,12 +642,14 @@
   function syncGameState() {
     const head = state.snake.length > 0 ? state.snake[0] : { x: 0, y: 0 };
     window.gameState.score          = state.score;
+    window.gameState.highScore      = state.hi;
     window.gameState.alive          = state.phase === 'playing' || state.phase === 'paused';
     window.gameState.gameOver       = state.phase === 'dead';
     window.gameState.phase          = state.phase;
     window.gameState.level          = 1;
     window.gameState.player         = { x: head.x, y: head.y };
     window.gameState.snake          = state.snake.map(s => ({ x: s.x, y: s.y }));
+    window.gameState.snakeLength    = state.snake.length;
     window.gameState.food           = { x: state.food.x, y: state.food.y };
     window.gameState.dir            = state.dir;
     window.gameState.hi             = state.hi;
@@ -947,6 +951,7 @@
     if (!tronMode) drawFood(ts);
     drawSnake();
     if (state.phase === 'paused') drawPauseOverlay();
+    syncGameState();
   }
 
   /** Solid background + grid lines. Tron mode: neon cyan grid on dark arena. */
