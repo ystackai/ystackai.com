@@ -383,10 +383,10 @@
   </div>
 
   <!-- Keyboard controls hint (desktop) -->
-  <div class="controls">
-    Move: <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd>
+  <div class="controls" id="controls-hint">
+    Move: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
     &nbsp; or &nbsp;
-    <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
+    <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd>
     &nbsp;&nbsp;|&nbsp;&nbsp;
     Pause: <kbd>P</kbd> or <kbd>Space</kbd>
   </div>
@@ -434,6 +434,8 @@
   const CANVAS_PX = 480;
   /** Milliseconds per game logic tick — constant regardless of display Hz. */
   const TICK_MS = 150;
+  /** Faster tick for Light Cycle mode — more intensity. */
+  const TRON_TICK_MS = 100;
   /** localStorage key for the persisted hi-score. */
   const LS_KEY = 'snakey_hi';
   /** Minimum swipe distance (px) to register as a directional input. */
@@ -506,6 +508,30 @@
   let tronMode = false;
   const tronToggleEl = document.getElementById('tron-toggle');
 
+  const splashSubEl = document.querySelector('#overlay-splash .overlay-sub');
+  const splashTitleEl = document.querySelector('#overlay-splash .overlay-title');
+  const splashEmojiEl = document.querySelector('#overlay-splash .overlay-emoji');
+  const heroTitleEl = document.querySelector('.hero h1');
+  const heroSubEl = document.querySelector('.hero p');
+
+  function updateModeUI() {
+    if (tronMode) {
+      splashEmojiEl.textContent = '\u26A1';
+      splashTitleEl.textContent = 'Light Cycle';
+      splashSubEl.innerHTML = 'Ride the grid. Leave a neon trail.<br>Hit your trail or the wall and you derez.';
+      heroTitleEl.textContent = 'Light Cycle \u26A1';
+      heroSubEl.textContent = 'Survive the grid. Don\'t hit your own trail.';
+      if (scoreLabelEl) scoreLabelEl.textContent = 'Survived';
+    } else {
+      splashEmojiEl.textContent = '\uD83D\uDC0D';
+      splashTitleEl.textContent = 'SnakeY';
+      splashSubEl.innerHTML = 'Eat the food. Grow longer.<br>Don\'t hit walls or yourself.';
+      heroTitleEl.textContent = 'SnakeY \uD83D\uDC0D';
+      heroSubEl.textContent = 'Eat the food. Grow longer. Don\'t hit walls or yourself.';
+      if (scoreLabelEl) scoreLabelEl.textContent = 'Score';
+    }
+  }
+
   tronToggleEl.addEventListener('click', function (e) {
     e.stopPropagation();
     tronMode = !tronMode;
@@ -515,6 +541,7 @@
     wrapper.style.boxShadow = tronMode
       ? '0 0 0 1px rgba(0,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(0,255,255,0.12)'
       : '';
+    updateModeUI();
     // Redraw the idle canvas with the new mode
     if (state.phase === 'idle') initialDraw();
   });
@@ -562,6 +589,7 @@
   // ── UI element references ────────────────────────────────────────────────
 
   const scoreEl    = /** @type {HTMLElement} */ (document.getElementById('score-display'));
+  const scoreLabelEl = /** @type {HTMLElement} */ (document.querySelector('.score-bar .score-label'));
   const hiEl       = /** @type {HTMLElement} */ (document.getElementById('hi-display'));
   const splashEl   = /** @type {HTMLElement} */ (document.getElementById('overlay-splash'));
   const gameoverEl = /** @type {HTMLElement} */ (document.getElementById('overlay-gameover'));
@@ -635,7 +663,7 @@
     state.dir       = 'ArrowRight';
     state.score     = 0;
     dirQueue.length = 0;
-    placeFood();
+    if (!tronMode) placeFood();
     updateScoreUI();
   }
 
@@ -668,8 +696,9 @@
     if (lastTs !== null) accumulated += Math.min(ts - lastTs, 250);
     lastTs = ts;
 
-    while (accumulated >= TICK_MS) {
-      accumulated -= TICK_MS;
+    const tickInterval = tronMode ? TRON_TICK_MS : TICK_MS;
+    while (accumulated >= tickInterval) {
+      accumulated -= tickInterval;
       tick();
       if (state.phase !== 'playing') break; // die() or pause fired — stop ticking
     }
@@ -707,43 +736,82 @@
     // 3. Prepend new head
     state.snake.unshift(newHead);
 
-    // 4. Food check
-    const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
+    if (tronMode) {
+      // ── Light Cycle mode: no food, trail always grows, survival scoring ──
 
-    // 5. Trim tail (only when not growing)
-    if (!ateFood) state.snake.pop();
-
-    // 6. Wall collision (>= not > — boundary is exclusive)
-    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
-      die();
-      return;
-    }
-
-    // 7. Self collision — iterate body[1..n]; tail already removed when !ateFood
-    for (let i = 1; i < state.snake.length; i++) {
-      if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+      // Wall collision
+      if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
         die();
         return;
       }
-    }
 
-    // 8. Food effects
-    if (ateFood) {
+      // Trail collision — hit your own light trail and you derez
+      for (let i = 1; i < state.snake.length; i++) {
+        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+          die();
+          return;
+        }
+      }
+
+      // Survival score — every tick you're alive earns a point
       state.score += 1;
       if (state.score > state.hi) {
         state.hi = state.score;
         saveHi(state.hi);
       }
       updateScoreUI();
-      placeFood();
+    } else {
+      // ── Classic Snake mode ──
+
+      // 4. Food check
+      const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
+
+      // 5. Trim tail (only when not growing)
+      if (!ateFood) state.snake.pop();
+
+      // 6. Wall collision (>= not > — boundary is exclusive)
+      if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+        die();
+        return;
+      }
+
+      // 7. Self collision — iterate body[1..n]; tail already removed when !ateFood
+      for (let i = 1; i < state.snake.length; i++) {
+        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+          die();
+          return;
+        }
+      }
+
+      // 8. Food effects
+      if (ateFood) {
+        state.score += 1;
+        if (state.score > state.hi) {
+          state.hi = state.score;
+          saveHi(state.hi);
+        }
+        updateScoreUI();
+        placeFood();
+      }
     }
   }
 
   // ── Death ────────────────────────────────────────────────────────────────
 
+  const goEmojiEl = document.querySelector('#overlay-gameover .overlay-emoji');
+  const goTitleEl = document.querySelector('#overlay-gameover .overlay-title');
+
   /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
   function die() {
     state.phase = 'dead';
+    // Update game-over overlay for mode
+    if (tronMode) {
+      goEmojiEl.textContent = '\u26A1';
+      goTitleEl.textContent = 'Derezzed';
+    } else {
+      goEmojiEl.textContent = '\uD83D\uDC80';
+      goTitleEl.textContent = 'Game Over';
+    }
     if (state.score > state.hi) {
       state.hi = state.score;
       saveHi(state.hi);
@@ -751,6 +819,9 @@
     goScoreEl.textContent = String(state.score);
     goHiEl.textContent    = String(state.hi);
     hiEl.textContent      = String(state.hi);
+    // Update score label for mode
+    const goScoreLabelEl = document.querySelector('#overlay-gameover .overlay-score-label');
+    if (goScoreLabelEl) goScoreLabelEl.textContent = tronMode ? 'Survived' : 'Score';
     gameoverEl.classList.remove('hidden');
   }
 
@@ -763,6 +834,7 @@
   function startGame() {
     splashEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
+    updateModeUI();
     initGame();
     state.phase = 'playing';
     startLoop();
@@ -791,7 +863,7 @@
    */
   function draw(ts) {
     drawBg();
-    drawFood(ts);
+    if (!tronMode) drawFood(ts);
     drawSnake();
     if (state.phase === 'paused') drawPauseOverlay();
   }
@@ -1033,9 +1105,14 @@
 
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#a5b4fc';
+    ctx.fillStyle = tronMode ? '#00ffff' : '#a5b4fc';
     ctx.font      = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    if (tronMode) {
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 12;
+    }
     ctx.fillText('PAUSED', CANVAS_PX / 2, CANVAS_PX / 2);
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle = '#64748b';
     ctx.font      = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -1190,6 +1267,8 @@
     phase: state.phase,
     snakeLength: 3,
     tronMode: tronMode,
+    mode: 'classic',
+    trailLength: 0,
   };
 
   /** Sync window.gameState with internal state — called every tick & on death. */
@@ -1198,12 +1277,14 @@
     window.gameState.score       = state.score;
     window.gameState.alive       = state.phase === 'playing' || state.phase === 'paused';
     window.gameState.gameOver    = state.phase === 'dead';
-    window.gameState.level       = 1 + Math.floor(state.score / 10);
+    window.gameState.level       = tronMode ? 1 : 1 + Math.floor(state.score / 10);
     window.gameState.player      = { x: head.x, y: head.y };
     window.gameState.highScore   = state.hi;
     window.gameState.phase       = state.phase;
     window.gameState.snakeLength = state.snake.length;
     window.gameState.tronMode    = tronMode;
+    window.gameState.mode        = tronMode ? 'lightcycle' : 'classic';
+    window.gameState.trailLength = tronMode ? state.snake.length - 1 : 0;
   }
 
   // ── Local metrics for launch dashboard ──────────────────────────────────
