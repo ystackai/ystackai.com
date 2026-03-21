@@ -61,9 +61,10 @@ var StackyInput = (function () {
         }
       }
 
-      // DAS for horizontal movement
+      // DAS for horizontal movement and soft drop
       if (key === 'ArrowLeft' || key === 'a' || key === 'A' ||
-          key === 'ArrowRight' || key === 'd' || key === 'D') {
+          key === 'ArrowRight' || key === 'd' || key === 'D' ||
+          key === 'ArrowDown' || key === 's' || key === 'S') {
         if (!e.repeat) {
           StackyGame.processInput(state, key);
           startDAS(key);
