@@ -1203,12 +1203,191 @@ class ColorPaletteContractTestFactory extends AbstractTestCaseFactory {
 }
 
 // ============================================================================
-// Section 12: Orchestration & Execution
+// Section 12: Boundary Rendering Verification Test Factory
+//             (ref: Schneider Test Protocol v2.0 §8.1 — Render Extrema)
+// ============================================================================
+
+/**
+ * BoundaryRenderingTestFactory
+ *
+ * Validates the rendering pipeline at grid boundary extrema: cells at row 0,
+ * row 19, column 0, and column 9. Ensures no off-by-one errors in pixel
+ * coordinate calculation and that boundary cells are rendered identically
+ * to interior cells.
+ */
+class BoundaryRenderingTestFactory extends AbstractTestCaseFactory {
+  createScenarios() {
+    const scenarios = [];
+
+    // TC-BR-01: Cell at (0, 0) — top-left corner renders
+    scenarios.push({
+      description: 'TC-BR-01: Filled cell at grid corner (0, 0) is rendered',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        state.grid[0][0] = 'T';
+        renderer.render(state);
+        const cell = recorder.operationsOfType('fillCell').find(
+          op => op.args.x === 0 && op.args.y === 0
+        );
+        check.truthy(cell !== undefined, 'corner cell (0,0) rendered');
+        check.eq(cell.args.color, PIECE_COLORS.T, 'corner cell has correct color');
+      },
+    });
+
+    // TC-BR-02: Cell at (9, 0) — top-right corner renders
+    scenarios.push({
+      description: 'TC-BR-02: Filled cell at grid corner (9, 0) is rendered',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        state.grid[0][9] = 'I';
+        renderer.render(state);
+        const cell = recorder.operationsOfType('fillCell').find(
+          op => op.args.x === 9 && op.args.y === 0
+        );
+        check.truthy(cell !== undefined, 'corner cell (9,0) rendered');
+        check.eq(cell.args.color, PIECE_COLORS.I, 'top-right corner has I color');
+      },
+    });
+
+    // TC-BR-03: Cell at (0, 19) — bottom-left corner renders
+    scenarios.push({
+      description: 'TC-BR-03: Filled cell at grid corner (0, 19) is rendered',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        state.grid[19][0] = 'S';
+        renderer.render(state);
+        const cell = recorder.operationsOfType('fillCell').find(
+          op => op.args.x === 0 && op.args.y === 19
+        );
+        check.truthy(cell !== undefined, 'corner cell (0,19) rendered');
+        check.eq(cell.args.color, PIECE_COLORS.S, 'bottom-left corner has S color');
+      },
+    });
+
+    // TC-BR-04: Cell at (9, 19) — bottom-right corner renders
+    scenarios.push({
+      description: 'TC-BR-04: Filled cell at grid corner (9, 19) is rendered',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        state.grid[19][9] = 'Z';
+        renderer.render(state);
+        const cell = recorder.operationsOfType('fillCell').find(
+          op => op.args.x === 9 && op.args.y === 19
+        );
+        check.truthy(cell !== undefined, 'corner cell (9,19) rendered');
+        check.eq(cell.args.color, PIECE_COLORS.Z, 'bottom-right corner has Z color');
+      },
+    });
+
+    // TC-BR-05: Active piece at row 0 boundary
+    scenarios.push({
+      description: 'TC-BR-05: Active piece cells at row 0 are rendered correctly',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState();
+        state.activePiece = {
+          type: 'I',
+          cells: [[-1, 0], [0, 0], [1, 0], [2, 0]],
+          rotation: 0,
+          x: 5, y: 0,
+        };
+        renderer.render(state);
+        const cells = recorder.operationsOfType('fillActivePieceCell');
+        check.eq(cells.length, 4, 'all 4 I-piece cells rendered at row 0');
+        for (const cell of cells) {
+          check.eq(cell.args.y, 0, 'piece cell at y=0');
+        }
+      },
+    });
+
+    // TC-BR-06: Ghost piece renders at row 19 boundary
+    scenarios.push({
+      description: 'TC-BR-06: Ghost piece projects to floor (row 19) on empty grid',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState();
+        state.activePiece = {
+          type: 'I',
+          cells: [[-1, 0], [0, 0], [1, 0], [2, 0]],
+          rotation: 0,
+          x: 5, y: 3,
+        };
+        renderer.render(state);
+        const ghostComplete = recorder.operationsOfType('ghostPieceComplete');
+        check.truthy(ghostComplete.length > 0, 'ghost rendered');
+        check.eq(ghostComplete[0].args.ghostY, 19, 'ghost projects to row 19');
+      },
+    });
+
+    // TC-BR-07: Full bottom row renders all 10 cells
+    scenarios.push({
+      description: 'TC-BR-07: Full row at y=19 renders all 10 filled cells',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        for (let x = 0; x < COLS; x++) state.grid[19][x] = 'G';
+        renderer.render(state);
+        const row19Cells = recorder.operationsOfType('fillCell').filter(
+          op => op.args.y === 19
+        );
+        check.eq(row19Cells.length, 10, 'all 10 cells in row 19 rendered');
+      },
+    });
+
+    // TC-BR-08: Full top row renders all 10 cells
+    scenarios.push({
+      description: 'TC-BR-08: Full row at y=0 renders all 10 filled cells',
+      category: 'Boundary Rendering',
+      execute: () => {
+        const recorder = new CanvasOperationRecorder();
+        const canvas = new MockCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+        const renderer = new StackYRendererKernel(canvas, recorder);
+        const state = createDefaultGameState({ activePiece: null });
+        for (let x = 0; x < COLS; x++) state.grid[0][x] = 'L';
+        renderer.render(state);
+        const row0Cells = recorder.operationsOfType('fillCell').filter(
+          op => op.args.y === 0
+        );
+        check.eq(row0Cells.length, 10, 'all 10 cells in row 0 rendered');
+      },
+    });
+
+    return scenarios;
+  }
+}
+
+// ============================================================================
+// Section 13: Orchestration & Execution
 // ============================================================================
 
 const orchestrator = new TestSuiteOrchestrator(
-  'StackY Renderer — Comprehensive Verification Suite v2.0.0 (Schneider Protocol)',
-  50
+  'StackY Renderer — Comprehensive Verification Suite v2.1.0 (Schneider Protocol)',
+  58
 );
 
 orchestrator.registerFactories([
