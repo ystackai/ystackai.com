@@ -248,6 +248,57 @@
       max-width: 360px;
     }
 
+    /* ── Tron Mode toggle ───────────────────────────────────────────────── */
+    .tron-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.25rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tron-toggle-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .tron-toggle.active .tron-toggle-label {
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    }
+    .tron-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: #1e1e2e;
+      border: 1px solid #334155;
+      border-radius: 11px;
+      transition: all 0.2s ease;
+    }
+    .tron-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: #64748b;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    .tron-toggle.active .tron-switch {
+      background: rgba(0, 255, 255, 0.15);
+      border-color: #00ffff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    .tron-toggle.active .tron-switch::after {
+      left: 20px;
+      background: #00ffff;
+      box-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+    }
+
     /* ── Footer ────────────────────────────────────────────────────────── */
     footer {
       text-align: center;
@@ -303,6 +354,10 @@
       <div class="overlay-sub">
         Eat the food. Grow longer.<br>
         Don't hit walls or yourself.
+      </div>
+      <div class="tron-toggle" id="tron-toggle">
+        <div class="tron-switch"></div>
+        <span class="tron-toggle-label">Tron Mode</span>
       </div>
       <div class="overlay-hint">Press Space or tap to play</div>
       <button class="btn" id="btn-start">Start Game</button>
@@ -445,6 +500,24 @@
   }
   applyResponsiveScale();
   window.addEventListener('resize', applyResponsiveScale);
+
+  // ── Tron Mode ──────────────────────────────────────────────────────────
+
+  let tronMode = false;
+  const tronToggleEl = document.getElementById('tron-toggle');
+
+  tronToggleEl.addEventListener('click', function (e) {
+    e.stopPropagation();
+    tronMode = !tronMode;
+    tronToggleEl.classList.toggle('active', tronMode);
+    // Update canvas wrapper border to match mode
+    wrapper.style.borderColor = tronMode ? 'rgba(0, 255, 255, 0.4)' : '';
+    wrapper.style.boxShadow = tronMode
+      ? '0 0 0 1px rgba(0,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(0,255,255,0.12)'
+      : '';
+    // Redraw the idle canvas with the new mode
+    if (state.phase === 'idle') initialDraw();
+  });
 
   // ── Game state ───────────────────────────────────────────────────────────
 
@@ -723,29 +796,59 @@
     if (state.phase === 'paused') drawPauseOverlay();
   }
 
-  /** Solid background + very subtle grid lines. */
+  /** Solid background + grid lines. Tron mode: neon cyan grid on dark arena. */
   function drawBg() {
-    ctx.fillStyle = '#0d0d14';
-    ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+    if (tronMode) {
+      ctx.fillStyle = '#0a0a12';
+      ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth   = 0.5;
-    for (let i = 1; i < COLS; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * CELL, 0);
-      ctx.lineTo(i * CELL, CANVAS_PX);
-      ctx.stroke();
-    }
-    for (let i = 1; i < ROWS; i++) {
-      ctx.beginPath();
-      ctx.moveTo(0, i * CELL);
-      ctx.lineTo(CANVAS_PX, i * CELL);
-      ctx.stroke();
+      // Neon grid
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.07)';
+      ctx.lineWidth = 0.5;
+      for (let i = 1; i < COLS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * CELL, 0);
+        ctx.lineTo(i * CELL, CANVAS_PX);
+        ctx.stroke();
+      }
+      for (let i = 1; i < ROWS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * CELL);
+        ctx.lineTo(CANVAS_PX, i * CELL);
+        ctx.stroke();
+      }
+
+      // Glowing border
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, CANVAS_PX - 2, CANVAS_PX - 2);
+      ctx.shadowBlur = 0;
+    } else {
+      ctx.fillStyle = '#0d0d14';
+      ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth   = 0.5;
+      for (let i = 1; i < COLS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * CELL, 0);
+        ctx.lineTo(i * CELL, CANVAS_PX);
+        ctx.stroke();
+      }
+      for (let i = 1; i < ROWS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * CELL);
+        ctx.lineTo(CANVAS_PX, i * CELL);
+        ctx.stroke();
+      }
     }
   }
 
   /**
    * Food pellet with pulsing radial glow (~0.8 Hz, ±12% of base radius).
+   * Tron mode: orange neon energy pickup.
    * @param {DOMHighResTimeStamp} ts
    */
   function drawFood(ts) {
@@ -756,30 +859,56 @@
     const r     = (CELL / 2 - 3) * pulse;
     const glowR = r + 7 * pulse;
 
-    // Outer radial glow
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-    grd.addColorStop(0, 'rgba(244,114,182,0.55)');
-    grd.addColorStop(1, 'rgba(244,114,182,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-    ctx.fill();
+    if (tronMode) {
+      // Neon orange glow
+      ctx.shadowColor = '#ff6600';
+      ctx.shadowBlur = 15;
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+      grd.addColorStop(0, 'rgba(255, 102, 0, 0.7)');
+      grd.addColorStop(1, 'rgba(255, 102, 0, 0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Food circle (#f472b6)
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Specular highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.38)';
-    ctx.beginPath();
-    ctx.arc(cx - r * 0.28, cy - r * 0.28, r * 0.32, 0, Math.PI * 2);
-    ctx.fill();
+      // White-hot core
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      // Outer radial glow
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+      grd.addColorStop(0, 'rgba(244,114,182,0.55)');
+      grd.addColorStop(1, 'rgba(244,114,182,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Food circle (#f472b6)
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Specular highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.38)';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.28, cy - r * 0.28, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   /**
    * Snake segments — head in #818cf8, body interpolated #6366f1 → #312e81.
+   * Tron mode: cyan light cycle with glowing trail.
    * Drawn tail-first so the head always renders on top.
    */
   function drawSnake() {
@@ -788,32 +917,78 @@
     const pad  = 1;           // inset (px) — creates visible gap between segments
     const size = CELL - pad * 2;
 
-    for (let i = len - 1; i >= 0; i--) {
-      const seg = snake[i];
-      const px  = seg.x * CELL + pad;
-      const py  = seg.y * CELL + pad;
-      const t   = len > 1 ? i / (len - 1) : 0; // 0 = head, 1 = tail end
+    if (tronMode) {
+      // Draw trail segments (tail to body) with fading cyan glow
+      for (let i = len - 1; i >= 1; i--) {
+        const seg = snake[i];
+        const fade = 1 - (i / len) * 0.6;
+        const px = seg.x * CELL + pad;
+        const py = seg.y * CELL + pad;
 
-      if (i === 0) {
-        ctx.fillStyle = '#818cf8';
-      } else {
-        // Lerp #6366f1 (99,102,241) → #312e81 (49,46,129)
-        const r = Math.round(99  + (49  - 99)  * t);
-        const g = Math.round(102 + (46  - 102) * t);
-        const b = Math.round(241 + (129 - 241) * t);
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        // Trail glow
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 6 * fade;
+        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
+        ctx.fillRect(px, py, size, size);
+
+        // Bright trail core line
+        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
+        ctx.fillRect(px + 3, py + 3, size - 6, size - 6);
+        ctx.shadowBlur = 0;
       }
 
-      roundRect(px, py, size, size, i === 0 ? 5 : 3);
-      ctx.fill();
+      // Draw the cycle head — bright white core with cyan glow
+      if (len > 0) {
+        const head = snake[0];
+        const hx = head.x * CELL;
+        const hy = head.y * CELL;
 
-      if (i === 0) {
-        // Highlight ring around head
-        ctx.strokeStyle = '#a5b4fc';
-        ctx.lineWidth   = 1;
-        roundRect(px, py, size, size, 5);
-        ctx.stroke();
-        drawEyes(seg, dir);
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(hx, hy, CELL, CELL);
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(hx + 3, hy + 3, CELL - 6, CELL - 6);
+
+        // Direction indicator — bright dot
+        const cx = hx + CELL / 2;
+        const cy = hy + CELL / 2;
+        const d = DELTA[dir];
+        ctx.fillStyle = '#00ffff';
+        ctx.beginPath();
+        ctx.arc(cx + d.x * 5, cy + d.y * 5, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      for (let i = len - 1; i >= 0; i--) {
+        const seg = snake[i];
+        const px  = seg.x * CELL + pad;
+        const py  = seg.y * CELL + pad;
+        const t   = len > 1 ? i / (len - 1) : 0; // 0 = head, 1 = tail end
+
+        if (i === 0) {
+          ctx.fillStyle = '#818cf8';
+        } else {
+          // Lerp #6366f1 (99,102,241) → #312e81 (49,46,129)
+          const r = Math.round(99  + (49  - 99)  * t);
+          const g = Math.round(102 + (46  - 102) * t);
+          const b = Math.round(241 + (129 - 241) * t);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+
+        roundRect(px, py, size, size, i === 0 ? 5 : 3);
+        ctx.fill();
+
+        if (i === 0) {
+          // Highlight ring around head
+          ctx.strokeStyle = '#a5b4fc';
+          ctx.lineWidth   = 1;
+          roundRect(px, py, size, size, 5);
+          ctx.stroke();
+          drawEyes(seg, dir);
+        }
       }
     }
   }
@@ -1014,6 +1189,7 @@
     highScore: state.hi,
     phase: state.phase,
     snakeLength: 3,
+    tronMode: tronMode,
   };
 
   /** Sync window.gameState with internal state — called every tick & on death. */
@@ -1027,6 +1203,7 @@
     window.gameState.highScore   = state.hi;
     window.gameState.phase       = state.phase;
     window.gameState.snakeLength = state.snake.length;
+    window.gameState.tronMode    = tronMode;
   }
 
   // ── Local metrics for launch dashboard ──────────────────────────────────
@@ -1062,8 +1239,9 @@
   /**
    * Render a static demo snake + food on the canvas before the game starts,
    * so there's something interesting visible through the semi-transparent splash.
+   * Called on page load and when Tron mode is toggled on the idle screen.
    */
-  (function initialDraw() {
+  function initialDraw() {
     drawBg();
 
     const pad  = 1;
@@ -1077,47 +1255,89 @@
     ];
     const dLen = demoSegs.length;
 
-    demoSegs.forEach((seg, i) => {
-      const t = dLen > 1 ? i / (dLen - 1) : 0;
-      if (i === 0) {
-        ctx.fillStyle = '#818cf8';
-      } else {
-        const r = Math.round(99  + (49  - 99)  * t);
-        const g = Math.round(102 + (46  - 102) * t);
-        const b = Math.round(241 + (129 - 241) * t);
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
+    if (tronMode) {
+      // Tron-style demo: light cycle trail with glow
+      for (let i = dLen - 1; i >= 1; i--) {
+        const seg = demoSegs[i];
+        const fade = 1 - (i / dLen) * 0.6;
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 6 * fade;
+        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
+        ctx.fillRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size);
+        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
+        ctx.fillRect(seg.x * CELL + pad + 3, seg.y * CELL + pad + 3, size - 6, size - 6);
+        ctx.shadowBlur = 0;
       }
-      roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, i === 0 ? 5 : 3);
-      ctx.fill();
-      if (i === 0) {
-        ctx.strokeStyle = '#a5b4fc';
-        ctx.lineWidth   = 1;
-        roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, 5);
-        ctx.stroke();
-      }
-    });
+      // Cycle head
+      const head = demoSegs[0];
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(head.x * CELL, head.y * CELL, CELL, CELL);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(head.x * CELL + 3, head.y * CELL + 3, CELL - 6, CELL - 6);
 
-    // Static food pellet (no pulsing on the idle screen)
-    const fc  = { x: 13, y: 10 };
-    const fcx = fc.x * CELL + CELL / 2;
-    const fcy = fc.y * CELL + CELL / 2;
-    const fr  = CELL / 2 - 3;
-    const grd = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, fr + 6);
-    grd.addColorStop(0, 'rgba(244,114,182,0.55)');
-    grd.addColorStop(1, 'rgba(244,114,182,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(fcx, fcy, fr + 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath();
-    ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.38)';
-    ctx.beginPath();
-    ctx.arc(fcx - fr * 0.28, fcy - fr * 0.28, fr * 0.32, 0, Math.PI * 2);
-    ctx.fill();
-  }());
+      // Orange neon food
+      const fc  = { x: 13, y: 10 };
+      const fcx = fc.x * CELL + CELL / 2;
+      const fcy = fc.y * CELL + CELL / 2;
+      const fr  = CELL / 2 - 3;
+      ctx.shadowColor = '#ff6600';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      demoSegs.forEach((seg, i) => {
+        const t = dLen > 1 ? i / (dLen - 1) : 0;
+        if (i === 0) {
+          ctx.fillStyle = '#818cf8';
+        } else {
+          const r = Math.round(99  + (49  - 99)  * t);
+          const g = Math.round(102 + (46  - 102) * t);
+          const b = Math.round(241 + (129 - 241) * t);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+        roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, i === 0 ? 5 : 3);
+        ctx.fill();
+        if (i === 0) {
+          ctx.strokeStyle = '#a5b4fc';
+          ctx.lineWidth   = 1;
+          roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, 5);
+          ctx.stroke();
+        }
+      });
+
+      // Static food pellet (no pulsing on the idle screen)
+      const fc  = { x: 13, y: 10 };
+      const fcx = fc.x * CELL + CELL / 2;
+      const fcy = fc.y * CELL + CELL / 2;
+      const fr  = CELL / 2 - 3;
+      const grd = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, fr + 6);
+      grd.addColorStop(0, 'rgba(244,114,182,0.55)');
+      grd.addColorStop(1, 'rgba(244,114,182,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr + 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.38)';
+      ctx.beginPath();
+      ctx.arc(fcx - fr * 0.28, fcy - fr * 0.28, fr * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  initialDraw();
 
 }());
 </script>
