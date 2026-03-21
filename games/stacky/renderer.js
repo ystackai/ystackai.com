@@ -21,10 +21,10 @@ const levelEl = document.getElementById('level');
 const linesEl = document.getElementById('lines');
 const overlay = document.getElementById('overlay');
 
-// --- line clear flash state ---
+// --- line clear animation state ---
 let clearingRows = [];
 let clearFlash = 0;
-const FLASH_FRAMES = 12;
+const FLASH_FRAMES = 18;
 
 export function triggerLineClear(rows) {
   clearingRows = rows;
@@ -82,10 +82,22 @@ function draw() {
     for (let c = 0; c < COLS; c++)
       if (state.board[r][c]) {
         const flashing = clearFlash > 0 && clearingRows.includes(r);
-        if (flashing && Math.floor(clearFlash / 2) % 2)
-          drawCell(ctx, c, r, '#fff');
-        else
+        if (flashing) {
+          const t = 1 - clearFlash / FLASH_FRAMES; // 0→1 progress
+          const sweep = (t * (COLS + 4) - 2); // sweep position across row
+          const dist = Math.abs(c - sweep);
+          const bright = Math.max(0, 1 - dist / 3);
+          const alpha = 1 - t * t; // fade out quadratically
+          drawCell(ctx, c, r, CANDY[(state.board[r][c] - 1) % CANDY.length], alpha);
+          if (bright > 0) {
+            ctx.globalAlpha = bright * alpha;
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+            ctx.globalAlpha = 1;
+          }
+        } else {
           drawCell(ctx, c, r, CANDY[(state.board[r][c] - 1) % CANDY.length]);
+        }
       }
 
   // ghost piece
@@ -139,6 +151,9 @@ function draw() {
 
   requestAnimationFrame(draw);
 }
+
+// wire up line-clear callback
+state.onLineClear = triggerLineClear;
 
 // start render loop
 draw();

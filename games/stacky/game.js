@@ -99,7 +99,6 @@ function tick(time) {
     if (!collides(state.piece.shape, state.piece.x, state.piece.y + 1)) state.piece.y++;
     else lock();
   }
-  window.gameState = { score: state.score, alive: !state.gameOver, gameOver: state.gameOver, level: state.level, lines: state.lines, player: state.piece ? { x: state.piece.x, y: state.piece.y } : null };
   requestAnimationFrame(tick);
 }
 
