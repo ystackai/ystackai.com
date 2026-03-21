@@ -10,6 +10,7 @@ var StackyInput = (function () {
   var TAP_THRESHOLD = 10;    // max movement for a tap
   var DAS_DELAY = 170;       // ms before auto-repeat starts
   var DAS_RATE = 50;         // ms between auto-repeat moves
+  var HARD_DROP_VELOCITY = 0.8; // px/ms — swipe faster than this = hard drop
 
   /**
    * Attach all input handlers. Returns a cleanup function.
@@ -26,6 +27,12 @@ var StackyInput = (function () {
     var dasTimer = null;
     var dasRepeatTimer = null;
 
+    /** Normalize key to lowercase for consistent DAS tracking. */
+    function normalizeKey(key) {
+      if (key.length === 1) return key.toLowerCase();
+      return key;
+    }
+
     function clearDAS() {
       dasKey = null;
       if (dasTimer) { clearTimeout(dasTimer); dasTimer = null; }
@@ -34,7 +41,7 @@ var StackyInput = (function () {
 
     function startDAS(key) {
       clearDAS();
-      dasKey = key;
+      dasKey = normalizeKey(key);
       dasTimer = setTimeout(function () {
         dasRepeatTimer = setInterval(function () {
           StackyGame.processInput(state, key);
@@ -77,7 +84,7 @@ var StackyInput = (function () {
     }
 
     function handleKeyup(e) {
-      var key = e.key;
+      var key = normalizeKey(e.key);
       // Stop DAS when the key is released
       if (dasKey === key) {
         clearDAS();
@@ -121,10 +128,14 @@ var StackyInput = (function () {
         if (dx > 0) StackyGame.moveRight(state);
         else StackyGame.moveLeft(state);
       } else if (absDy > SWIPE_THRESHOLD) {
-        // Vertical swipe
         if (dy > 0) {
-          // Swipe down — hard drop
-          StackyGame.hardDrop(state);
+          // Swipe down — velocity determines soft vs hard drop
+          var velocity = elapsed > 0 ? absDy / elapsed : 0;
+          if (velocity >= HARD_DROP_VELOCITY) {
+            StackyGame.hardDrop(state);
+          } else {
+            StackyGame.softDrop(state);
+          }
         } else {
           // Swipe up — hold
           StackyGame.hold(state);

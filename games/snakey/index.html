@@ -440,6 +440,8 @@
   const LS_KEY = 'snakey_hi';
   /** Minimum swipe distance (px) to register as a directional input. */
   const SWIPE_MIN = 20;
+  /** How long (ms) a Tron trail segment persists as a wall before fading out. */
+  const TRAIL_LIFETIME_MS = 7000;
 
   /** Direction string → {x,y} delta vector (y+ = downward in canvas space). */
   const DELTA = Object.freeze({
@@ -518,7 +520,7 @@
     if (tronMode) {
       splashEmojiEl.textContent = '\u26A1';
       splashTitleEl.textContent = 'Light Cycle';
-      splashSubEl.innerHTML = 'Ride the grid. Leave a neon trail.<br>Hit your trail or the wall and you derez.';
+      splashSubEl.innerHTML = 'Ride the grid. Your trail persists as a wall.<br>It fades after a few seconds — but hit it and you derez.';
       heroTitleEl.textContent = 'Light Cycle \u26A1';
       heroSubEl.textContent = 'Survive the grid. Don\'t hit your own trail.';
       if (scoreLabelEl) scoreLabelEl.textContent = 'Survived';
@@ -562,6 +564,7 @@
    *   food:  Cell,
    *   score: number,
    *   hi:    number,
+   *   tronTrail: Array<{x: number, y: number, placedAt: number}>,
    * }}
    */
   const state = {
@@ -571,6 +574,7 @@
     food:  { x: 0, y: 0 },
     score: 0,
     hi:    loadHi(),
+    tronTrail: [],
   };
 
   /**
@@ -626,7 +630,9 @@
     snakeLength: 0,
     tronMode: tronMode,
     mode: 'classic',
+    tronTrail: [],
     trailLength: 0,
+    trailLifetimeMs: TRAIL_LIFETIME_MS,
     dirQueueLength: 0,
   };
 
@@ -647,7 +653,9 @@
     window.gameState.snakeLength    = state.snake.length;
     window.gameState.tronMode       = tronMode;
     window.gameState.mode           = tronMode ? 'lightcycle' : 'classic';
-    window.gameState.trailLength    = tronMode ? state.snake.length - 1 : 0;
+    window.gameState.tronTrail      = state.tronTrail.map(t => ({ x: t.x, y: t.y, placedAt: t.placedAt }));
+    window.gameState.trailLength    = tronMode ? state.tronTrail.length : 0;
+    window.gameState.trailLifetimeMs = TRAIL_LIFETIME_MS;
     window.gameState.dirQueueLength = dirQueue.length;
   }
   syncGameState();
@@ -715,6 +723,7 @@
     ];
     state.dir       = 'ArrowRight';
     state.score     = 0;
+    state.tronTrail = [];
     dirQueue.length = 0;
     if (!tronMode) placeFood();
     updateScoreUI();
@@ -792,7 +801,19 @@
     state.snake.unshift(newHead);
 
     if (tronMode) {
-      // ── Light Cycle mode: no food, trail always grows, survival scoring ──
+      // ── Light Cycle mode: persistent trail wall, survival scoring ──
+      const now = Date.now();
+
+      // Add old head position to persistent trail
+      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
+
+      // Expire trail segments older than TRAIL_LIFETIME_MS
+      while (state.tronTrail.length > 0 && now - state.tronTrail[0].placedAt > TRAIL_LIFETIME_MS) {
+        state.tronTrail.shift();
+      }
+
+      // Keep snake short (just head) — trail is the separate array
+      if (state.snake.length > 1) state.snake.pop();
 
       // Wall collision
       if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
@@ -800,9 +821,9 @@
         return;
       }
 
-      // Trail collision — hit your own light trail and you derez
-      for (let i = 1; i < state.snake.length; i++) {
-        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+      // Trail collision — hit your own persistent trail and you derez
+      for (let i = 0; i < state.tronTrail.length; i++) {
+        if (state.tronTrail[i].x === newHead.x && state.tronTrail[i].y === newHead.y) {
           die();
           return;
         }
@@ -1050,21 +1071,25 @@
     const size = CELL - pad * 2;
 
     if (tronMode) {
-      // Draw trail segments (tail to body) with fading cyan glow
-      for (let i = len - 1; i >= 1; i--) {
-        const seg = snake[i];
-        const fade = 1 - (i / len) * 0.6;
+      // Draw persistent trail segments with age-based fade (cyan → dim → gone)
+      const trail = state.tronTrail;
+      for (let i = 0; i < trail.length; i++) {
+        const seg = trail[i];
+        const age = Date.now() - seg.placedAt;
+        const life = Math.max(0, 1 - age / TRAIL_LIFETIME_MS); // 1=fresh, 0=expired
+        if (life <= 0) continue;
+
         const px = seg.x * CELL + pad;
         const py = seg.y * CELL + pad;
 
-        // Trail glow
+        // Outer glow — fades with age
         ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 6 * fade;
-        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
+        ctx.shadowBlur = 8 * life;
+        ctx.fillStyle = `rgba(0, 95, 111, ${life * 0.85})`;
         ctx.fillRect(px, py, size, size);
 
-        // Bright trail core line
-        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
+        // Inner bright core — fades faster
+        ctx.fillStyle = `rgba(0, 255, 255, ${life * life * 0.6})`;
         ctx.fillRect(px + 3, py + 3, size - 6, size - 6);
         ctx.shadowBlur = 0;
       }
