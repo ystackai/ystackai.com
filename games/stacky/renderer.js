@@ -28,12 +28,45 @@
     '#0000f0',  // 7 = J (blue)
   ];
 
+  /** Candy glow palette (matching PIECE_COLORS order). */
+  var PIECE_GLOW = [
+    null,
+    '#7ff8f8',  // I
+    '#f8f87f',  // O
+    '#d07ff8',  // T
+    '#7ff87f',  // S
+    '#f87f7f',  // Z
+    '#f8d07f',  // L
+    '#7f7ff8',  // J
+  ];
+
   var GHOST_ALPHA = 0.2;
 
   // --- line clear animation state ---
   var clearingRows = [];
   var clearFlash = 0;
-  var FLASH_FRAMES = 18;
+  var FLASH_FRAMES = 20;
+
+  // --- particles ---
+  var particles = [];
+
+  function spawnParticles(rows) {
+    for (var ri = 0; ri < rows.length; ri++) {
+      var r = rows[ri];
+      for (var c = 0; c < COLS; c++) {
+        if (state.grid[r][c] === 0) continue;
+        var colorIdx = state.grid[r][c];
+        for (var i = 0; i < 3; i++) {
+          particles.push({
+            x: (c + 0.5) * CELL, y: (r + 0.5) * CELL,
+            vx: (Math.random() - 0.5) * 6, vy: -Math.random() * 4 - 2,
+            life: 1, decay: 0.02 + Math.random() * 0.02,
+            color: PIECE_COLORS[colorIdx], size: 2 + Math.random() * 3
+          });
+        }
+      }
+    }
+  }
 
   // ── Canvas setup ───────────────────────────────────────────────────────
 
@@ -123,6 +156,7 @@
   // ── Line-clear animation ─────────────────────────────────────────────
 
   function triggerLineClear(rows) {
+    spawnParticles(rows);
     clearingRows = rows.slice();
     clearFlash = FLASH_FRAMES;
   }
@@ -150,6 +184,7 @@
 
     // Advance line-clear flash animation
     if (clearFlash > 0) clearFlash--;
+    if (clearFlash === 0) clearingRows = [];
 
     // Run gravity tick
     StackyGame.tick(state, ts);
@@ -158,6 +193,7 @@
     if (state.phase === 'gameOver') {
       onGameOver();
       draw();
+      syncExposedState();
       StackyGame.syncGameState(state);
       return;
     }
@@ -176,6 +212,7 @@
     draw();
     drawHoldPanel();
     drawNextPanel();
+    syncExposedState();
     StackyGame.syncGameState(state);
 
     lastTs = ts;
@@ -187,6 +224,18 @@
     goHiEl.textContent = String(state.hi);
     gameoverEl.classList.remove('hidden');
     stopLoop();
+  }
+
+  /** Expose game state on window for external tooling / overlays. */
+  function syncExposedState() {
+    window.gameState = {
+      score: state.score,
+      alive: state.phase !== 'gameOver',
+      gameOver: state.phase === 'gameOver',
+      level: state.level,
+      lines: state.linesCleared,
+      player: state.activePiece ? { x: state.activePiece.x, y: state.activePiece.y } : null
+    };
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────
@@ -251,7 +300,7 @@
       for (var i = 0; i < ghostCells.length; i++) {
         var gc = ghostCells[i];
         if (gc.y >= 0) {
-          drawCell(ctx, gc.x, gc.y, PIECE_COLORS[colorIdx], GHOST_ALPHA);
+          drawGhostCell(gc.x, gc.y, colorIdx);
         }
       }
     }
@@ -267,33 +316,72 @@
         }
       }
     }
+
+    // Particles
+    ctx.shadowBlur = 0;
+    for (var pi = particles.length - 1; pi >= 0; pi--) {
+      var pt = particles[pi];
+      pt.x += pt.vx; pt.y += pt.vy; pt.vy += 0.15; pt.life -= pt.decay;
+      if (pt.life <= 0) { particles.splice(pi, 1); continue; }
+      ctx.globalAlpha = pt.life;
+      ctx.fillStyle = pt.color;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, pt.size * pt.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
 
   function drawCell(context, col, row, color, alpha) {
     var x = col * CELL;
     var y = row * CELL;
     var inset = 1;
+    var s = CELL - inset * 2;
+    var glowColor = PIECE_GLOW[PIECE_COLORS.indexOf(color)];
 
     context.save();
     context.globalAlpha = alpha;
 
+    // Glow
+    if (glowColor) {
+      context.shadowColor = glowColor;
+      context.shadowBlur = 8;
+    }
+
     // Main fill
     context.fillStyle = color;
-    context.fillRect(x + inset, y + inset, CELL - inset * 2, CELL - inset * 2);
+    context.fillRect(x + inset, y + inset, s, s);
+    context.shadowBlur = 0;
 
-    // Top highlight
-    context.fillStyle = 'rgba(255,255,255,0.2)';
-    context.fillRect(x + inset, y + inset, CELL - inset * 2, 2);
-
-    // Left highlight
-    context.fillStyle = 'rgba(255,255,255,0.1)';
-    context.fillRect(x + inset, y + inset, 2, CELL - inset * 2);
+    // Candy highlight
+    context.fillStyle = 'rgba(255,255,255,0.28)';
+    context.fillRect(x + inset + 2, y + inset + 2, s - 4, s * 0.32);
 
     // Bottom shadow
     context.fillStyle = 'rgba(0,0,0,0.3)';
-    context.fillRect(x + inset, y + CELL - inset - 2, CELL - inset * 2, 2);
+    context.fillRect(x + inset, y + CELL - inset - 2, s, 2);
 
     context.restore();
+  }
+
+  /** Ghost piece cell — semi-transparent with dashed outline. */
+  function drawGhostCell(col, row, colorIdx) {
+    var px = col * CELL + 1;
+    var py = row * CELL + 1;
+    var s = CELL - 2;
+    var color = PIECE_COLORS[colorIdx];
+
+    ctx.globalAlpha = 0.18;
+    ctx.fillStyle = color;
+    ctx.fillRect(px, py, s, s);
+
+    ctx.globalAlpha = 0.4;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 3]);
+    ctx.strokeRect(px, py, s, s);
+    ctx.setLineDash([]);
+    ctx.globalAlpha = 1;
   }
 
   // ── Side panel rendering ───────────────────────────────────────────────

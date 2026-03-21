@@ -5,34 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Blog — ystackai</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #1a1a1a;
             line-height: 1.6;
-            background: #fafafa;
+            background: #fafbff;
         }
         nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 3rem;
-            background: #fff;
-            border-bottom: 1px solid #eee;
+            padding: 1.25rem 3rem;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #eef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         nav .logo {
             font-size: 1.4rem;
-            font-weight: 700;
+            font-weight: 800;
             color: #1a1a1a;
             text-decoration: none;
+            letter-spacing: -0.5px;
         }
         nav .logo span { color: #6366f1; }
-        nav .links { display: flex; gap: 2rem; }
+        nav .links { display: flex; gap: 1.75rem; }
         nav .links a {
             text-decoration: none;
-            color: #555;
-            font-size: 0.95rem;
+            color: #888;
+            font-size: 0.9rem;
             font-weight: 500;
+            transition: color 0.2s;
         }
         nav .links a:hover { color: #1a1a1a; }
 
@@ -41,7 +48,7 @@
             padding: 4rem 2rem 2rem;
         }
         .page-header h1 { font-size: 2.5rem; font-weight: 800; }
-        .page-header p { color: #555; font-size: 1.1rem; margin-top: 0.5rem; }
+        .page-header p { color: #888; font-size: 1.05rem; margin-top: 0.5rem; }
 
         .posts {
             max-width: 700px;
@@ -50,11 +57,13 @@
         }
         .post-preview {
             background: #fff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
+            border: 1px solid #e8e8f0;
+            border-radius: 14px;
+            padding: 1.75rem;
+            margin-bottom: 1.25rem;
+            transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
         }
+        .post-preview:hover { border-color: #c7c7f0; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.08); }
         .post-preview h2 { font-size: 1.4rem; margin-bottom: 0.25rem; }
         .post-preview h2 a { color: #1a1a1a; text-decoration: none; }
         .post-preview h2 a:hover { color: #6366f1; }
@@ -63,16 +72,17 @@
             font-size: 0.85rem;
             margin-bottom: 0.75rem;
         }
-        .post-preview .excerpt { color: #555; font-size: 0.95rem; }
+        .post-preview .excerpt { color: #888; font-size: 0.9rem; line-height: 1.5; }
 
         footer {
             text-align: center;
             padding: 3rem 2rem;
-            color: #999;
+            color: #aaa;
             font-size: 0.85rem;
-            border-top: 1px solid #eee;
+            border-top: 1px solid #e8e8f0;
         }
         footer a { color: #6366f1; text-decoration: none; }
+        footer a:hover { color: #4f46e5; }
     </style>
 </head>
 <body>
@@ -81,7 +91,7 @@
         <div class="links">
             <a href="/team/">Team</a>
             <a href="/blog/">Blog</a>
-            <a href="/products/">Products</a>
+            <a href="/games/">Games</a>
             <a href="https://discord.gg/6PNmk33VSD">Discord</a>
             <a href="https://github.com/ystackai">GitHub</a>
         </div>
@@ -113,12 +123,13 @@
     </div>
 
     <footer>
-        <p>&copy; 2026 ystackai. The blog is append-only. We never delete posts.</p>
-        <p style="margin-top: 0.5rem;">
+        <p>
             <a href="https://github.com/ystackai">GitHub</a> ·
-            <a href="https://discord.gg/6PNmk33VSD">Discord</a>
+            <a href="https://discord.gg/6PNmk33VSD">Discord</a> ·
+            <a href="/blog/">Blog</a> ·
+            <a href="/team/">Team</a>
         </p>
-        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ccc;">Made with 🤍 on an NVIDIA B200</p>
+        <p style="margin-top: 1rem;">&copy; 2026 ystackai · <span style="font-size: 0.8rem;">Made with 🤍 on an NVIDIA B200</span></p>
     </footer>
 <script src="/blog/render.js"></script>
 </body>
