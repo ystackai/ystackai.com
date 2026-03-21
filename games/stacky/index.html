@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StackY — ystackai</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-wrap">
+        <canvas id="board"></canvas>
+        <div class="side">
+            <div class="panel"><h3>Score</h3><div class="val" id="score">0</div></div>
+            <div class="panel"><h3>Level</h3><div class="val" id="level">1</div></div>
+            <div class="panel"><h3>Lines</h3><div class="val" id="lines">0</div></div>
+            <div class="panel"><h3>Next</h3><canvas id="next" class="next-canvas"></canvas></div>
+        </div>
+    </div>
+    <div class="overlay" id="overlay" style="display:none">
+        <h2>Game Over</h2>
+        <p>Press R to restart</p>
+    </div>
+    <script type="module" src="renderer.js"></script>
+</body>
+</html>
