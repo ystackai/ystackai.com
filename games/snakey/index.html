@@ -797,37 +797,34 @@
     const head    = state.snake[0];
     const newHead = { x: head.x + dx, y: head.y + dy };
 
-    // 3. Prepend new head
-    state.snake.unshift(newHead);
-
     if (tronMode) {
       // ── Light Cycle mode: persistent trail wall, survival scoring ──
+
+      // Expire trail segments older than TRAIL_LIFETIME_MS (before collision check)
       const now = Date.now();
-
-      // Add old head position to persistent trail
-      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
-
-      // Expire trail segments older than TRAIL_LIFETIME_MS
       while (state.tronTrail.length > 0 && now - state.tronTrail[0].placedAt > TRAIL_LIFETIME_MS) {
         state.tronTrail.shift();
       }
 
-      // Keep snake short (just head) — trail is the separate array
-      if (state.snake.length > 1) state.snake.pop();
-
-      // Wall collision
+      // Wall collision — check BEFORE moving
       if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
         die();
         return;
       }
 
-      // Trail collision — hit your own persistent trail and you derez
+      // Trail collision — check BEFORE moving; hit your own persistent trail and you derez
       for (let i = 0; i < state.tronTrail.length; i++) {
         if (state.tronTrail[i].x === newHead.x && state.tronTrail[i].y === newHead.y) {
           die();
           return;
         }
       }
+
+      // All clear — commit the move
+      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
+      state.snake.unshift(newHead);
+      // Keep snake short (just head) — trail is the separate array
+      if (state.snake.length > 1) state.snake.pop();
 
       // Survival score — every tick you're alive earns a point
       state.score += 1;
@@ -838,6 +835,9 @@
       updateScoreUI();
     } else {
       // ── Classic Snake mode ──
+
+      // 3. Prepend new head
+      state.snake.unshift(newHead);
 
       // 4. Food check
       const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
