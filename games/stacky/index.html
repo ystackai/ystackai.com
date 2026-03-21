@@ -1009,7 +1009,7 @@
   //  2. All handler functions are named (not anonymous) so refs match
   //  3. All async work (RAF, setTimeout) is tracked by ID and cancelled
   //  4. Mutable state is reset to prevent stale data across reloads
-  //  5. HMR guard runs BEFORE reassigning window.stackyCleanup
+  //  5. HMR guard runs BEFORE reassigning window.stackyDestroy
 
   /** The beforeunload handler ref — stored so cleanup can remove it too. */
   let beforeUnloadRef = null;
@@ -1039,8 +1039,15 @@
       beforeUnloadRef = null;
     }
 
+    // Reset visual effect timers
+    shakeUntil = 0;
+
     // Clear particle pool
     particles.length = 0;
+
+    // Reset overlay visibility (splash shown, gameover hidden)
+    splashEl.classList.remove('hidden');
+    gameoverEl.classList.add('hidden');
 
     // Reset game state
     state.phase         = 'idle';
@@ -1063,12 +1070,12 @@
 
   // ── HMR guard — tear down previous instance BEFORE overwriting refs ───
 
-  if (typeof window.stackyCleanup === 'function' && window._stackyInitialized) {
-    window.stackyCleanup();
+  if (typeof window.stackyDestroy === 'function' && window._stackyInitialized) {
+    window.stackyDestroy();
   }
 
   // Now expose the new cleanup and mark as initialized
-  window.stackyCleanup = cleanup;
+  window.stackyDestroy = cleanup;
   window._stackyInitialized = true;
 
   // Clean up before page unload to ensure no lingering RAF
