@@ -498,6 +498,46 @@
   // Populate hi-score from localStorage on page load.
   hiEl.textContent = String(state.hi);
 
+  // ── Expose gameState for automated testing ────────────────────────────
+
+  /**
+   * window.gameState — a live, read-only-by-convention projection of the
+   * canonical game model. Updated every frame (and on death/pause transitions)
+   * so that external test harnesses, accessibility tools, and Schneider Protocol
+   * compliance auditors can observe the game without DOM scraping.
+   */
+  window.gameState = {
+    score: 0,
+    alive: true,
+    gameOver: false,
+    phase: 'idle',
+    level: 1,
+    player: { x: 10, y: 10 },
+    snake: [],
+    food: { x: 0, y: 0 },
+    dir: 'ArrowRight',
+    gridCols: COLS,
+    gridRows: ROWS,
+    hi: state.hi,
+    dirQueueLength: 0,
+  };
+
+  /** Sync window.gameState with internal state — called every frame and on transitions. */
+  function syncGameState() {
+    const head = state.snake.length > 0 ? state.snake[0] : { x: 0, y: 0 };
+    window.gameState.score          = state.score;
+    window.gameState.alive          = state.phase === 'playing' || state.phase === 'paused';
+    window.gameState.gameOver       = state.phase === 'dead';
+    window.gameState.phase          = state.phase;
+    window.gameState.level          = 1; // SnakeY has no levels — constant 1
+    window.gameState.player         = { x: head.x, y: head.y };
+    window.gameState.snake          = state.snake.map(s => ({ x: s.x, y: s.y }));
+    window.gameState.food           = { x: state.food.x, y: state.food.y };
+    window.gameState.dir            = state.dir;
+    window.gameState.hi             = state.hi;
+    window.gameState.dirQueueLength = dirQueue.length;
+  }
+
   // ── Direction queue ──────────────────────────────────────────────────────
 
   /**
@@ -602,6 +642,7 @@
     }
 
     draw(ts);
+    syncGameState();
     if (state.phase === 'playing') rafId = requestAnimationFrame(loop);
   }
 
@@ -679,6 +720,7 @@
     goHiEl.textContent    = String(state.hi);
     hiEl.textContent      = String(state.hi);
     gameoverEl.classList.remove('hidden');
+    syncGameState();
   }
 
   // ── State transitions ────────────────────────────────────────────────────
@@ -692,6 +734,7 @@
     gameoverEl.classList.add('hidden');
     initGame();
     state.phase = 'playing';
+    syncGameState();
     startLoop();
   }
 
@@ -708,6 +751,7 @@
       state.phase = 'playing';
       startLoop(); // fresh slate — lastTs=null, accumulated=0
     }
+    syncGameState();
   }
 
   // ── Rendering ────────────────────────────────────────────────────────────
