@@ -1414,6 +1414,9 @@ orchestrator.registerFactories([
 
   // Color palette (6 tests)
   wrapFactory(new ColorPaletteContractTestFactory()),
+
+  // Boundary rendering at grid extrema (8 tests)
+  wrapFactory(new BoundaryRenderingTestFactory()),
 ]);
 
 orchestrator.execute();

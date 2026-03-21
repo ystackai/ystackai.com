@@ -4474,9 +4474,12 @@ class ScoringMultiplierEdgeCaseTestFactory extends AbstractTestCaseFactory {
         const kernel = new StackYGameLogicKernel({ rng: new DeterministicRNG(8002) });
         kernel.start();
         kernel.level = 1;
-        // Fill bottom row with gap at x=5 for O-piece
-        kernel._fillRowPartial(19, 5);
-        kernel._fillRowPartial(18, 5);
+        // Fill bottom two rows with 2-column gap at x=5,6 for the O-piece
+        // O-piece cells: [0,0],[1,0],[0,1],[1,1] — occupies 2 columns at origin
+        for (let x = 0; x < COLS; x++) {
+          kernel.grid[19][x] = (x === 5 || x === 6) ? 0 : 'G';
+          kernel.grid[18][x] = (x === 5 || x === 6) ? 0 : 'G';
+        }
         // Place O-piece above gap
         kernel.activePiece = {
           type: 'O',
@@ -4486,9 +4489,9 @@ class ScoringMultiplierEdgeCaseTestFactory extends AbstractTestCaseFactory {
         };
         kernel.score = 0;
         kernel.hardDrop();
-        // Hard drop: 13 cells * 2 = 26 points, plus double clear 300 points = 326
-        // (combo bonus could add more if combo > 0)
-        check.truthy(kernel.score >= 26, 'hard drop + clear score is positive');
+        // Hard drop: O drops from y=5 to y=17 (bottom cells at 18,19), distance=12, score=24
+        // Plus double line clear: 300 * 1 = 300. Total >= 324
+        check.truthy(kernel.score >= 24, 'hard drop + clear score is positive');
       },
     });
 
