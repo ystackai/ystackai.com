@@ -30,6 +30,11 @@
 
   var GHOST_ALPHA = 0.2;
 
+  // --- line clear animation state ---
+  var clearingRows = [];
+  var clearFlash = 0;
+  var FLASH_FRAMES = 18;
+
   // ── Canvas setup ───────────────────────────────────────────────────────
 
   var canvas = document.getElementById('game-canvas');
@@ -115,6 +120,13 @@
     startGame();
   }
 
+  // ── Line-clear animation ─────────────────────────────────────────────
+
+  function triggerLineClear(rows) {
+    clearingRows = rows.slice();
+    clearFlash = FLASH_FRAMES;
+  }
+
   // ── RAF loop ───────────────────────────────────────────────────────────
 
   var lastTs = null;
@@ -135,6 +147,9 @@
 
   function loop(ts) {
     if (lastTs === null) lastTs = ts;
+
+    // Advance line-clear flash animation
+    if (clearFlash > 0) clearFlash--;
 
     // Run gravity tick
     StackyGame.tick(state, ts);
@@ -197,11 +212,27 @@
       ctx.stroke();
     }
 
-    // Locked blocks
+    // Locked blocks (with line-clear flash animation)
     for (var row = 0; row < ROWS; row++) {
       for (var col = 0; col < COLS; col++) {
         if (state.grid[row][col] !== 0) {
-          drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], 1);
+          var flashing = clearFlash > 0 && clearingRows.indexOf(row) !== -1;
+          if (flashing) {
+            var t = 1 - clearFlash / FLASH_FRAMES; // 0→1 progress
+            var sweep = (t * (COLS + 4) - 2);      // sweep position across row
+            var dist = Math.abs(col - sweep);
+            var bright = Math.max(0, 1 - dist / 3);
+            var alpha = 1 - t * t;                  // fade out quadratically
+            drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], alpha);
+            if (bright > 0) {
+              ctx.globalAlpha = bright * alpha;
+              ctx.fillStyle = '#fff';
+              ctx.fillRect(col * CELL + 1, row * CELL + 1, CELL - 2, CELL - 2);
+              ctx.globalAlpha = 1;
+            }
+          } else {
+            drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], 1);
+          }
         }
       }
     }
@@ -367,6 +398,9 @@
   window.addEventListener('beforeunload', cleanup);
 
   // ── Initial state ──────────────────────────────────────────────────────
+
+  // Wire up line-clear callback
+  state.onLineClear = triggerLineClear;
 
   StackyGame.syncGameState(state);
   draw();

@@ -1,0 +1,30 @@
+/* ── Pulsing grid overlay + border glow ──────────────────────────────── */
+/* Layer a CSS grid pattern on top of the canvas wrapper that pulses.    */
+/* The canvas draws underneath; this adds the "fever dream" glow.        */
+
+.canvas-wrapper {
+  animation: border-glow 2s ease-in-out infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(99,102,241,0.15), 0 20px 60px rgba(0,0,0,0.6), 0 0 40px rgba(99,102,241,0.05); border-color: rgba(99,102,241,0.25); }
+  50%      { box-shadow: 0 0 0 1px rgba(99,102,241,0.4),  0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(99,102,241,0.2);  border-color: rgba(99,102,241,0.6);  }
+}
+
+/* Pulsing grid lines via repeating-linear-gradient on a pseudo-element */
+.canvas-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background:
+    repeating-linear-gradient(90deg, transparent, transparent 23px, rgba(99,102,241,0.06) 23px, rgba(99,102,241,0.06) 24px),
+    repeating-linear-gradient(0deg,  transparent, transparent 23px, rgba(99,102,241,0.06) 23px, rgba(99,102,241,0.06) 24px);
+  animation: grid-pulse 2s ease-in-out infinite;
+}
+
+@keyframes grid-pulse {
+  0%, 100% { opacity: 0.3; }
+  50%      { opacity: 1; }
+}
