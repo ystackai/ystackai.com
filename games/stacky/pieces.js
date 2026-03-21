@@ -239,7 +239,26 @@ class AbstractRotationTransformationEngine {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  §5. MODULE EXPORTS
+//  §5. MINIMAL RENDERER PIECE DEFINITIONS (2D shape arrays with color index)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+/**
+ * Simplified piece definitions for the minimal renderer.
+ * Each piece: { shapes: [rotations], color: 1-7 }
+ * color is 1-based index into renderer's CANDY palette.
+ */
+const PIECES = [
+  { shapes: [[[1,1,1,1]], [[1],[1],[1],[1]]], color: 1 },                          // I
+  { shapes: [[[1,0],[1,0],[1,1]], [[1,1,1],[1,0,0]], [[1,1],[0,1],[0,1]], [[0,0,1],[1,1,1]]], color: 2 }, // J
+  { shapes: [[[0,1],[0,1],[1,1]], [[1,0,0],[1,1,1]], [[1,1],[1,0],[1,0]], [[1,1,1],[0,0,1]]], color: 3 }, // L
+  { shapes: [[[1,1],[1,1]]], color: 4 },                                            // O
+  { shapes: [[[0,1,1],[1,1,0]], [[1,0],[1,1],[0,1]]], color: 5 },                  // S
+  { shapes: [[[0,1,0],[1,1,1]], [[1,0],[1,1],[1,0]], [[1,1,1],[0,1,0]], [[0,1],[1,1],[0,1]]], color: 6 }, // T
+  { shapes: [[[1,1,0],[0,1,1]], [[0,1],[1,1],[1,0]]], color: 7 },                  // Z
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  §6. MODULE EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -251,5 +270,6 @@ if (typeof module !== 'undefined' && module.exports) {
     PIECE_SHAPES,
     SRS_WALL_KICK_TABLE,
     AbstractRotationTransformationEngine,
+    PIECES,
   };
 }

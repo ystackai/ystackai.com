@@ -1111,7 +1111,138 @@ class StackYGameLogicKernel {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  §4. MODULE EXPORTS
+//  §4. MINIMAL RENDERER GAME LOGIC
+//      — simplified game functions for the lightweight renderer
+// ═══════════════════════════════════════════════════════════════════════════════
+
+var StackyMinimal = (function () {
+  var _COLS = 10, _ROWS = 20, _CELL = 28;
+  var _PIECES = (typeof PIECES !== 'undefined') ? PIECES : [];
+
+  var minimalState = {
+    board: Array.from({ length: _ROWS }, function () { return Array(_COLS).fill(0); }),
+    piece: null, nextPiece: null,
+    score: 0, level: 1, lines: 0, gameOver: false,
+    onLineClear: null,
+  };
+
+  var dropTimer = 0, lastTime = 0;
+
+  function randomPiece() {
+    var p = _PIECES[Math.random() * _PIECES.length | 0];
+    return { shape: p.shapes[0], rot: 0, defs: p, x: (_COLS - p.shapes[0][0].length) / 2 | 0, y: 0, color: p.color };
+  }
+
+  function collides(shape, px, py) {
+    for (var r = 0; r < shape.length; r++)
+      for (var c = 0; c < shape[r].length; c++)
+        if (shape[r][c]) {
+          var x = px + c, y = py + r;
+          if (x < 0 || x >= _COLS || y >= _ROWS) return true;
+          if (y >= 0 && minimalState.board[y][x]) return true;
+        }
+    return false;
+  }
+
+  function lock() {
+    var p = minimalState.piece;
+    for (var r = 0; r < p.shape.length; r++)
+      for (var c = 0; c < p.shape[r].length; c++)
+        if (p.shape[r][c]) {
+          var y = p.y + r;
+          if (y < 0) { minimalState.gameOver = true; return; }
+          minimalState.board[y][p.x + c] = p.color;
+        }
+    clearLines();
+    spawn();
+  }
+
+  function clearLines() {
+    var full = [];
+    for (var r = 0; r < _ROWS; r++)
+      if (minimalState.board[r].every(function (c) { return c; })) full.push(r);
+    if (!full.length) return;
+    if (minimalState.onLineClear) minimalState.onLineClear(full);
+    var pts = [0, 100, 300, 500, 800];
+    minimalState.score += (pts[full.length] || 800) * minimalState.level;
+    minimalState.lines += full.length;
+    minimalState.level = (minimalState.lines / 10 | 0) + 1;
+    for (var i = 0; i < full.length; i++) {
+      minimalState.board.splice(full[i], 1);
+      minimalState.board.unshift(Array(_COLS).fill(0));
+    }
+  }
+
+  function spawn() {
+    minimalState.piece = minimalState.nextPiece || randomPiece();
+    minimalState.nextPiece = randomPiece();
+    if (collides(minimalState.piece.shape, minimalState.piece.x, minimalState.piece.y)) {
+      minimalState.gameOver = true;
+    }
+  }
+
+  function reset() {
+    minimalState.board = Array.from({ length: _ROWS }, function () { return Array(_COLS).fill(0); });
+    minimalState.score = 0; minimalState.level = 1; minimalState.lines = 0; minimalState.gameOver = false;
+    minimalState.piece = null; minimalState.nextPiece = null;
+    spawn();
+  }
+
+  function drop() {
+    var p = minimalState.piece;
+    while (!collides(p.shape, p.x, p.y + 1)) p.y++;
+    lock();
+  }
+
+  function move(dx) {
+    if (!collides(minimalState.piece.shape, minimalState.piece.x + dx, minimalState.piece.y)) {
+      minimalState.piece.x += dx;
+    }
+  }
+
+  function rotate() {
+    var p = minimalState.piece;
+    var next = (p.rot + 1) % p.defs.shapes.length;
+    var shape = p.defs.shapes[next];
+    var kicks = [0, -1, 1, -2, 2];
+    for (var i = 0; i < kicks.length; i++) {
+      if (!collides(shape, p.x + kicks[i], p.y)) {
+        p.shape = shape; p.rot = next; p.x += kicks[i]; return;
+      }
+    }
+  }
+
+  function tick(time) {
+    if (minimalState.gameOver) return;
+    var dt = time - lastTime; lastTime = time;
+    var speed = Math.max(50, 500 - (minimalState.level - 1) * 40);
+    dropTimer += dt;
+    if (dropTimer >= speed) {
+      dropTimer = 0;
+      if (!collides(minimalState.piece.shape, minimalState.piece.x, minimalState.piece.y + 1)) {
+        minimalState.piece.y++;
+      } else {
+        lock();
+      }
+    }
+  }
+
+  return {
+    state: minimalState,
+    COLS: _COLS,
+    ROWS: _ROWS,
+    CELL: _CELL,
+    reset: reset,
+    drop: drop,
+    move: move,
+    rotate: rotate,
+    tick: tick,
+    collides: collides,
+  };
+})();
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  §5. MODULE EXPORTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 if (typeof module !== 'undefined' && module.exports) {
@@ -1119,5 +1250,6 @@ if (typeof module !== 'undefined' && module.exports) {
     StackyGame,
     StackYGameLogicKernel,
     MinimalDeterministicRNG,
+    StackyMinimal,
   };
 }
