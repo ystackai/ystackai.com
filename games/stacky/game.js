@@ -1,0 +1,484 @@
+/**
+ * StackY Game Engine — Tetris-variant with Wonka Golden Ticket mechanics.
+ *
+ * Standard Tetris rules: 7 pieces (I, O, T, S, Z, L, J), SRS rotation,
+ * gravity, line clearing, scoring, progressive speed, game over detection.
+ *
+ * Depends on: pieces.js (StackyPieces)
+ */
+'use strict';
+
+var StackyGame = (function () {
+  var P = StackyPieces;
+  var COLS = P.COLS;
+  var ROWS = P.ROWS;
+
+  // Scoring table (Guideline)
+  var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
+
+  // localStorage key
+  var LS_KEY = 'stacky_hi';
+
+  function loadHi() {
+    try { return parseInt(localStorage.getItem(LS_KEY) || '0', 10) || 0; }
+    catch (_) { return 0; }
+  }
+  function saveHi(n) {
+    try { localStorage.setItem(LS_KEY, String(n)); } catch (_) {}
+  }
+
+  // 7-bag randomizer
+  function createBag() {
+    var bag = P.TYPES.slice();
+    for (var i = bag.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = bag[i]; bag[i] = bag[j]; bag[j] = tmp;
+    }
+    return bag;
+  }
+
+  /**
+   * Create a fresh game state object.
+   */
+  function createState() {
+    return {
+      grid: createEmptyGrid(),
+      activePiece: null,
+      heldPiece: null,
+      holdUsedThisTurn: false,
+      score: 0,
+      hi: loadHi(),
+      level: 1,
+      linesCleared: 0,
+      alive: true,
+      phase: 'idle',       // 'idle' | 'playing' | 'paused' | 'gameOver'
+      goldenTickets: 0,
+      comboCounter: 0,
+      dropInterval: 1000,  // ms between gravity drops
+      lastDropTime: 0,
+      lockDelayActive: false,
+      lockDelayTimer: 0,
+      lockDelayMax: 30,    // frames before auto-lock
+      bag: [],
+      nextPiece: null,
+    };
+  }
+
+  function createEmptyGrid() {
+    var grid = [];
+    for (var y = 0; y < ROWS; y++) {
+      grid.push(new Array(COLS).fill(0));
+    }
+    return grid;
+  }
+
+  /**
+   * Check if a piece placement causes a collision.
+   * Uses >= for boundary checks (fixes off-by-one issue).
+   */
+  function checkCollision(grid, piece) {
+    var cells = P.getCells(piece);
+    for (var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if (c.x < 0 || c.x >= COLS) return true;
+      if (c.y < 0 || c.y >= ROWS) return true;
+      if (grid[c.y][c.x] !== 0) return true;
+    }
+    return false;
+  }
+
+  /** Pull next piece type from the 7-bag. */
+  function nextFromBag(state) {
+    if (state.bag.length === 0) {
+      state.bag = createBag();
+    }
+    return state.bag.pop();
+  }
+
+  /** Spawn a new piece at the top. */
+  function spawnPiece(state) {
+    var type = state.nextPiece || nextFromBag(state);
+    state.nextPiece = nextFromBag(state);
+
+    state.activePiece = {
+      type: type,
+      rotation: 0,
+      x: Math.floor((COLS - 4) / 2),
+      y: 0,
+    };
+    state.holdUsedThisTurn = false;
+    state.lockDelayActive = false;
+    state.lockDelayTimer = 0;
+
+    if (checkCollision(state.grid, state.activePiece)) {
+      state.alive = false;
+      state.phase = 'gameOver';
+      state.activePiece = null;
+      if (state.score > state.hi) {
+        state.hi = state.score;
+        saveHi(state.hi);
+      }
+    }
+  }
+
+  /** Start a new game. */
+  function start(state) {
+    state.grid = createEmptyGrid();
+    state.activePiece = null;
+    state.heldPiece = null;
+    state.holdUsedThisTurn = false;
+    state.score = 0;
+    state.level = 1;
+    state.linesCleared = 0;
+    state.alive = true;
+    state.phase = 'playing';
+    state.goldenTickets = 0;
+    state.comboCounter = 0;
+    state.dropInterval = 1000;
+    state.lastDropTime = 0;
+    state.lockDelayActive = false;
+    state.lockDelayTimer = 0;
+    state.bag = [];
+    state.nextPiece = null;
+    spawnPiece(state);
+    syncGameState(state);
+  }
+
+  /** Move active piece left. Returns true on success. */
+  function moveLeft(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    var candidate = {
+      type: state.activePiece.type,
+      rotation: state.activePiece.rotation,
+      x: state.activePiece.x - 1,
+      y: state.activePiece.y,
+    };
+    if (!checkCollision(state.grid, candidate)) {
+      state.activePiece.x = candidate.x;
+      if (state.lockDelayActive) state.lockDelayTimer = 0;
+      return true;
+    }
+    return false;
+  }
+
+  /** Move active piece right. */
+  function moveRight(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    var candidate = {
+      type: state.activePiece.type,
+      rotation: state.activePiece.rotation,
+      x: state.activePiece.x + 1,
+      y: state.activePiece.y,
+    };
+    if (!checkCollision(state.grid, candidate)) {
+      state.activePiece.x = candidate.x;
+      if (state.lockDelayActive) state.lockDelayTimer = 0;
+      return true;
+    }
+    return false;
+  }
+
+  /** Rotate clockwise with SRS wall kicks. */
+  function rotateCW(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    if (state.activePiece.type === 'O') return true;
+    var fromRot = state.activePiece.rotation;
+    var toRot = (fromRot + 1) % 4;
+    var kicks = P.getKicks(state.activePiece.type, fromRot, toRot);
+    for (var i = 0; i < kicks.length; i++) {
+      var candidate = {
+        type: state.activePiece.type,
+        rotation: toRot,
+        x: state.activePiece.x + kicks[i][0],
+        y: state.activePiece.y - kicks[i][1], // SRS Y is inverted
+      };
+      if (!checkCollision(state.grid, candidate)) {
+        state.activePiece.rotation = toRot;
+        state.activePiece.x = candidate.x;
+        state.activePiece.y = candidate.y;
+        if (state.lockDelayActive) state.lockDelayTimer = 0;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Rotate counter-clockwise with SRS wall kicks. */
+  function rotateCCW(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    if (state.activePiece.type === 'O') return true;
+    var fromRot = state.activePiece.rotation;
+    var toRot = (fromRot + 3) % 4;
+    var kicks = P.getKicks(state.activePiece.type, fromRot, toRot);
+    for (var i = 0; i < kicks.length; i++) {
+      var candidate = {
+        type: state.activePiece.type,
+        rotation: toRot,
+        x: state.activePiece.x + kicks[i][0],
+        y: state.activePiece.y - kicks[i][1],
+      };
+      if (!checkCollision(state.grid, candidate)) {
+        state.activePiece.rotation = toRot;
+        state.activePiece.x = candidate.x;
+        state.activePiece.y = candidate.y;
+        if (state.lockDelayActive) state.lockDelayTimer = 0;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /** Soft drop: move piece down one row. +1 score. */
+  function softDrop(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    var candidate = {
+      type: state.activePiece.type,
+      rotation: state.activePiece.rotation,
+      x: state.activePiece.x,
+      y: state.activePiece.y + 1,
+    };
+    if (!checkCollision(state.grid, candidate)) {
+      state.activePiece.y = candidate.y;
+      state.score += 1;
+      state.lockDelayActive = false;
+      return true;
+    }
+    return false;
+  }
+
+  /** Hard drop: instant placement at lowest valid y. +2 per row. */
+  function hardDrop(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    var dropDistance = 0;
+    while (true) {
+      var candidate = {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: state.activePiece.y + dropDistance + 1,
+      };
+      if (checkCollision(state.grid, candidate)) break;
+      dropDistance++;
+    }
+    state.activePiece.y += dropDistance;
+    state.score += dropDistance * 2;
+    lockPiece(state);
+    return true;
+  }
+
+  /** Get the ghost piece Y position (hard drop preview). */
+  function getGhostY(state) {
+    if (!state.activePiece) return 0;
+    var ghostY = state.activePiece.y;
+    while (true) {
+      var candidate = {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: ghostY + 1,
+      };
+      if (checkCollision(state.grid, candidate)) break;
+      ghostY++;
+    }
+    return ghostY;
+  }
+
+  /** Lock piece into grid and handle line clears. */
+  function lockPiece(state) {
+    if (!state.activePiece) return;
+    var cells = P.getCells(state.activePiece);
+    var colorIndex = P.TYPES.indexOf(state.activePiece.type) + 1;
+    for (var i = 0; i < cells.length; i++) {
+      var c = cells[i];
+      if (c.y >= 0 && c.y < ROWS && c.x >= 0 && c.x < COLS) {
+        state.grid[c.y][c.x] = colorIndex;
+      }
+    }
+    state.activePiece = null;
+    var cleared = clearLines(state);
+    if (cleared > 0) {
+      updateScore(state, cleared);
+      state.comboCounter++;
+    } else {
+      state.comboCounter = 0;
+    }
+    spawnPiece(state);
+  }
+
+  /** Clear completed lines, return count. */
+  function clearLines(state) {
+    var cleared = 0;
+    for (var y = ROWS - 1; y >= 0; y--) {
+      var full = true;
+      for (var x = 0; x < COLS; x++) {
+        if (state.grid[y][x] === 0) { full = false; break; }
+      }
+      if (full) {
+        state.grid.splice(y, 1);
+        state.grid.unshift(new Array(COLS).fill(0));
+        cleared++;
+        y++; // re-check this row
+      }
+    }
+    state.linesCleared += cleared;
+    return cleared;
+  }
+
+  /** Update score based on lines cleared. */
+  function updateScore(state, lines) {
+    var points = (LINE_SCORES[lines] || 0) * state.level;
+    state.score += points;
+
+    // Golden Ticket: 4-line clear (Tetris)
+    if (lines === 4) {
+      state.goldenTickets++;
+    }
+
+    // Level progression: every 10 lines
+    var newLevel = Math.floor(state.linesCleared / 10) + 1;
+    if (newLevel > state.level) {
+      state.level = newLevel;
+      state.dropInterval = Math.max(100, 1000 - (state.level - 1) * 75);
+    }
+
+    if (state.score > state.hi) {
+      state.hi = state.score;
+      saveHi(state.hi);
+    }
+  }
+
+  /** Hold piece: swap active with held. */
+  function hold(state) {
+    if (!state.activePiece || state.phase !== 'playing') return false;
+    if (state.holdUsedThisTurn) return false;
+    var currentType = state.activePiece.type;
+    if (state.heldPiece) {
+      state.activePiece = {
+        type: state.heldPiece,
+        rotation: 0,
+        x: Math.floor((COLS - 4) / 2),
+        y: 0,
+      };
+      state.heldPiece = currentType;
+    } else {
+      state.heldPiece = currentType;
+      spawnPiece(state);
+    }
+    state.holdUsedThisTurn = true;
+    return true;
+  }
+
+  /** Gravity tick — called each frame with timestamp. */
+  function tick(state, timestamp) {
+    if (state.phase !== 'playing' || !state.activePiece) return;
+    if (timestamp - state.lastDropTime >= state.dropInterval) {
+      state.lastDropTime = timestamp;
+      var candidate = {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: state.activePiece.y + 1,
+      };
+      if (!checkCollision(state.grid, candidate)) {
+        state.activePiece.y = candidate.y;
+      } else {
+        if (state.lockDelayActive) {
+          state.lockDelayTimer++;
+          if (state.lockDelayTimer >= state.lockDelayMax) {
+            lockPiece(state);
+          }
+        } else {
+          state.lockDelayActive = true;
+          state.lockDelayTimer = 0;
+        }
+      }
+    }
+  }
+
+  /** Pause / resume / toggle. */
+  function pause(state) {
+    if (state.phase === 'playing') state.phase = 'paused';
+  }
+  function resume(state) {
+    if (state.phase === 'paused') state.phase = 'playing';
+  }
+  function togglePause(state) {
+    if (state.phase === 'playing') pause(state);
+    else if (state.phase === 'paused') resume(state);
+  }
+
+  /** Process a single input key. */
+  function processInput(state, key) {
+    if (state.phase !== 'playing') {
+      if (key === 'Escape' || key === 'p' || key === 'P') {
+        togglePause(state);
+      }
+      return;
+    }
+    switch (key) {
+      case 'ArrowLeft':  case 'a': case 'A': moveLeft(state); break;
+      case 'ArrowRight': case 'd': case 'D': moveRight(state); break;
+      case 'ArrowDown':  case 's': case 'S': softDrop(state); break;
+      case 'ArrowUp':    case 'w': case 'W': rotateCW(state); break;
+      case ' ':          hardDrop(state); break;
+      case 'z': case 'Z': rotateCCW(state); break;
+      case 'c': case 'C': hold(state); break;
+      case 'Escape': case 'p': case 'P': togglePause(state); break;
+    }
+  }
+
+  /** Sync window.gameState for automated testing. */
+  function syncGameState(state) {
+    window.gameState = {
+      score: state.score,
+      hi: state.hi,
+      level: state.level,
+      linesCleared: state.linesCleared,
+      alive: state.alive,
+      gameOver: !state.alive,
+      phase: state.phase,
+      goldenTickets: state.goldenTickets,
+      activePiece: state.activePiece ? {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: state.activePiece.y,
+      } : null,
+      heldPiece: state.heldPiece,
+      nextPiece: state.nextPiece,
+      comboCounter: state.comboCounter,
+      grid: state.grid.map(function (row) { return row.slice(); }),
+      dropInterval: state.dropInterval,
+      player: state.activePiece ? {
+        x: state.activePiece.x,
+        y: state.activePiece.y,
+      } : null,
+    };
+  }
+
+  return {
+    createState: createState,
+    start: start,
+    moveLeft: moveLeft,
+    moveRight: moveRight,
+    rotateCW: rotateCW,
+    rotateCCW: rotateCCW,
+    softDrop: softDrop,
+    hardDrop: hardDrop,
+    hold: hold,
+    tick: tick,
+    pause: pause,
+    resume: resume,
+    togglePause: togglePause,
+    processInput: processInput,
+    syncGameState: syncGameState,
+    getGhostY: getGhostY,
+    checkCollision: checkCollision,
+    COLS: COLS,
+    ROWS: ROWS,
+  };
+})();
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = StackyGame;
+}

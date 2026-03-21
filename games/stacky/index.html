@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StackY 🧱 — ystackai</title>
+  <title>StackY — ystackai</title>
   <style>
     /* ── Reset & base ──────────────────────────────────────────────────── */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -118,10 +118,43 @@
     }
     .score-value.high { color: #c084fc; }
 
+    /* ── Game area ────────────────────────────────────────────────────── */
+    .game-area {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    /* ── Side panels (hold, next) ─────────────────────────────────────── */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .panel-box {
+      background: rgba(30, 30, 46, 0.5);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 8px;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .panel-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .panel-canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
     /* ── Canvas wrapper ────────────────────────────────────────────────── */
     .canvas-wrapper {
       position: relative;
-      width: 400px;
+      width: 300px;
       height: 600px;
       border: 2px solid rgba(99, 102, 241, 0.35);
       border-radius: 10px;
@@ -133,9 +166,9 @@
       transform-origin: top center;
     }
 
-    canvas {
+    canvas#game-canvas {
       display: block;
-      width: 400px;
+      width: 300px;
       height: 600px;
     }
 
@@ -155,7 +188,6 @@
     }
     .overlay.hidden { display: none; }
 
-    .overlay-emoji { font-size: 3.5rem; line-height: 1; }
     .overlay-title {
       font-size: 2rem;
       font-weight: 800;
@@ -252,9 +284,13 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    @media (max-width: 440px) {
+    @media (max-width: 520px) {
       .mobile-note { display: block; }
       .controls { display: none; }
+      .game-area { flex-direction: column; align-items: center; }
+      .side-panel { flex-direction: row; }
+      .canvas-wrapper { width: 250px; height: 500px; }
+      canvas#game-canvas { width: 250px; height: 500px; }
     }
   </style>
 </head>
@@ -268,8 +304,8 @@
 
 <!-- ── Header band ─────────────────────────────────────────────────────── -->
 <div class="hero">
-  <h1>StackY 🧱</h1>
-  <p>Stack the blocks. Stay aligned. Don't miss.</p>
+  <h1>StackY</h1>
+  <p>Classic block stacking. SRS rotation. Progressive speed.</p>
 </div>
 
 <!-- ── Main ────────────────────────────────────────────────────────────── -->
@@ -289,52 +325,86 @@
       <span class="score-label">Level</span>
       <span class="score-value" id="level-display" style="color:#34d399;">1</span>
     </div>
+    <div class="score-item">
+      <span class="score-label">Lines</span>
+      <span class="score-value" id="lines-display" style="color:#fbbf24;">0</span>
+    </div>
   </div>
 
-  <!-- Canvas + overlays -->
-  <div class="canvas-wrapper" id="canvas-wrapper">
-    <canvas id="game-canvas"></canvas>
+  <!-- Game area: hold panel + board + next panel -->
+  <div class="game-area">
 
-    <!-- Splash overlay -->
-    <div class="overlay" id="overlay-splash">
-      <div class="overlay-emoji">🧱</div>
-      <div class="overlay-title">StackY</div>
-      <div class="overlay-sub">
-        Blocks slide back and forth.<br>
-        Tap or press Space to drop.<br>
-        Stack perfectly to keep your width.
+    <!-- Hold panel -->
+    <div class="side-panel">
+      <div class="panel-box">
+        <div class="panel-label">Hold</div>
+        <canvas class="panel-canvas" id="hold-canvas" width="120" height="80"></canvas>
       </div>
-      <div class="overlay-hint">Press Space or tap to play</div>
-      <button class="btn" id="btn-start">Start Game</button>
     </div>
 
-    <!-- Game-over overlay -->
-    <div class="overlay hidden" id="overlay-gameover">
-      <div class="overlay-emoji">💀</div>
-      <div class="overlay-title">Game Over</div>
-      <div class="overlay-score-block">
-        <div class="overlay-score-item">
-          <span class="overlay-score-label">Score</span>
-          <span class="overlay-score-val" id="go-score">0</span>
+    <!-- Canvas + overlays -->
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Splash overlay -->
+      <div class="overlay" id="overlay-splash">
+        <div class="overlay-title">StackY</div>
+        <div class="overlay-sub">
+          Stack tetrominoes. Clear lines.<br>
+          SRS rotation with wall kicks.<br>
+          Speed increases every 10 lines.
         </div>
-        <div class="overlay-score-item">
-          <span class="overlay-score-label">Best</span>
-          <span class="overlay-score-val hi" id="go-hi">0</span>
-        </div>
+        <div class="overlay-hint">Press Space or tap to play</div>
+        <button class="btn" id="btn-start">Start Game</button>
       </div>
-      <div class="overlay-hint">Press Space or tap to restart</div>
-      <button class="btn" id="btn-restart">Play Again</button>
+
+      <!-- Paused overlay -->
+      <div class="overlay hidden" id="overlay-paused">
+        <div class="overlay-title">Paused</div>
+        <div class="overlay-hint">Press Esc or P to resume</div>
+      </div>
+
+      <!-- Game-over overlay -->
+      <div class="overlay hidden" id="overlay-gameover">
+        <div class="overlay-title">Game Over</div>
+        <div class="overlay-score-block">
+          <div class="overlay-score-item">
+            <span class="overlay-score-label">Score</span>
+            <span class="overlay-score-val" id="go-score">0</span>
+          </div>
+          <div class="overlay-score-item">
+            <span class="overlay-score-label">Best</span>
+            <span class="overlay-score-val hi" id="go-hi">0</span>
+          </div>
+        </div>
+        <div class="overlay-hint">Press Space or tap to restart</div>
+        <button class="btn" id="btn-restart">Play Again</button>
+      </div>
     </div>
+
+    <!-- Next panel -->
+    <div class="side-panel">
+      <div class="panel-box">
+        <div class="panel-label">Next</div>
+        <canvas class="panel-canvas" id="next-canvas" width="120" height="80"></canvas>
+      </div>
+    </div>
+
   </div>
 
   <!-- Keyboard hint (desktop) -->
   <div class="controls">
-    Drop: <kbd>Space</kbd> or <kbd>Enter</kbd> or click
+    Move: <kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>A</kbd><kbd>D</kbd> &nbsp;
+    Rotate: <kbd>&uarr;</kbd> / <kbd>Z</kbd> &nbsp;
+    Soft drop: <kbd>&darr;</kbd> &nbsp;
+    Hard drop: <kbd>Space</kbd> &nbsp;
+    Hold: <kbd>C</kbd> &nbsp;
+    Pause: <kbd>Esc</kbd>
   </div>
 
   <!-- Touch hint (mobile) -->
   <div class="mobile-note">
-    Tap anywhere to drop the block
+    Swipe left/right to move, tap to rotate, swipe down to drop, swipe up to hold
   </div>
 
 </main>
@@ -344,206 +414,97 @@
   &copy; 2026 ystackai &mdash; browser games for agents and humans
 </footer>
 
+<script src="pieces.js"></script>
+<script src="game.js"></script>
+<script src="input.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
-//  StackY — production-quality single-file block-stacking game
-//  ─────────────────────────────────────────────────────────────────────────
-//  Architecture:
-//   • All mutable game state in a single `state` object
-//   • cleanup() removes all listeners and cancels RAF — prevents memory leaks
-//   • Each animation component (falling blocks, particles, camera) has cleanup
-//   • devicePixelRatio canvas scaling for crisp HiDPI / Retina rendering
-//   • Touch + keyboard input with proper listener references for removal
-//   • Auto-pause on document.hidden (visibilitychange)
-//   • Hi-score persisted to localStorage (with try/catch)
-//   • window.gameState exposed for automated testing
-//   • State machine: idle → playing → dead → idle
+//  StackY Renderer — connects StackyGame engine to canvas display
 // ═══════════════════════════════════════════════════════════════════════════
 
 (function () {
   'use strict';
 
-  // ── Constants ────────────────────────────────────────────────────────────
+  // ── Constants ──────────────────────────────────────────────────────────
 
-  /** Canvas dimensions in CSS pixels. */
-  const CANVAS_W = 400;
-  const CANVAS_H = 600;
-  /** Block height in pixels. */
-  const BLOCK_H = 25;
-  /** Initial block width. */
-  const INITIAL_W = 200;
-  /** Base speed (px/sec) — increases with level. */
-  const BASE_SPEED = 120;
-  /** Speed increase per level (px/sec). */
-  const SPEED_PER_LEVEL = 12;
-  /** Maximum speed cap (px/sec). */
-  const MAX_SPEED = 500;
-  /** Perfect-placement tolerance (px). */
-  const PERFECT_TOLERANCE = 3;
-  /** localStorage key for the persisted hi-score. */
-  const LS_KEY = 'stacky_hi';
-  /** Y position where the active block slides. */
-  const ACTIVE_Y = CANVAS_H - BLOCK_H - 20;
-  /** Maximum visible stack rows before camera scrolls. */
-  const MAX_VISIBLE_ROWS = 18;
+  var COLS = StackyGame.COLS;
+  var ROWS = StackyGame.ROWS;
+  var CANVAS_W = 300;
+  var CANVAS_H = 600;
+  var CELL = CANVAS_W / COLS;  // 30px per cell
 
-  /** Color palette — cycles through these for stacked blocks. */
-  const COLORS = [
-    '#6366f1', '#818cf8', '#a5b4fc', '#c084fc', '#e879f9',
-    '#f472b6', '#fb7185', '#f87171', '#fb923c', '#fbbf24',
-    '#a3e635', '#34d399', '#2dd4bf', '#22d3ee', '#38bdf8',
+  /** Color palette for piece types (indexed by TYPES order + 1). */
+  var PIECE_COLORS = [
+    null,       // 0 = empty
+    '#00f0f0',  // 1 = I (cyan)
+    '#f0f000',  // 2 = O (yellow)
+    '#a000f0',  // 3 = T (purple)
+    '#00f000',  // 4 = S (green)
+    '#f00000',  // 5 = Z (red)
+    '#f0a000',  // 6 = L (orange)
+    '#0000f0',  // 7 = J (blue)
   ];
 
-  // ── localStorage hi-score ────────────────────────────────────────────────
+  var GHOST_ALPHA = 0.2;
 
-  /** @returns {number} */
-  function loadHi() {
-    try { return parseInt(localStorage.getItem(LS_KEY) || '0', 10) || 0; }
-    catch (_) { return 0; }
-  }
+  // ── Canvas setup ───────────────────────────────────────────────────────
 
-  /** @param {number} n */
-  function saveHi(n) {
-    try { localStorage.setItem(LS_KEY, String(n)); } catch (_) {}
-  }
-
-  // ── Canvas / HiDPI setup ─────────────────────────────────────────────────
-
-  const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('game-canvas'));
-  const ctx    = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
-
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width        = CANVAS_W * dpr;
-  canvas.height       = CANVAS_H * dpr;
-  canvas.style.width  = CANVAS_W + 'px';
+  var canvas = document.getElementById('game-canvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_W * dpr;
+  canvas.height = CANVAS_H * dpr;
+  canvas.style.width = CANVAS_W + 'px';
   canvas.style.height = CANVAS_H + 'px';
   ctx.scale(dpr, dpr);
 
-  // ── Responsive scaling ───────────────────────────────────────────────────
+  // Side panel canvases
+  var holdCanvas = document.getElementById('hold-canvas');
+  var holdCtx = holdCanvas.getContext('2d');
+  var nextCanvas = document.getElementById('next-canvas');
+  var nextCtx = nextCanvas.getContext('2d');
 
-  const wrapper = /** @type {HTMLElement} */ (document.getElementById('canvas-wrapper'));
+  // Scale side panels for HiDPI
+  function setupSmallCanvas(c, cx) {
+    var w = c.width; var h = c.height;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    cx.scale(dpr, dpr);
+    return { w: w, h: h };
+  }
+  var holdSize = setupSmallCanvas(holdCanvas, holdCtx);
+  var nextSize = setupSmallCanvas(nextCanvas, nextCtx);
+
+  // ── Responsive scaling ─────────────────────────────────────────────────
+
+  var wrapper = document.getElementById('canvas-wrapper');
 
   function applyResponsiveScale() {
-    const available = window.innerWidth * 0.95;
-    const scale = available < CANVAS_W ? available / CANVAS_W : 1;
-    wrapper.style.transform    = scale < 1 ? `scale(${scale})` : '';
-    wrapper.style.marginBottom = scale < 1 ? `${CANVAS_H * scale - CANVAS_H}px` : '';
+    var available = window.innerWidth * 0.55;
+    var scale = available < CANVAS_W ? available / CANVAS_W : 1;
+    wrapper.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
+    wrapper.style.marginBottom = scale < 1 ? (CANVAS_H * scale - CANVAS_H) + 'px' : '';
   }
 
-  // ── Game state ───────────────────────────────────────────────────────────
+  // ── UI refs ────────────────────────────────────────────────────────────
 
-  /**
-   * @typedef {{ x: number, w: number, color: string }} Block
-   *
-   * @type {{
-   *   phase: 'idle'|'playing'|'dead',
-   *   score: number,
-   *   hi: number,
-   *   level: number,
-   *   stack: Block[],
-   *   activeX: number,
-   *   activeW: number,
-   *   activeDir: number,
-   *   speed: number,
-   *   cameraY: number,
-   *   targetCameraY: number,
-   * }}
-   */
-  const state = {
-    phase:    'idle',
-    score:    0,
-    hi:       loadHi(),
-    level:    1,
-    stack:    [],
-    activeX:  0,
-    activeW:  INITIAL_W,
-    activeDir: 1,
-    speed:    BASE_SPEED,
-    cameraY:  0,
-    targetCameraY: 0,
-  };
+  var scoreEl = document.getElementById('score-display');
+  var hiEl = document.getElementById('hi-display');
+  var levelEl = document.getElementById('level-display');
+  var linesEl = document.getElementById('lines-display');
+  var splashEl = document.getElementById('overlay-splash');
+  var pausedEl = document.getElementById('overlay-paused');
+  var gameoverEl = document.getElementById('overlay-gameover');
+  var goScoreEl = document.getElementById('go-score');
+  var goHiEl = document.getElementById('go-hi');
+  var btnStart = document.getElementById('btn-start');
+  var btnRestart = document.getElementById('btn-restart');
 
-  // Fixed-timestep RAF loop state
-  let rafId       = null;
-  let lastTs      = null;
+  // ── Game state ─────────────────────────────────────────────────────────
 
-  /** Pending setTimeout ID from die() — tracked so cleanup can cancel it. */
-  let dieTimerId  = null;
-
-  // ── Particle system ─────────────────────────────────────────────────────
-
-  /**
-   * @typedef {{ x: number, y: number, vx: number, vy: number, w: number, h: number, color: string, born: number, dur: number }} Particle
-   * @type {Particle[]}
-   */
-  const particles = [];
-
-  /** Spawn debris particles when a block is trimmed. */
-  function spawnDebris(x, y, w, color) {
-    const count = Math.min(Math.ceil(w / 8), 12);
-    const now = performance.now();
-    for (let i = 0; i < count; i++) {
-      particles.push({
-        x: x + Math.random() * w,
-        y: y + Math.random() * BLOCK_H,
-        vx: (Math.random() - 0.5) * 200,
-        vy: -Math.random() * 150 - 50,
-        w: 4 + Math.random() * 6,
-        h: 3 + Math.random() * 4,
-        color,
-        born: now,
-        dur: 600 + Math.random() * 400,
-      });
-    }
-  }
-
-  /** Spawn "+N" or "PERFECT" text particles. */
-  function spawnTextParticle(x, y, text) {
-    particles.push({
-      x, y,
-      vx: 0, vy: -40,
-      w: 0, h: 0,
-      color: text === 'PERFECT!' ? '#fbbf24' : '#a5b4fc',
-      born: performance.now(),
-      dur: 800,
-      /** @type {string|undefined} */ text,
-    });
-  }
-
-  /** Update particles — apply gravity, remove expired. */
-  function updateParticles(dt) {
-    const now = performance.now();
-    for (let i = particles.length - 1; i >= 0; i--) {
-      const p = particles[i];
-      if (now - p.born > p.dur) {
-        particles.splice(i, 1);
-        continue;
-      }
-      if (!p.text) {
-        p.vy += 400 * dt; // gravity
-      }
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-    }
-  }
-
-  // ── Screen shake ──────────────────────────────────────────────────────
-
-  let shakeUntil = 0;
-  const SHAKE_DUR = 200;
-  const SHAKE_AMP = 3;
-
-  function triggerShake() { shakeUntil = performance.now() + SHAKE_DUR; }
-
-  // ── UI element references ──────────────────────────────────────────────
-
-  const scoreEl    = /** @type {HTMLElement} */ (document.getElementById('score-display'));
-  const hiEl       = /** @type {HTMLElement} */ (document.getElementById('hi-display'));
-  const levelEl    = /** @type {HTMLElement} */ (document.getElementById('level-display'));
-  const splashEl   = /** @type {HTMLElement} */ (document.getElementById('overlay-splash'));
-  const gameoverEl = /** @type {HTMLElement} */ (document.getElementById('overlay-gameover'));
-  const goScoreEl  = /** @type {HTMLElement} */ (document.getElementById('go-score'));
-  const goHiEl     = /** @type {HTMLElement} */ (document.getElementById('go-hi'));
+  var state = StackyGame.createState();
+  var rafId = null;
+  var inputCleanup = null;
 
   hiEl.textContent = String(state.hi);
 
@@ -551,154 +512,29 @@
 
   function updateScoreUI() {
     scoreEl.textContent = String(state.score);
-    hiEl.textContent    = String(state.hi);
-    levelEl.textContent = String(state.level);
-  }
-
-  // ── Game initialiser ───────────────────────────────────────────────────
-
-  function initGame() {
-    state.score     = 0;
-    state.level     = 1;
-    state.speed     = BASE_SPEED;
-    state.activeW   = INITIAL_W;
-    state.activeX   = (CANVAS_W - INITIAL_W) / 2;
-    state.activeDir = 1;
-    state.cameraY   = 0;
-    state.targetCameraY = 0;
-    particles.length = 0;
-
-    // Base platform — centered, full initial width
-    state.stack = [{
-      x: (CANVAS_W - INITIAL_W) / 2,
-      w: INITIAL_W,
-      color: COLORS[0],
-    }];
-
-    updateScoreUI();
-    syncGameState();
-  }
-
-  // ── Game logic: place block ────────────────────────────────────────────
-
-  function placeBlock() {
-    if (state.phase !== 'playing') return;
-
-    const top = state.stack[state.stack.length - 1];
-    const ax  = state.activeX;
-    const aw  = state.activeW;
-
-    // Calculate overlap
-    const overlapLeft  = Math.max(ax, top.x);
-    const overlapRight = Math.min(ax + aw, top.x + top.w);
-    const overlapW     = overlapRight - overlapLeft;
-
-    if (overlapW <= 0) {
-      // Complete miss — game over
-      die();
-      return;
-    }
-
-    const trimLeft  = overlapLeft - ax;
-    const trimRight = (ax + aw) - overlapRight;
-
-    // Check for perfect placement
-    const isPerfect = Math.abs(ax - top.x) <= PERFECT_TOLERANCE && Math.abs(aw - top.w) <= PERFECT_TOLERANCE;
-
-    let placedX, placedW;
-    if (isPerfect) {
-      // Perfect — keep the full width of the previous block
-      placedX = top.x;
-      placedW = top.w;
-    } else {
-      placedX = overlapLeft;
-      placedW = overlapW;
-    }
-
-    const blockY = getBlockY(state.stack.length);
-    const color  = COLORS[state.stack.length % COLORS.length];
-
-    // Spawn debris for trimmed parts
-    if (!isPerfect) {
-      if (trimLeft > 2) {
-        spawnDebris(ax, blockY, trimLeft, color);
-      }
-      if (trimRight > 2) {
-        spawnDebris(overlapRight, blockY, trimRight, color);
-      }
-    }
-
-    // Add to stack
-    state.stack.push({ x: placedX, w: placedW, color });
-    state.score += 1;
-    state.level = Math.floor(state.score / 5) + 1;
-    state.speed = Math.min(BASE_SPEED + SPEED_PER_LEVEL * state.score, MAX_SPEED);
-
-    if (state.score > state.hi) {
-      state.hi = state.score;
-      saveHi(state.hi);
-    }
-
-    // Feedback
-    if (isPerfect) {
-      spawnTextParticle(placedX + placedW / 2, blockY - 10, 'PERFECT!');
-    } else {
-      spawnTextParticle(placedX + placedW / 2, blockY - 10, '+' + state.score);
-    }
-
-    // Set up next active block
-    state.activeW   = placedW;
-    state.activeDir = (Math.random() > 0.5) ? 1 : -1;
-    state.activeX   = state.activeDir === 1 ? -state.activeW : CANVAS_W;
-
-    // Camera scroll
-    const rowsAboveBase = state.stack.length;
-    if (rowsAboveBase > MAX_VISIBLE_ROWS) {
-      state.targetCameraY = (rowsAboveBase - MAX_VISIBLE_ROWS) * BLOCK_H;
-    }
-
-    updateScoreUI();
-    syncGameState();
-  }
-
-  /** Get the Y position for a block at stack index i. */
-  function getBlockY(i) {
-    return ACTIVE_Y - i * BLOCK_H;
-  }
-
-  // ── Death ──────────────────────────────────────────────────────────────
-
-  function die() {
-    state.phase = 'dead';
-    if (state.score > state.hi) {
-      state.hi = state.score;
-      saveHi(state.hi);
-    }
     hiEl.textContent = String(state.hi);
-    triggerShake();
-
-    // Show game-over overlay after shake (tracked for cleanup)
-    dieTimerId = setTimeout(() => {
-      dieTimerId = null;
-      goScoreEl.textContent = String(state.score);
-      goHiEl.textContent    = String(state.hi);
-      gameoverEl.classList.remove('hidden');
-    }, SHAKE_DUR + 100);
-
-    syncGameState();
+    levelEl.textContent = String(state.level);
+    linesEl.textContent = String(state.linesCleared);
   }
 
-  // ── State transitions ──────────────────────────────────────────────────
+  // ── State transitions ─────────────────────────────────────────────────
 
   function startGame() {
     splashEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
-    initGame();
-    state.phase = 'playing';
+    pausedEl.classList.add('hidden');
+    StackyGame.start(state);
+    updateScoreUI();
     startLoop();
   }
 
+  function restartGame() {
+    startGame();
+  }
+
   // ── RAF loop ───────────────────────────────────────────────────────────
+
+  var lastTs = null;
 
   function startLoop() {
     if (rafId !== null) cancelAnimationFrame(rafId);
@@ -714,402 +550,245 @@
     lastTs = null;
   }
 
-  /**
-   * RAF callback — continuous animation loop.
-   * @param {DOMHighResTimeStamp} ts
-   */
   function loop(ts) {
-    const dt = lastTs !== null ? Math.min((ts - lastTs) / 1000, 0.1) : 0;
-    lastTs = ts;
+    if (lastTs === null) lastTs = ts;
 
-    if (state.phase === 'playing') {
-      update(dt);
+    // Run gravity tick
+    StackyGame.tick(state, ts);
+
+    // Check phase transitions
+    if (state.phase === 'gameOver') {
+      onGameOver();
+      draw();
+      StackyGame.syncGameState(state);
+      return;
     }
 
-    // Always update visual effects even when dead (for debris settling)
-    updateParticles(dt);
-    updateCamera(dt);
-    draw(ts);
-    syncGameState();
+    if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
+      draw();
+      StackyGame.syncGameState(state);
+      // Keep looping to detect resume
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
 
+    pausedEl.classList.add('hidden');
+    updateScoreUI();
+    draw();
+    drawHoldPanel();
+    drawNextPanel();
+    StackyGame.syncGameState(state);
+
+    lastTs = ts;
     rafId = requestAnimationFrame(loop);
   }
 
-  // ── Update ─────────────────────────────────────────────────────────────
-
-  function update(dt) {
-    // Move active block
-    state.activeX += state.activeDir * state.speed * dt;
-
-    // Bounce off edges
-    if (state.activeX + state.activeW > CANVAS_W) {
-      state.activeX = CANVAS_W - state.activeW;
-      state.activeDir = -1;
-    } else if (state.activeX < 0) {
-      state.activeX = 0;
-      state.activeDir = 1;
-    }
-  }
-
-  /** Smooth camera scrolling. */
-  function updateCamera(dt) {
-    const diff = state.targetCameraY - state.cameraY;
-    if (Math.abs(diff) > 0.5) {
-      state.cameraY += diff * Math.min(dt * 5, 1);
-    } else {
-      state.cameraY = state.targetCameraY;
-    }
+  function onGameOver() {
+    goScoreEl.textContent = String(state.score);
+    goHiEl.textContent = String(state.hi);
+    gameoverEl.classList.remove('hidden');
+    stopLoop();
   }
 
   // ── Rendering ──────────────────────────────────────────────────────────
 
-  /**
-   * Full render pass.
-   * @param {DOMHighResTimeStamp} ts
-   */
-  function draw(ts) {
-    const now = performance.now();
-
-    ctx.save();
-
-    // Screen shake
-    if (now < shakeUntil) {
-      const intensity = (shakeUntil - now) / SHAKE_DUR;
-      const sx = (Math.random() - 0.5) * 2 * SHAKE_AMP * intensity;
-      const sy = (Math.random() - 0.5) * 2 * SHAKE_AMP * intensity;
-      ctx.translate(sx, sy);
-    }
-
+  function draw() {
     // Background
     ctx.fillStyle = '#0d0d14';
     ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
-    // Grid lines (subtle)
-    ctx.strokeStyle = 'rgba(255,255,255,0.02)';
-    ctx.lineWidth   = 0.5;
-    for (let y = BLOCK_H; y < CANVAS_H; y += BLOCK_H) {
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    for (var x = 1; x < COLS; x++) {
       ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(CANVAS_W, y);
+      ctx.moveTo(x * CELL, 0);
+      ctx.lineTo(x * CELL, CANVAS_H);
+      ctx.stroke();
+    }
+    for (var y = 1; y < ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL);
+      ctx.lineTo(CANVAS_W, y * CELL);
       ctx.stroke();
     }
 
-    // Camera transform
-    ctx.save();
-    ctx.translate(0, state.cameraY);
-
-    // Draw stacked blocks
-    for (let i = 0; i < state.stack.length; i++) {
-      const block = state.stack[i];
-      const by = getBlockY(i);
-      drawBlock(block.x, by, block.w, BLOCK_H, block.color, i === 0);
+    // Locked blocks
+    for (var row = 0; row < ROWS; row++) {
+      for (var col = 0; col < COLS; col++) {
+        if (state.grid[row][col] !== 0) {
+          drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], 1);
+        }
+      }
     }
 
-    // Draw active block (only when playing)
-    if (state.phase === 'playing') {
-      const activeY = getBlockY(state.stack.length);
-      const color = COLORS[state.stack.length % COLORS.length];
-      drawBlock(state.activeX, activeY, state.activeW, BLOCK_H, color, false);
-
-      // Draw guide lines from active block down to stack
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth   = 1;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(state.activeX, activeY + BLOCK_H);
-      ctx.lineTo(state.activeX, ACTIVE_Y + BLOCK_H);
-      ctx.moveTo(state.activeX + state.activeW, activeY + BLOCK_H);
-      ctx.lineTo(state.activeX + state.activeW, ACTIVE_Y + BLOCK_H);
-      ctx.stroke();
-      ctx.setLineDash([]);
+    // Ghost piece
+    if (state.activePiece && state.phase === 'playing') {
+      var ghostY = StackyGame.getGhostY(state);
+      var ghostPiece = {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: ghostY,
+      };
+      var ghostCells = StackyPieces.getCells(ghostPiece);
+      var colorIdx = StackyPieces.TYPES.indexOf(state.activePiece.type) + 1;
+      for (var i = 0; i < ghostCells.length; i++) {
+        var gc = ghostCells[i];
+        if (gc.y >= 0) {
+          drawCell(ctx, gc.x, gc.y, PIECE_COLORS[colorIdx], GHOST_ALPHA);
+        }
+      }
     }
 
-    // Draw particles (in camera space)
-    drawParticles(now);
-
-    ctx.restore(); // camera
-
-    ctx.restore(); // shake
+    // Active piece
+    if (state.activePiece) {
+      var cells = StackyPieces.getCells(state.activePiece);
+      var ci = StackyPieces.TYPES.indexOf(state.activePiece.type) + 1;
+      for (var j = 0; j < cells.length; j++) {
+        var c = cells[j];
+        if (c.y >= 0) {
+          drawCell(ctx, c.x, c.y, PIECE_COLORS[ci], 1);
+        }
+      }
+    }
   }
 
-  /**
-   * Draw a single block with subtle 3D effect.
-   * @param {number} x @param {number} y @param {number} w @param {number} h
-   * @param {string} color @param {boolean} isBase
-   */
-  function drawBlock(x, y, w, h, color, isBase) {
+  function drawCell(context, col, row, color, alpha) {
+    var x = col * CELL;
+    var y = row * CELL;
+    var inset = 1;
+
+    context.save();
+    context.globalAlpha = alpha;
+
     // Main fill
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, w, h);
+    context.fillStyle = color;
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, CELL - inset * 2);
 
     // Top highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.fillRect(x, y, w, 2);
-
-    // Bottom shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.2)';
-    ctx.fillRect(x, y + h - 2, w, 2);
+    context.fillStyle = 'rgba(255,255,255,0.2)';
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, 2);
 
     // Left highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.08)';
-    ctx.fillRect(x, y, 2, h);
+    context.fillStyle = 'rgba(255,255,255,0.1)';
+    context.fillRect(x + inset, y + inset, 2, CELL - inset * 2);
 
-    // Right shadow
-    ctx.fillStyle = 'rgba(0,0,0,0.15)';
-    ctx.fillRect(x + w - 2, y, 2, h);
+    // Bottom shadow
+    context.fillStyle = 'rgba(0,0,0,0.3)';
+    context.fillRect(x + inset, y + CELL - inset - 2, CELL - inset * 2, 2);
 
-    // Base indicator
-    if (isBase) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      ctx.lineWidth   = 1;
-      ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+    context.restore();
+  }
+
+  // ── Side panel rendering ───────────────────────────────────────────────
+
+  function drawPiecePreview(context, size, type) {
+    context.clearRect(0, 0, size.w, size.h);
+    context.fillStyle = '#1a1a2e';
+    context.fillRect(0, 0, size.w, size.h);
+
+    if (!type) return;
+
+    var piece = { type: type, rotation: 0, x: 0, y: 0 };
+    var cells = StackyPieces.getCells(piece);
+    var colorIdx = StackyPieces.TYPES.indexOf(type) + 1;
+
+    // Find bounding box
+    var minX = 99, maxX = -1, minY = 99, maxY = -1;
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].x < minX) minX = cells[i].x;
+      if (cells[i].x > maxX) maxX = cells[i].x;
+      if (cells[i].y < minY) minY = cells[i].y;
+      if (cells[i].y > maxY) maxY = cells[i].y;
+    }
+
+    var pw = maxX - minX + 1;
+    var ph = maxY - minY + 1;
+    var cellSize = Math.min((size.w - 20) / pw, (size.h - 20) / ph, 20);
+    var offsetX = (size.w - pw * cellSize) / 2;
+    var offsetY = (size.h - ph * cellSize) / 2;
+
+    for (var j = 0; j < cells.length; j++) {
+      var cx = offsetX + (cells[j].x - minX) * cellSize;
+      var cy = offsetY + (cells[j].y - minY) * cellSize;
+
+      context.fillStyle = PIECE_COLORS[colorIdx];
+      context.fillRect(cx + 1, cy + 1, cellSize - 2, cellSize - 2);
+
+      context.fillStyle = 'rgba(255,255,255,0.2)';
+      context.fillRect(cx + 1, cy + 1, cellSize - 2, 2);
     }
   }
 
-  /**
-   * Draw particles (debris + text).
-   * @param {number} now
-   */
-  function drawParticles(now) {
-    for (const p of particles) {
-      const elapsed = now - p.born;
-      if (elapsed > p.dur) continue;
-      const t     = elapsed / p.dur;
-      const alpha = 1 - t;
-
-      ctx.save();
-      ctx.globalAlpha = alpha;
-
-      if (p.text) {
-        // Text particle
-        ctx.textAlign    = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font         = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-        ctx.fillStyle    = p.color;
-        ctx.fillText(p.text, p.x, p.y);
-      } else {
-        // Debris particle
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.w, p.h);
-      }
-
-      ctx.restore();
-    }
+  function drawHoldPanel() {
+    drawPiecePreview(holdCtx, holdSize, state.heldPiece);
   }
 
-  // ── window.gameState for automated testing ────────────────────────────
-
-  function syncGameState() {
-    const top = state.stack.length > 0 ? state.stack[state.stack.length - 1] : null;
-    window.gameState = {
-      score:    state.score,
-      hi:       state.hi,
-      alive:    state.phase === 'playing',
-      gameOver: state.phase === 'dead',
-      level:    state.level,
-      phase:    state.phase,
-      player: {
-        x:     state.activeX,
-        width: state.activeW,
-      },
-      stack: {
-        height: state.stack.length,
-        topBlock: top ? { x: top.x, w: top.w } : null,
-      },
-    };
+  function drawNextPanel() {
+    drawPiecePreview(nextCtx, nextSize, state.nextPiece);
   }
 
-  // Initialize gameState immediately
-  syncGameState();
+  // ── Input setup ────────────────────────────────────────────────────────
 
-  // ── Input handlers (stored as named refs for cleanup) ──────────────────
+  function handleStateChange() {
+    updateScoreUI();
+    draw();
+    drawHoldPanel();
+    drawNextPanel();
+    StackyGame.syncGameState(state);
 
-  /** @param {KeyboardEvent} e */
-  function handleKeydown(e) {
-    const code = e.code;
-
-    switch (state.phase) {
-      case 'idle':
-        if (code === 'Space' || code === 'Enter') {
-          e.preventDefault();
-          startGame();
-        }
-        break;
-
-      case 'dead':
-        if (code === 'Space' || code === 'Enter') {
-          e.preventDefault();
-          startGame();
-        }
-        break;
-
-      case 'playing':
-        if (code === 'Space' || code === 'Enter') {
-          e.preventDefault();
-          placeBlock();
-        }
-        break;
-    }
-  }
-
-  function handleVisibilityChange() {
-    if (document.hidden && state.phase === 'playing') {
-      // Auto-pause: stop the loop so the block doesn't drift while tabbed out
-      stopLoop();
-    } else if (!document.hidden && state.phase === 'playing') {
-      startLoop();
-    }
-  }
-
-  /** @param {MouseEvent} e */
-  function handleCanvasClick(e) {
-    e.preventDefault();
-    if (state.phase === 'idle' || state.phase === 'dead') {
-      startGame();
+    // Handle overlay transitions triggered by input
+    if (state.phase === 'gameOver') {
+      onGameOver();
+    } else if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
     } else if (state.phase === 'playing') {
-      placeBlock();
+      pausedEl.classList.add('hidden');
     }
   }
 
-  /** @param {TouchEvent} e */
-  function handleTouchStart(e) {
-    e.preventDefault();
-    if (state.phase === 'idle' || state.phase === 'dead') {
-      startGame();
-    } else if (state.phase === 'playing') {
-      placeBlock();
-    }
-  }
+  inputCleanup = StackyInput.attach(state, {
+    onStart: startGame,
+    onRestart: restartGame,
+    onStateChange: handleStateChange,
+  });
 
-  function handleBtnStart() { startGame(); }
-  function handleBtnRestart() { startGame(); }
+  // Button handlers
+  btnStart.addEventListener('click', function () { startGame(); });
+  btnRestart.addEventListener('click', function () { restartGame(); });
 
-  // ── Event listener registration ────────────────────────────────────────
+  // ── Responsive ─────────────────────────────────────────────────────────
 
-  const btnStart   = /** @type {HTMLElement} */ (document.getElementById('btn-start'));
-  const btnRestart = /** @type {HTMLElement} */ (document.getElementById('btn-restart'));
+  window.addEventListener('resize', applyResponsiveScale);
+  applyResponsiveScale();
 
-  function attachListeners() {
-    document.addEventListener('keydown', handleKeydown);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    canvas.addEventListener('click', handleCanvasClick);
-    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-    window.addEventListener('resize', applyResponsiveScale);
-    btnStart.addEventListener('click', handleBtnStart);
-    btnRestart.addEventListener('click', handleBtnRestart);
-  }
-
-  // ── Cleanup — removes all listeners, cancels RAF, resets state ────────
-  //
-  // Call cleanup() during hot reloads or game transitions to prevent
-  // memory leaks from orphaned event listeners and animation frames.
-  //
-  // Pattern:
-  //  1. Every addEventListener has a matching removeEventListener in cleanup()
-  //  2. All handler functions are named (not anonymous) so refs match
-  //  3. All async work (RAF, setTimeout) is tracked by ID and cancelled
-  //  4. Mutable state is reset to prevent stale data across reloads
-  //  5. HMR guard runs BEFORE reassigning window.stackyDestroy
-
-  /** The beforeunload handler ref — stored so cleanup can remove it too. */
-  let beforeUnloadRef = null;
+  // ── Cleanup for HMR ───────────────────────────────────────────────────
 
   function cleanup() {
-    // Cancel animation frame loop
     stopLoop();
-
-    // Cancel any pending die() timeout
-    if (dieTimerId !== null) {
-      clearTimeout(dieTimerId);
-      dieTimerId = null;
-    }
-
-    // Remove all event listeners using the same references used to attach
-    document.removeEventListener('keydown', handleKeydown);
-    document.removeEventListener('visibilitychange', handleVisibilityChange);
-    canvas.removeEventListener('click', handleCanvasClick);
-    canvas.removeEventListener('touchstart', handleTouchStart);
+    if (inputCleanup) { inputCleanup(); inputCleanup = null; }
     window.removeEventListener('resize', applyResponsiveScale);
-    btnStart.removeEventListener('click', handleBtnStart);
-    btnRestart.removeEventListener('click', handleBtnRestart);
-
-    // Remove beforeunload listener itself (prevents stacking on hot reload)
-    if (beforeUnloadRef) {
-      window.removeEventListener('beforeunload', beforeUnloadRef);
-      beforeUnloadRef = null;
-    }
-
-    // Reset visual effect timers
-    shakeUntil = 0;
-
-    // Clear particle pool
-    particles.length = 0;
-
-    // Reset overlay visibility (splash shown, gameover hidden)
-    splashEl.classList.remove('hidden');
-    gameoverEl.classList.add('hidden');
-
-    // Reset game state
-    state.phase         = 'idle';
-    state.score         = 0;
-    state.level         = 1;
-    state.speed         = BASE_SPEED;
-    state.stack         = [];
-    state.activeX       = 0;
-    state.activeW       = INITIAL_W;
-    state.activeDir     = 1;
-    state.cameraY       = 0;
-    state.targetCameraY = 0;
-
-    // Update gameState for automated testing
-    syncGameState();
-
-    // Clear the initialization flag
+    state.phase = 'idle';
+    state.alive = true;
+    StackyGame.syncGameState(state);
     window._stackyInitialized = false;
   }
-
-  // ── HMR guard — tear down previous instance BEFORE overwriting refs ───
 
   if (typeof window.stackyDestroy === 'function' && window._stackyInitialized) {
     window.stackyDestroy();
   }
-
-  // Now expose the new cleanup and mark as initialized
   window.stackyDestroy = cleanup;
   window._stackyInitialized = true;
+  window.addEventListener('beforeunload', cleanup);
 
-  // Clean up before page unload to ensure no lingering RAF
-  beforeUnloadRef = cleanup;
-  window.addEventListener('beforeunload', beforeUnloadRef);
+  // ── Initial state ──────────────────────────────────────────────────────
 
-  // ── Boot ───────────────────────────────────────────────────────────────
-
-  attachListeners();
-  applyResponsiveScale();
-
-  // Initial decorative draw — static stack preview behind splash
-  (function initialDraw() {
-    ctx.fillStyle = '#0d0d14';
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-    // Draw a demo stack
-    const demoBlocks = [
-      { x: 100, w: 200 },
-      { x: 105, w: 190 },
-      { x: 102, w: 186 },
-      { x: 110, w: 178 },
-      { x: 108, w: 172 },
-      { x: 115, w: 164 },
-      { x: 112, w: 158 },
-    ];
-
-    for (let i = 0; i < demoBlocks.length; i++) {
-      const b = demoBlocks[i];
-      const by = ACTIVE_Y - i * BLOCK_H;
-      const color = COLORS[i % COLORS.length];
-      drawBlock(b.x, by, b.w, BLOCK_H, color, i === 0);
-    }
-  }());
+  StackyGame.syncGameState(state);
+  draw();
+  drawHoldPanel();
+  drawNextPanel();
 
 }());
 </script>
