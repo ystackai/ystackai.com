@@ -248,6 +248,57 @@
       max-width: 360px;
     }
 
+    /* ── Tron Mode toggle ───────────────────────────────────────────────── */
+    .tron-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-top: 0.25rem;
+      cursor: pointer;
+      user-select: none;
+    }
+    .tron-toggle-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .tron-toggle.active .tron-toggle-label {
+      color: #00ffff;
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+    }
+    .tron-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      background: #1e1e2e;
+      border: 1px solid #334155;
+      border-radius: 11px;
+      transition: all 0.2s ease;
+    }
+    .tron-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: #64748b;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    .tron-toggle.active .tron-switch {
+      background: rgba(0, 255, 255, 0.15);
+      border-color: #00ffff;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+    .tron-toggle.active .tron-switch::after {
+      left: 20px;
+      background: #00ffff;
+      box-shadow: 0 0 6px rgba(0, 255, 255, 0.6);
+    }
+
     /* ── Footer ────────────────────────────────────────────────────────── */
     footer {
       text-align: center;
@@ -304,6 +355,10 @@
         Eat the food. Grow longer.<br>
         Don't hit walls or yourself.
       </div>
+      <div class="tron-toggle" id="tron-toggle">
+        <div class="tron-switch"></div>
+        <span class="tron-toggle-label">Tron Mode</span>
+      </div>
       <div class="overlay-hint">Press Space or tap to play</div>
       <button class="btn" id="btn-start">Start Game</button>
     </div>
@@ -328,10 +383,10 @@
   </div>
 
   <!-- Keyboard controls hint (desktop) -->
-  <div class="controls">
-    Move: <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd>
+  <div class="controls" id="controls-hint">
+    Move: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
     &nbsp; or &nbsp;
-    <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
+    <kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd>
     &nbsp;&nbsp;|&nbsp;&nbsp;
     Pause: <kbd>P</kbd> or <kbd>Space</kbd>
   </div>
@@ -379,6 +434,8 @@
   const CANVAS_PX = 480;
   /** Milliseconds per game logic tick — constant regardless of display Hz. */
   const TICK_MS = 150;
+  /** Faster tick for Light Cycle mode — more intensity. */
+  const TRON_TICK_MS = 100;
   /** localStorage key for the persisted hi-score. */
   const LS_KEY = 'snakey_hi';
   /** Minimum swipe distance (px) to register as a directional input. */
@@ -446,6 +503,49 @@
   applyResponsiveScale();
   window.addEventListener('resize', applyResponsiveScale);
 
+  // ── Tron Mode ──────────────────────────────────────────────────────────
+
+  let tronMode = false;
+  const tronToggleEl = document.getElementById('tron-toggle');
+
+  const splashSubEl = document.querySelector('#overlay-splash .overlay-sub');
+  const splashTitleEl = document.querySelector('#overlay-splash .overlay-title');
+  const splashEmojiEl = document.querySelector('#overlay-splash .overlay-emoji');
+  const heroTitleEl = document.querySelector('.hero h1');
+  const heroSubEl = document.querySelector('.hero p');
+
+  function updateModeUI() {
+    if (tronMode) {
+      splashEmojiEl.textContent = '\u26A1';
+      splashTitleEl.textContent = 'Light Cycle';
+      splashSubEl.innerHTML = 'Ride the grid. Leave a neon trail.<br>Hit your trail or the wall and you derez.';
+      heroTitleEl.textContent = 'Light Cycle \u26A1';
+      heroSubEl.textContent = 'Survive the grid. Don\'t hit your own trail.';
+      if (scoreLabelEl) scoreLabelEl.textContent = 'Survived';
+    } else {
+      splashEmojiEl.textContent = '\uD83D\uDC0D';
+      splashTitleEl.textContent = 'SnakeY';
+      splashSubEl.innerHTML = 'Eat the food. Grow longer.<br>Don\'t hit walls or yourself.';
+      heroTitleEl.textContent = 'SnakeY \uD83D\uDC0D';
+      heroSubEl.textContent = 'Eat the food. Grow longer. Don\'t hit walls or yourself.';
+      if (scoreLabelEl) scoreLabelEl.textContent = 'Score';
+    }
+  }
+
+  tronToggleEl.addEventListener('click', function (e) {
+    e.stopPropagation();
+    tronMode = !tronMode;
+    tronToggleEl.classList.toggle('active', tronMode);
+    // Update canvas wrapper border to match mode
+    wrapper.style.borderColor = tronMode ? 'rgba(0, 255, 255, 0.4)' : '';
+    wrapper.style.boxShadow = tronMode
+      ? '0 0 0 1px rgba(0,255,255,0.15), 0 20px 60px rgba(0,0,0,0.6), 0 0 80px rgba(0,255,255,0.12)'
+      : '';
+    updateModeUI();
+    // Redraw the idle canvas with the new mode
+    if (state.phase === 'idle') initialDraw();
+  });
+
   // ── Game state ───────────────────────────────────────────────────────────
 
   /**
@@ -489,6 +589,7 @@
   // ── UI element references ────────────────────────────────────────────────
 
   const scoreEl    = /** @type {HTMLElement} */ (document.getElementById('score-display'));
+  const scoreLabelEl = /** @type {HTMLElement} */ (document.querySelector('.score-bar .score-label'));
   const hiEl       = /** @type {HTMLElement} */ (document.getElementById('hi-display'));
   const splashEl   = /** @type {HTMLElement} */ (document.getElementById('overlay-splash'));
   const gameoverEl = /** @type {HTMLElement} */ (document.getElementById('overlay-gameover'));
@@ -602,7 +703,7 @@
     state.dir       = 'ArrowRight';
     state.score     = 0;
     dirQueue.length = 0;
-    placeFood();
+    if (!tronMode) placeFood();
     updateScoreUI();
   }
 
@@ -635,8 +736,9 @@
     if (lastTs !== null) accumulated += Math.min(ts - lastTs, 250);
     lastTs = ts;
 
-    while (accumulated >= TICK_MS) {
-      accumulated -= TICK_MS;
+    const tickInterval = tronMode ? TRON_TICK_MS : TICK_MS;
+    while (accumulated >= tickInterval) {
+      accumulated -= tickInterval;
       tick();
       if (state.phase !== 'playing') break; // die() or pause fired — stop ticking
     }
@@ -675,43 +777,82 @@
     // 3. Prepend new head
     state.snake.unshift(newHead);
 
-    // 4. Food check
-    const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
+    if (tronMode) {
+      // ── Light Cycle mode: no food, trail always grows, survival scoring ──
 
-    // 5. Trim tail (only when not growing)
-    if (!ateFood) state.snake.pop();
-
-    // 6. Wall collision (>= not > — boundary is exclusive)
-    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
-      die();
-      return;
-    }
-
-    // 7. Self collision — iterate body[1..n]; tail already removed when !ateFood
-    for (let i = 1; i < state.snake.length; i++) {
-      if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+      // Wall collision
+      if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
         die();
         return;
       }
-    }
 
-    // 8. Food effects
-    if (ateFood) {
+      // Trail collision — hit your own light trail and you derez
+      for (let i = 1; i < state.snake.length; i++) {
+        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+          die();
+          return;
+        }
+      }
+
+      // Survival score — every tick you're alive earns a point
       state.score += 1;
       if (state.score > state.hi) {
         state.hi = state.score;
         saveHi(state.hi);
       }
       updateScoreUI();
-      placeFood();
+    } else {
+      // ── Classic Snake mode ──
+
+      // 4. Food check
+      const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
+
+      // 5. Trim tail (only when not growing)
+      if (!ateFood) state.snake.pop();
+
+      // 6. Wall collision (>= not > — boundary is exclusive)
+      if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+        die();
+        return;
+      }
+
+      // 7. Self collision — iterate body[1..n]; tail already removed when !ateFood
+      for (let i = 1; i < state.snake.length; i++) {
+        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
+          die();
+          return;
+        }
+      }
+
+      // 8. Food effects
+      if (ateFood) {
+        state.score += 1;
+        if (state.score > state.hi) {
+          state.hi = state.score;
+          saveHi(state.hi);
+        }
+        updateScoreUI();
+        placeFood();
+      }
     }
   }
 
   // ── Death ────────────────────────────────────────────────────────────────
 
+  const goEmojiEl = document.querySelector('#overlay-gameover .overlay-emoji');
+  const goTitleEl = document.querySelector('#overlay-gameover .overlay-title');
+
   /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
   function die() {
     state.phase = 'dead';
+    // Update game-over overlay for mode
+    if (tronMode) {
+      goEmojiEl.textContent = '\u26A1';
+      goTitleEl.textContent = 'Derezzed';
+    } else {
+      goEmojiEl.textContent = '\uD83D\uDC80';
+      goTitleEl.textContent = 'Game Over';
+    }
     if (state.score > state.hi) {
       state.hi = state.score;
       saveHi(state.hi);
@@ -719,6 +860,9 @@
     goScoreEl.textContent = String(state.score);
     goHiEl.textContent    = String(state.hi);
     hiEl.textContent      = String(state.hi);
+    // Update score label for mode
+    const goScoreLabelEl = document.querySelector('#overlay-gameover .overlay-score-label');
+    if (goScoreLabelEl) goScoreLabelEl.textContent = tronMode ? 'Survived' : 'Score';
     gameoverEl.classList.remove('hidden');
     syncGameState();
   }
@@ -732,6 +876,7 @@
   function startGame() {
     splashEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
+    updateModeUI();
     initGame();
     state.phase = 'playing';
     syncGameState();
@@ -762,34 +907,64 @@
    */
   function draw(ts) {
     drawBg();
-    drawFood(ts);
+    if (!tronMode) drawFood(ts);
     drawSnake();
     if (state.phase === 'paused') drawPauseOverlay();
   }
 
-  /** Solid background + very subtle grid lines. */
+  /** Solid background + grid lines. Tron mode: neon cyan grid on dark arena. */
   function drawBg() {
-    ctx.fillStyle = '#0d0d14';
-    ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+    if (tronMode) {
+      ctx.fillStyle = '#0a0a12';
+      ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
 
-    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
-    ctx.lineWidth   = 0.5;
-    for (let i = 1; i < COLS; i++) {
-      ctx.beginPath();
-      ctx.moveTo(i * CELL, 0);
-      ctx.lineTo(i * CELL, CANVAS_PX);
-      ctx.stroke();
-    }
-    for (let i = 1; i < ROWS; i++) {
-      ctx.beginPath();
-      ctx.moveTo(0, i * CELL);
-      ctx.lineTo(CANVAS_PX, i * CELL);
-      ctx.stroke();
+      // Neon grid
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.07)';
+      ctx.lineWidth = 0.5;
+      for (let i = 1; i < COLS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * CELL, 0);
+        ctx.lineTo(i * CELL, CANVAS_PX);
+        ctx.stroke();
+      }
+      for (let i = 1; i < ROWS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * CELL);
+        ctx.lineTo(CANVAS_PX, i * CELL);
+        ctx.stroke();
+      }
+
+      // Glowing border
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 12;
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, CANVAS_PX - 2, CANVAS_PX - 2);
+      ctx.shadowBlur = 0;
+    } else {
+      ctx.fillStyle = '#0d0d14';
+      ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+      ctx.lineWidth   = 0.5;
+      for (let i = 1; i < COLS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * CELL, 0);
+        ctx.lineTo(i * CELL, CANVAS_PX);
+        ctx.stroke();
+      }
+      for (let i = 1; i < ROWS; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * CELL);
+        ctx.lineTo(CANVAS_PX, i * CELL);
+        ctx.stroke();
+      }
     }
   }
 
   /**
    * Food pellet with pulsing radial glow (~0.8 Hz, ±12% of base radius).
+   * Tron mode: orange neon energy pickup.
    * @param {DOMHighResTimeStamp} ts
    */
   function drawFood(ts) {
@@ -800,30 +975,56 @@
     const r     = (CELL / 2 - 3) * pulse;
     const glowR = r + 7 * pulse;
 
-    // Outer radial glow
-    const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-    grd.addColorStop(0, 'rgba(244,114,182,0.55)');
-    grd.addColorStop(1, 'rgba(244,114,182,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
-    ctx.fill();
+    if (tronMode) {
+      // Neon orange glow
+      ctx.shadowColor = '#ff6600';
+      ctx.shadowBlur = 15;
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+      grd.addColorStop(0, 'rgba(255, 102, 0, 0.7)');
+      grd.addColorStop(1, 'rgba(255, 102, 0, 0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Food circle (#f472b6)
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath();
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.fill();
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
 
-    // Specular highlight
-    ctx.fillStyle = 'rgba(255,255,255,0.38)';
-    ctx.beginPath();
-    ctx.arc(cx - r * 0.28, cy - r * 0.28, r * 0.32, 0, Math.PI * 2);
-    ctx.fill();
+      // White-hot core
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      // Outer radial glow
+      const grd = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
+      grd.addColorStop(0, 'rgba(244,114,182,0.55)');
+      grd.addColorStop(1, 'rgba(244,114,182,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Food circle (#f472b6)
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Specular highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.38)';
+      ctx.beginPath();
+      ctx.arc(cx - r * 0.28, cy - r * 0.28, r * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   /**
    * Snake segments — head in #818cf8, body interpolated #6366f1 → #312e81.
+   * Tron mode: cyan light cycle with glowing trail.
    * Drawn tail-first so the head always renders on top.
    */
   function drawSnake() {
@@ -832,32 +1033,78 @@
     const pad  = 1;           // inset (px) — creates visible gap between segments
     const size = CELL - pad * 2;
 
-    for (let i = len - 1; i >= 0; i--) {
-      const seg = snake[i];
-      const px  = seg.x * CELL + pad;
-      const py  = seg.y * CELL + pad;
-      const t   = len > 1 ? i / (len - 1) : 0; // 0 = head, 1 = tail end
+    if (tronMode) {
+      // Draw trail segments (tail to body) with fading cyan glow
+      for (let i = len - 1; i >= 1; i--) {
+        const seg = snake[i];
+        const fade = 1 - (i / len) * 0.6;
+        const px = seg.x * CELL + pad;
+        const py = seg.y * CELL + pad;
 
-      if (i === 0) {
-        ctx.fillStyle = '#818cf8';
-      } else {
-        // Lerp #6366f1 (99,102,241) → #312e81 (49,46,129)
-        const r = Math.round(99  + (49  - 99)  * t);
-        const g = Math.round(102 + (46  - 102) * t);
-        const b = Math.round(241 + (129 - 241) * t);
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        // Trail glow
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 6 * fade;
+        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
+        ctx.fillRect(px, py, size, size);
+
+        // Bright trail core line
+        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
+        ctx.fillRect(px + 3, py + 3, size - 6, size - 6);
+        ctx.shadowBlur = 0;
       }
 
-      roundRect(px, py, size, size, i === 0 ? 5 : 3);
-      ctx.fill();
+      // Draw the cycle head — bright white core with cyan glow
+      if (len > 0) {
+        const head = snake[0];
+        const hx = head.x * CELL;
+        const hy = head.y * CELL;
 
-      if (i === 0) {
-        // Highlight ring around head
-        ctx.strokeStyle = '#a5b4fc';
-        ctx.lineWidth   = 1;
-        roundRect(px, py, size, size, 5);
-        ctx.stroke();
-        drawEyes(seg, dir);
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = '#00ffff';
+        ctx.fillRect(hx, hy, CELL, CELL);
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(hx + 3, hy + 3, CELL - 6, CELL - 6);
+
+        // Direction indicator — bright dot
+        const cx = hx + CELL / 2;
+        const cy = hy + CELL / 2;
+        const d = DELTA[dir];
+        ctx.fillStyle = '#00ffff';
+        ctx.beginPath();
+        ctx.arc(cx + d.x * 5, cy + d.y * 5, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      for (let i = len - 1; i >= 0; i--) {
+        const seg = snake[i];
+        const px  = seg.x * CELL + pad;
+        const py  = seg.y * CELL + pad;
+        const t   = len > 1 ? i / (len - 1) : 0; // 0 = head, 1 = tail end
+
+        if (i === 0) {
+          ctx.fillStyle = '#818cf8';
+        } else {
+          // Lerp #6366f1 (99,102,241) → #312e81 (49,46,129)
+          const r = Math.round(99  + (49  - 99)  * t);
+          const g = Math.round(102 + (46  - 102) * t);
+          const b = Math.round(241 + (129 - 241) * t);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+
+        roundRect(px, py, size, size, i === 0 ? 5 : 3);
+        ctx.fill();
+
+        if (i === 0) {
+          // Highlight ring around head
+          ctx.strokeStyle = '#a5b4fc';
+          ctx.lineWidth   = 1;
+          roundRect(px, py, size, size, 5);
+          ctx.stroke();
+          drawEyes(seg, dir);
+        }
       }
     }
   }
@@ -902,9 +1149,14 @@
 
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#a5b4fc';
+    ctx.fillStyle = tronMode ? '#00ffff' : '#a5b4fc';
     ctx.font      = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    if (tronMode) {
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 12;
+    }
     ctx.fillText('PAUSED', CANVAS_PX / 2, CANVAS_PX / 2);
+    ctx.shadowBlur = 0;
 
     ctx.fillStyle = '#64748b';
     ctx.font      = '13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
@@ -1058,6 +1310,9 @@
     highScore: state.hi,
     phase: state.phase,
     snakeLength: 3,
+    tronMode: tronMode,
+    mode: 'classic',
+    trailLength: 0,
   };
 
   /** Sync window.gameState with internal state — called every tick & on death. */
@@ -1066,11 +1321,14 @@
     window.gameState.score       = state.score;
     window.gameState.alive       = state.phase === 'playing' || state.phase === 'paused';
     window.gameState.gameOver    = state.phase === 'dead';
-    window.gameState.level       = 1 + Math.floor(state.score / 10);
+    window.gameState.level       = tronMode ? 1 : 1 + Math.floor(state.score / 10);
     window.gameState.player      = { x: head.x, y: head.y };
     window.gameState.highScore   = state.hi;
     window.gameState.phase       = state.phase;
     window.gameState.snakeLength = state.snake.length;
+    window.gameState.tronMode    = tronMode;
+    window.gameState.mode        = tronMode ? 'lightcycle' : 'classic';
+    window.gameState.trailLength = tronMode ? state.snake.length - 1 : 0;
   }
 
   // ── Local metrics for launch dashboard ──────────────────────────────────
@@ -1106,8 +1364,9 @@
   /**
    * Render a static demo snake + food on the canvas before the game starts,
    * so there's something interesting visible through the semi-transparent splash.
+   * Called on page load and when Tron mode is toggled on the idle screen.
    */
-  (function initialDraw() {
+  function initialDraw() {
     drawBg();
 
     const pad  = 1;
@@ -1121,47 +1380,89 @@
     ];
     const dLen = demoSegs.length;
 
-    demoSegs.forEach((seg, i) => {
-      const t = dLen > 1 ? i / (dLen - 1) : 0;
-      if (i === 0) {
-        ctx.fillStyle = '#818cf8';
-      } else {
-        const r = Math.round(99  + (49  - 99)  * t);
-        const g = Math.round(102 + (46  - 102) * t);
-        const b = Math.round(241 + (129 - 241) * t);
-        ctx.fillStyle = `rgb(${r},${g},${b})`;
+    if (tronMode) {
+      // Tron-style demo: light cycle trail with glow
+      for (let i = dLen - 1; i >= 1; i--) {
+        const seg = demoSegs[i];
+        const fade = 1 - (i / dLen) * 0.6;
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 6 * fade;
+        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
+        ctx.fillRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size);
+        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
+        ctx.fillRect(seg.x * CELL + pad + 3, seg.y * CELL + pad + 3, size - 6, size - 6);
+        ctx.shadowBlur = 0;
       }
-      roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, i === 0 ? 5 : 3);
-      ctx.fill();
-      if (i === 0) {
-        ctx.strokeStyle = '#a5b4fc';
-        ctx.lineWidth   = 1;
-        roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, 5);
-        ctx.stroke();
-      }
-    });
+      // Cycle head
+      const head = demoSegs[0];
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(head.x * CELL, head.y * CELL, CELL, CELL);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(head.x * CELL + 3, head.y * CELL + 3, CELL - 6, CELL - 6);
 
-    // Static food pellet (no pulsing on the idle screen)
-    const fc  = { x: 13, y: 10 };
-    const fcx = fc.x * CELL + CELL / 2;
-    const fcy = fc.y * CELL + CELL / 2;
-    const fr  = CELL / 2 - 3;
-    const grd = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, fr + 6);
-    grd.addColorStop(0, 'rgba(244,114,182,0.55)');
-    grd.addColorStop(1, 'rgba(244,114,182,0)');
-    ctx.fillStyle = grd;
-    ctx.beginPath();
-    ctx.arc(fcx, fcy, fr + 6, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#f472b6';
-    ctx.beginPath();
-    ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = 'rgba(255,255,255,0.38)';
-    ctx.beginPath();
-    ctx.arc(fcx - fr * 0.28, fcy - fr * 0.28, fr * 0.32, 0, Math.PI * 2);
-    ctx.fill();
-  }());
+      // Orange neon food
+      const fc  = { x: 13, y: 10 };
+      const fcx = fc.x * CELL + CELL / 2;
+      const fcy = fc.y * CELL + CELL / 2;
+      const fr  = CELL / 2 - 3;
+      ctx.shadowColor = '#ff6600';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    } else {
+      demoSegs.forEach((seg, i) => {
+        const t = dLen > 1 ? i / (dLen - 1) : 0;
+        if (i === 0) {
+          ctx.fillStyle = '#818cf8';
+        } else {
+          const r = Math.round(99  + (49  - 99)  * t);
+          const g = Math.round(102 + (46  - 102) * t);
+          const b = Math.round(241 + (129 - 241) * t);
+          ctx.fillStyle = `rgb(${r},${g},${b})`;
+        }
+        roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, i === 0 ? 5 : 3);
+        ctx.fill();
+        if (i === 0) {
+          ctx.strokeStyle = '#a5b4fc';
+          ctx.lineWidth   = 1;
+          roundRect(seg.x * CELL + pad, seg.y * CELL + pad, size, size, 5);
+          ctx.stroke();
+        }
+      });
+
+      // Static food pellet (no pulsing on the idle screen)
+      const fc  = { x: 13, y: 10 };
+      const fcx = fc.x * CELL + CELL / 2;
+      const fcy = fc.y * CELL + CELL / 2;
+      const fr  = CELL / 2 - 3;
+      const grd = ctx.createRadialGradient(fcx, fcy, 0, fcx, fcy, fr + 6);
+      grd.addColorStop(0, 'rgba(244,114,182,0.55)');
+      grd.addColorStop(1, 'rgba(244,114,182,0)');
+      ctx.fillStyle = grd;
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr + 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.38)';
+      ctx.beginPath();
+      ctx.arc(fcx - fr * 0.28, fcy - fr * 0.28, fr * 0.32, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  initialDraw();
 
 }());
 </script>
