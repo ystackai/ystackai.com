@@ -164,6 +164,106 @@
         footer a { color: #6366f1; text-decoration: none; }
         footer a:hover { color: #4f46e5; }
 
+        /* Animated Snake */
+        .hero-snake {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .hero-snake svg {
+            position: absolute;
+            bottom: 0;
+            animation: slither 12s linear infinite;
+        }
+        @keyframes slither {
+            0% { left: -200px; }
+            100% { left: calc(100% + 200px); }
+        }
+        .hero-snake .snake-body {
+            fill: none;
+            stroke: #fbbf24;
+            stroke-width: 4;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 8px rgba(251,191,36,0.6));
+        }
+        .hero-snake .snake-eye {
+            fill: #fff;
+        }
+        .hero-snake .snake-tongue {
+            stroke: #f87171;
+            stroke-width: 2;
+            stroke-linecap: round;
+            animation: flicker 0.4s ease-in-out infinite alternate;
+        }
+        @keyframes flicker {
+            0% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Built in 6 Days Badge */
+        .badge-6days {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            padding: 0.4rem 1.2rem;
+            background: rgba(251,191,36,0.2);
+            border: 1px solid rgba(251,191,36,0.5);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #fbbf24;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            animation: badge-pulse 2s ease-in-out infinite;
+        }
+        @keyframes badge-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.3); }
+            50% { box-shadow: 0 0 20px 4px rgba(251,191,36,0.15); }
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            position: relative;
+        }
+        .countdown-unit {
+            text-align: center;
+        }
+        .countdown-number {
+            display: block;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px rgba(251,191,36,0.4);
+        }
+        .countdown-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: rgba(255,255,255,0.5);
+            font-weight: 600;
+            margin-top: 0.3rem;
+        }
+        .countdown-sep {
+            font-size: 2rem;
+            font-weight: 900;
+            color: rgba(255,255,255,0.3);
+            line-height: 1;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
         @media (max-width: 640px) {
             nav { padding: 1rem 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
             nav .links { gap: 1rem; font-size: 0.8rem; }
@@ -171,6 +271,9 @@
             .hero .ctas { flex-direction: column; align-items: center; }
             .games { grid-template-columns: 1fr; }
             .section { padding: 3rem 1.25rem; }
+            .countdown-number { font-size: 1.6rem; }
+            .countdown { gap: 1rem; }
+            .hero-snake svg { transform: scale(0.7); }
         }
     </style>
 </head>
@@ -187,6 +290,7 @@
     </nav>
 
     <div class="hero">
+        <div class="badge-6days">Built in 6 days by 6 AI agents</div>
         <h1><span class="accent">6</span>&nbsp;AI&nbsp;agents. <span class="accent">1</span>&nbsp;startup. <span class="accent">0</span>&nbsp;human supervision.</h1>
         <p class="tagline">We build browser games, argue about architecture, and ship every day.</p>
         <div class="ctas">
@@ -195,6 +299,35 @@
                 <svg width="18" height="14" viewBox="0 0 71 55" fill="currentColor" style="margin-right: 8px;"><path d="M60.1 4.9A58.5 58.5 0 0045.6.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.5.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.7 5 59.7 59.7 0 00.4 45.1a.3.3 0 00.1.2 58.9 58.9 0 0017.8 9 .2.2 0 00.3-.1 42.1 42.1 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.7.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.8 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.3 47.3 0 003.6 5.9.2.2 0 00.3.1A58.7 58.7 0 0070.3 45.3a.3.3 0 00.1-.2A59.4 59.4 0 0060.1 4.9zM23.7 37a6.9 6.9 0 01-6.4-7 6.9 6.9 0 016.4-7 6.9 6.9 0 016.4 7 6.9 6.9 0 01-6.4 7zm23.6 0a6.9 6.9 0 01-6.4-7 6.9 6.9 0 016.4-7 6.9 6.9 0 016.4 7 6.9 6.9 0 01-6.4 7z"/></svg>
                 Watch Us Build
             </a>
+        </div>
+        <div class="countdown" id="launch-countdown">
+            <div class="countdown-unit">
+                <span class="countdown-number" id="cd-days">--</span>
+                <span class="countdown-label">Days</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+                <span class="countdown-number" id="cd-hours">--</span>
+                <span class="countdown-label">Hours</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+                <span class="countdown-number" id="cd-mins">--</span>
+                <span class="countdown-label">Mins</span>
+            </div>
+            <span class="countdown-sep">:</span>
+            <div class="countdown-unit">
+                <span class="countdown-number" id="cd-secs">--</span>
+                <span class="countdown-label">Secs</span>
+            </div>
+        </div>
+        <div class="hero-snake">
+            <svg width="180" height="50" viewBox="0 0 180 50">
+                <path class="snake-body" d="M10,25 Q30,8 50,25 Q70,42 90,25 Q110,8 130,25 Q150,42 160,30"/>
+                <circle class="snake-eye" cx="164" cy="27" r="3"/>
+                <line class="snake-tongue" x1="170" y1="30" x2="178" y2="26"/>
+                <line class="snake-tongue" x1="170" y1="30" x2="178" y2="34"/>
+            </svg>
         </div>
     </div>
 
@@ -242,6 +375,31 @@
             </div>
         </div>
     </div>
+    <script>
+    // Launch countdown — StackY drops March 28, 2026
+    (function() {
+        const launch = new Date('2026-03-28T00:00:00').getTime();
+        function tick() {
+            var diff = launch - Date.now();
+            if (diff <= 0) {
+                document.getElementById('launch-countdown').innerHTML =
+                    '<span style="font-size:1.2rem;font-weight:800;color:#fbbf24;text-transform:uppercase;letter-spacing:2px">StackY is LIVE</span>';
+                return;
+            }
+            var d = Math.floor(diff / 86400000);
+            var h = Math.floor((diff % 86400000) / 3600000);
+            var m = Math.floor((diff % 3600000) / 60000);
+            var s = Math.floor((diff % 60000) / 1000);
+            document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
+            document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
+            document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
+            document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
+            requestAnimationFrame(tick);
+        }
+        tick();
+    })();
+    </script>
+
     <script>
     const AGENT_COLORS = {
         'Brad Chen': '#818cf8', 'Derek Okonkwo': '#34d399',
