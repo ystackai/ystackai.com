@@ -16,6 +16,11 @@ var StackyGame = (function () {
   // Scoring table (Guideline)
   var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
 
+  // Chocolate river constants
+  var CHOCOLATE_CELL = 8;            // grid value for chocolate blocks
+  var CHOCOLATE_INTERVAL = 30000;    // ms between chocolate row rises
+  var CHOCOLATE_GAPS = 2;            // random gaps per chocolate row
+
   // localStorage key
   var LS_KEY = 'stacky_hi';
 
@@ -61,6 +66,9 @@ var StackyGame = (function () {
       lockDelayMax: 30,    // frames before auto-lock
       bag: [],
       nextPiece: null,
+      // Chocolate river state
+      lastChocolateTime: 0,
+      chocolateRowsRisen: 0,
     };
   }
 
@@ -140,6 +148,8 @@ var StackyGame = (function () {
     state.lockDelayTimer = 0;
     state.bag = [];
     state.nextPiece = null;
+    state.lastChocolateTime = 0;
+    state.chocolateRowsRisen = 0;
     spawnPiece(state);
     syncGameState(state);
   }
@@ -305,15 +315,76 @@ var StackyGame = (function () {
     spawnPiece(state);
   }
 
-  /** Clear completed lines, return count. */
+  /**
+   * Create a chocolate row: filled with CHOCOLATE_CELL except for random gaps.
+   */
+  function createChocolateRow() {
+    var row = new Array(COLS).fill(CHOCOLATE_CELL);
+    // Punch random gaps so the row doesn't auto-clear
+    var gaps = [];
+    while (gaps.length < CHOCOLATE_GAPS) {
+      var g = Math.floor(Math.random() * COLS);
+      if (gaps.indexOf(g) === -1) gaps.push(g);
+    }
+    for (var i = 0; i < gaps.length; i++) {
+      row[gaps[i]] = 0;
+    }
+    return row;
+  }
+
+  /**
+   * Rise one chocolate row from the bottom, pushing the grid up.
+   * Returns false if the rise causes game over (top row occupied).
+   */
+  function riseChocolateRow(state) {
+    // Check if top row has any blocks — if so, rising will push them off
+    for (var x = 0; x < COLS; x++) {
+      if (state.grid[0][x] !== 0) {
+        state.alive = false;
+        state.phase = 'gameOver';
+        if (state.score > state.hi) {
+          state.hi = state.score;
+          saveHi(state.hi);
+        }
+        return false;
+      }
+    }
+    // Shift grid up by removing top row, push chocolate row at bottom
+    state.grid.shift();
+    state.grid.push(createChocolateRow());
+    state.chocolateRowsRisen++;
+
+    // Adjust active piece position — it stays visually in place,
+    // but the grid shifted up so piece's y decreases by 1
+    if (state.activePiece) {
+      state.activePiece.y -= 1;
+      // If the piece now collides after the shift, lock it
+      if (state.activePiece.y < 0 || checkCollision(state.grid, state.activePiece)) {
+        lockPiece(state);
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Clear completed lines, return count.
+   * Also counts how many cleared rows contained chocolate cells (for bonus).
+   */
   function clearLines(state) {
     var cleared = 0;
+    var chocolateCleared = 0;
     for (var y = ROWS - 1; y >= 0; y--) {
       var full = true;
       for (var x = 0; x < COLS; x++) {
         if (state.grid[y][x] === 0) { full = false; break; }
       }
       if (full) {
+        // Check if this row had any chocolate cells
+        var hasChocolate = false;
+        for (var cx = 0; cx < COLS; cx++) {
+          if (state.grid[y][cx] === CHOCOLATE_CELL) { hasChocolate = true; break; }
+        }
+        if (hasChocolate) chocolateCleared++;
         state.grid.splice(y, 1);
         state.grid.unshift(new Array(COLS).fill(0));
         cleared++;
@@ -321,12 +392,18 @@ var StackyGame = (function () {
       }
     }
     state.linesCleared += cleared;
+    state._lastChocolateCleared = chocolateCleared;
     return cleared;
   }
 
   /** Update score based on lines cleared. */
   function updateScore(state, lines) {
     var points = (LINE_SCORES[lines] || 0) * state.level;
+    // Chocolate river bonus: 2x points for each chocolate row cleared
+    var chocoCleared = state._lastChocolateCleared || 0;
+    if (chocoCleared > 0) {
+      points += (LINE_SCORES[chocoCleared] || chocoCleared * 100) * state.level;
+    }
     state.score += points;
 
     // Golden Ticket: 4-line clear (Tetris)
@@ -371,6 +448,16 @@ var StackyGame = (function () {
   /** Gravity tick — called each frame with timestamp. */
   function tick(state, timestamp) {
     if (state.phase !== 'playing' || !state.activePiece) return;
+
+    // Chocolate river: rise a row every CHOCOLATE_INTERVAL ms
+    if (state.lastChocolateTime === 0) {
+      state.lastChocolateTime = timestamp;
+    }
+    if (timestamp - state.lastChocolateTime >= CHOCOLATE_INTERVAL) {
+      state.lastChocolateTime = timestamp;
+      if (!riseChocolateRow(state)) return; // game over from chocolate
+    }
+
     if (timestamp - state.lastDropTime >= state.dropInterval) {
       state.lastDropTime = timestamp;
       var candidate = {
@@ -453,6 +540,8 @@ var StackyGame = (function () {
         x: state.activePiece.x,
         y: state.activePiece.y,
       } : null,
+      chocolateRowsRisen: state.chocolateRowsRisen,
+      chocolateCell: CHOCOLATE_CELL,
     };
   }
 
@@ -474,8 +563,11 @@ var StackyGame = (function () {
     syncGameState: syncGameState,
     getGhostY: getGhostY,
     checkCollision: checkCollision,
+    riseChocolateRow: riseChocolateRow,
     COLS: COLS,
     ROWS: ROWS,
+    CHOCOLATE_CELL: CHOCOLATE_CELL,
+    CHOCOLATE_INTERVAL: CHOCOLATE_INTERVAL,
   };
 })();
 
