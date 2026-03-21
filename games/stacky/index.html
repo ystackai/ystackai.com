@@ -467,6 +467,9 @@
   let rafId       = null;
   let lastTs      = null;
 
+  /** Pending setTimeout ID from die() — tracked so cleanup can cancel it. */
+  let dieTimerId  = null;
+
   // ── Particle system ─────────────────────────────────────────────────────
 
   /**
@@ -674,8 +677,9 @@
     hiEl.textContent = String(state.hi);
     triggerShake();
 
-    // Show game-over overlay after shake
-    setTimeout(() => {
+    // Show game-over overlay after shake (tracked for cleanup)
+    dieTimerId = setTimeout(() => {
+      dieTimerId = null;
       goScoreEl.textContent = String(state.score);
       goHiEl.textContent    = String(state.hi);
       gameoverEl.classList.remove('hidden');
@@ -995,14 +999,30 @@
     btnRestart.addEventListener('click', handleBtnRestart);
   }
 
-  // ── Cleanup — removes all listeners, cancels RAF ──────────────────────
+  // ── Cleanup — removes all listeners, cancels RAF, resets state ────────
   //
   // Call cleanup() during hot reloads or game transitions to prevent
   // memory leaks from orphaned event listeners and animation frames.
+  //
+  // Pattern:
+  //  1. Every addEventListener has a matching removeEventListener in cleanup()
+  //  2. All handler functions are named (not anonymous) so refs match
+  //  3. All async work (RAF, setTimeout) is tracked by ID and cancelled
+  //  4. Mutable state is reset to prevent stale data across reloads
+  //  5. HMR guard runs BEFORE reassigning window.stackyCleanup
+
+  /** The beforeunload handler ref — stored so cleanup can remove it too. */
+  let beforeUnloadRef = null;
 
   function cleanup() {
     // Cancel animation frame loop
     stopLoop();
+
+    // Cancel any pending die() timeout
+    if (dieTimerId !== null) {
+      clearTimeout(dieTimerId);
+      dieTimerId = null;
+    }
 
     // Remove all event listeners using the same references used to attach
     document.removeEventListener('keydown', handleKeydown);
@@ -1013,27 +1033,47 @@
     btnStart.removeEventListener('click', handleBtnStart);
     btnRestart.removeEventListener('click', handleBtnRestart);
 
+    // Remove beforeunload listener itself (prevents stacking on hot reload)
+    if (beforeUnloadRef) {
+      window.removeEventListener('beforeunload', beforeUnloadRef);
+      beforeUnloadRef = null;
+    }
+
     // Clear particle pool
     particles.length = 0;
 
-    // Clear gameState
-    if (window.gameState) {
-      window.gameState.alive    = false;
-      window.gameState.gameOver = true;
-    }
+    // Reset game state
+    state.phase         = 'idle';
+    state.score         = 0;
+    state.level         = 1;
+    state.speed         = BASE_SPEED;
+    state.stack         = [];
+    state.activeX       = 0;
+    state.activeW       = INITIAL_W;
+    state.activeDir     = 1;
+    state.cameraY       = 0;
+    state.targetCameraY = 0;
+
+    // Update gameState for automated testing
+    syncGameState();
+
+    // Clear the initialization flag
+    window._stackyInitialized = false;
   }
 
-  // Expose cleanup on window for hot-reload and external teardown
-  window.stackyCleanup = cleanup;
+  // ── HMR guard — tear down previous instance BEFORE overwriting refs ───
 
-  // Clean up before page unload to ensure no lingering RAF
-  window.addEventListener('beforeunload', cleanup);
-
-  // Support HMR-style hot reload: if a previous instance exists, clean it up
   if (typeof window.stackyCleanup === 'function' && window._stackyInitialized) {
     window.stackyCleanup();
   }
+
+  // Now expose the new cleanup and mark as initialized
+  window.stackyCleanup = cleanup;
   window._stackyInitialized = true;
+
+  // Clean up before page unload to ensure no lingering RAF
+  beforeUnloadRef = cleanup;
+  window.addEventListener('beforeunload', beforeUnloadRef);
 
   // ── Boot ───────────────────────────────────────────────────────────────
 
