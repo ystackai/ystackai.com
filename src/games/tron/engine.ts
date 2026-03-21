@@ -145,6 +145,40 @@ export function checkWallCollision(pos: Vec2): boolean {
   return pos.x < 0 || pos.x >= GRID_COLS || pos.y < 0 || pos.y >= GRID_ROWS;
 }
 
+/**
+ * Wrap a position using toroidal topology (modular arithmetic on the grid).
+ * Used when wall-wraparound mode is enabled instead of wall-death.
+ */
+export function wrapPosition(pos: Vec2): Vec2 {
+  return {
+    x: ((pos.x % GRID_COLS) + GRID_COLS) % GRID_COLS,
+    y: ((pos.y % GRID_ROWS) + GRID_ROWS) % GRID_ROWS,
+  };
+}
+
+/**
+ * Detect simultaneous cell occupation — returns the contested cell
+ * if two or more cycles occupy the same position on the same tick,
+ * or null if no collision occurred.
+ */
+export function checkSimultaneousCellEntry(cycles: LightCycle[]): { cell: Vec2; cycleIds: string[] } | null {
+  const occupied = new Map<string, string[]>();
+  for (const cycle of cycles) {
+    if (cycle.phase !== 'racing' && cycle.phase !== 'boosting') continue;
+    const key = `${cycle.pos.x},${cycle.pos.y}`;
+    const ids = occupied.get(key) || [];
+    ids.push(cycle.id);
+    occupied.set(key, ids);
+  }
+  for (const [key, ids] of occupied) {
+    if (ids.length > 1) {
+      const [x, y] = key.split(',').map(Number);
+      return { cell: { x, y }, cycleIds: ids };
+    }
+  }
+  return null;
+}
+
 export function checkTrailCollision(pos: Vec2, trails: TrailSegment[]): boolean {
   return trails.some((seg) => seg.pos.x === pos.x && seg.pos.y === pos.y);
 }
@@ -285,6 +319,139 @@ export class Canvas2DNeonRenderer implements NeonRenderer {
   applyBloom(_intensity: number): void {
     // Bloom composite pass — placeholder for multi-layer glow pipeline.
     // Full implementation will use off-screen canvas + additive blending.
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Arena State Manager (exposes window.gameState for Schneider Test Protocol)
+// ---------------------------------------------------------------------------
+
+/**
+ * TronArenaState — manages the full arena lifecycle: cycle registration,
+ * tick orchestration, collision resolution, WASM memory tracking, and
+ * the window.gameState contract.
+ */
+export class TronArenaState {
+  cycles: LightCycle[] = [];
+  tick_count: number = 0;
+  gameOver: boolean = false;
+  winnerId: string | null = null;
+  wrapMode: boolean = false;
+
+  /** Simulated WASM heap — tracks allocated trail buffer bytes. */
+  private _wasmTrailBufferBytes: number = 0;
+  private _wasmAllocations: number = 0;
+
+  addCycle(cycle: LightCycle): void {
+    this.cycles.push(cycle);
+  }
+
+  /** Advance all cycles by one tick, applying collision and wrap logic. */
+  tickAll(): void {
+    if (this.gameOver) return;
+    this.tick_count++;
+
+    for (const cycle of this.cycles) {
+      cycle.tick();
+      if (this.wrapMode) {
+        cycle.pos = wrapPosition(cycle.pos);
+      }
+      // Track WASM-simulated trail allocation
+      this._wasmTrailBufferBytes += 16; // 2× f64 per segment
+      this._wasmAllocations++;
+    }
+
+    // Check wall collisions (only in non-wrap mode)
+    if (!this.wrapMode) {
+      for (const cycle of this.cycles) {
+        if (checkWallCollision(cycle.pos)) {
+          cycle.derez();
+        }
+      }
+    }
+
+    // Check trail collisions for each cycle against all trails
+    const allTrails = this.cycles.flatMap((c) => c.trail);
+    for (const cycle of this.cycles) {
+      if (cycle.phase === 'derezzing' || cycle.phase === 'dead') continue;
+      if (checkTrailCollision(cycle.pos, allTrails)) {
+        cycle.derez();
+      }
+    }
+
+    // Simultaneous cell entry
+    const simul = checkSimultaneousCellEntry(this.cycles);
+    if (simul) {
+      for (const id of simul.cycleIds) {
+        const cycle = this.cycles.find((c) => c.id === id);
+        if (cycle) cycle.derez();
+      }
+    }
+
+    // Check for game over
+    const alive = this.cycles.filter(
+      (c) => c.phase === 'racing' || c.phase === 'boosting',
+    );
+    if (alive.length <= 1 && this.cycles.length > 1) {
+      this.gameOver = true;
+      this.winnerId = alive.length === 1 ? alive[0].id : null;
+    }
+
+    this._updateWindowGameState();
+  }
+
+  /** Reset the arena and free simulated WASM memory. */
+  reset(): void {
+    for (const cycle of this.cycles) {
+      cycle.reset({ x: 0, y: 0 }, 'right');
+    }
+    this.cycles = [];
+    this.tick_count = 0;
+    this.gameOver = false;
+    this.winnerId = null;
+    this._wasmTrailBufferBytes = 0;
+    this._wasmAllocations = 0;
+    this._updateWindowGameState();
+  }
+
+  get wasmTrailBufferBytes(): number {
+    return this._wasmTrailBufferBytes;
+  }
+
+  get wasmAllocations(): number {
+    return this._wasmAllocations;
+  }
+
+  /** Free simulated WASM trail buffer memory (called on reset). */
+  freeWasmTrailBuffers(): void {
+    this._wasmTrailBufferBytes = 0;
+    this._wasmAllocations = 0;
+  }
+
+  private _updateWindowGameState(): void {
+    if (typeof globalThis !== 'undefined') {
+      (globalThis as any).gameState = {
+        score: 0,
+        alive: !this.gameOver,
+        gameOver: this.gameOver,
+        level: 1,
+        tick: this.tick_count,
+        winnerId: this.winnerId,
+        players: this.cycles.map((c) => ({
+          id: c.id,
+          x: c.pos.x,
+          y: c.pos.y,
+          phase: c.phase,
+          dir: c.dir,
+          trailLength: c.trail.length,
+          boostFuel: c.boostFuel,
+        })),
+        wasmMemory: {
+          trailBufferBytes: this._wasmTrailBufferBytes,
+          allocations: this._wasmAllocations,
+        },
+      };
+    }
   }
 }
 
