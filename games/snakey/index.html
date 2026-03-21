@@ -1047,6 +1047,60 @@
   document.getElementById('btn-start').addEventListener('click', startGame);
   document.getElementById('btn-restart').addEventListener('click', startGame);
 
+  // ── Expose window.gameState for automated testing / dashboard ────────────
+
+  window.gameState = {
+    score: 0,
+    alive: true,
+    gameOver: false,
+    level: 1,
+    player: { x: 10, y: 10 },
+    highScore: state.hi,
+    phase: state.phase,
+    snakeLength: 3,
+  };
+
+  /** Sync window.gameState with internal state — called every tick & on death. */
+  function syncGameState() {
+    const head = state.snake.length > 0 ? state.snake[0] : { x: 0, y: 0 };
+    window.gameState.score       = state.score;
+    window.gameState.alive       = state.phase === 'playing' || state.phase === 'paused';
+    window.gameState.gameOver    = state.phase === 'dead';
+    window.gameState.level       = 1 + Math.floor(state.score / 10);
+    window.gameState.player      = { x: head.x, y: head.y };
+    window.gameState.highScore   = state.hi;
+    window.gameState.phase       = state.phase;
+    window.gameState.snakeLength = state.snake.length;
+  }
+
+  // ── Local metrics for launch dashboard ──────────────────────────────────
+  let gameStartedAt = null;
+
+  function trackGameStart() {
+    gameStartedAt = Date.now();
+  }
+
+  function trackGameEnd() {
+    if (gameStartedAt) {
+      var elapsed = Math.floor((Date.now() - gameStartedAt) / 1000);
+      gameStartedAt = null;
+      try {
+        var prev = parseInt(localStorage.getItem('snakey_total_sec') || '0', 10) || 0;
+        localStorage.setItem('snakey_total_sec', String(prev + elapsed));
+        var games = parseInt(localStorage.getItem('snakey_games') || '0', 10) || 0;
+        localStorage.setItem('snakey_games', String(games + 1));
+      } catch(e) {}
+    }
+  }
+
+  // Patch tick, die, and startGame to auto-sync gameState + track metrics
+  const _origTick = tick;
+  tick = function() { _origTick(); syncGameState(); };
+  const _origDie = die;
+  die = function() { _origDie(); trackGameEnd(); syncGameState(); };
+  const _origStartGame = startGame;
+  startGame = function() { _origStartGame(); trackGameStart(); syncGameState(); };
+
   // ── Initial decorative draw ──────────────────────────────────────────────
 
   /**

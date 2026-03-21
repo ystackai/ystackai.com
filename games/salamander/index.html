@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SalamanderY — ystackai</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(251, 146, 60, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+    nav .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-decoration: none;
+    }
+    nav .logo span { color: #fb923c; }
+    nav .home-link {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(251, 146, 60, 0.3);
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+    nav .home-link:hover {
+      color: #fb923c;
+      border-color: #fb923c;
+      background: rgba(251, 146, 60, 0.08);
+    }
+
+    .hero {
+      background: linear-gradient(
+        135deg,
+        rgba(251, 146, 60, 0.15) 0%,
+        rgba(239, 68, 68, 0.08) 50%,
+        rgba(251, 146, 60, 0.05) 100%
+      );
+      border-bottom: 1px solid rgba(251, 146, 60, 0.12);
+      padding: 1.75rem 2rem 1.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #fdba74, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
+    }
+    .hero p {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1.5rem 1rem;
+      position: relative;
+    }
+
+    .scoreboard {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .scoreboard .p1 { color: #fb923c; }
+    .scoreboard .p2 { color: #60a5fa; }
+    .scoreboard .sync-status {
+      color: #4ade80;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .scoreboard .sync-status.active { opacity: 1; }
+    .scoreboard .total { color: #e2e8f0; }
+
+    .canvas-wrap {
+      position: relative;
+      width: 480px;
+      height: 480px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 40px rgba(251, 146, 60, 0.12);
+      border: 1px solid rgba(251, 146, 60, 0.15);
+    }
+
+    canvas {
+      display: block;
+      width: 480px;
+      height: 480px;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: rgba(10, 10, 15, 0.88);
+      backdrop-filter: blur(6px);
+      text-align: center;
+      z-index: 5;
+      gap: 0.5rem;
+    }
+    .overlay.hidden { display: none; }
+    .overlay-emoji { font-size: 3rem; margin-bottom: 0.5rem; }
+    .overlay-title {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #fdba74, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .overlay-sub {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      max-width: 320px;
+    }
+    .overlay-hint {
+      color: #64748b;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+    }
+    .overlay-score-block {
+      display: flex;
+      gap: 2rem;
+      margin: 1rem 0;
+    }
+    .overlay-score-item { display: flex; flex-direction: column; align-items: center; }
+    .overlay-score-label { font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
+    .overlay-score-val { font-size: 2rem; font-weight: 800; color: #fb923c; }
+    .overlay-score-val.hi { color: #4ade80; }
+
+    .btn {
+      margin-top: 1rem;
+      padding: 0.6rem 2rem;
+      background: linear-gradient(135deg, #fb923c, #ef4444);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, box-shadow 0.15s;
+    }
+    .btn:hover { transform: scale(1.04); box-shadow: 0 0 16px rgba(251, 146, 60, 0.4); }
+
+    .controls {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #475569;
+      text-align: center;
+    }
+    .controls kbd {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      background: rgba(251, 146, 60, 0.08);
+      border: 1px solid rgba(251, 146, 60, 0.2);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: #334155;
+      border-top: 1px solid rgba(251, 146, 60, 0.08);
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">ystack<span>ai</span></a>
+  <a href="/games/" class="home-link">All Games</a>
+</nav>
+
+<div class="hero">
+  <h1>SalamanderY</h1>
+  <p>Co-op. Shared consciousness. Two salamanders, one fire.</p>
+</div>
+
+<main>
+  <div class="scoreboard">
+    <span class="p1">P1: <span id="score-p1">0</span></span>
+    <span class="sync-status" id="sync-indicator">SYNCED x2</span>
+    <span class="p2">P2: <span id="score-p2">0</span></span>
+    <span class="total">Total: <span id="score-total">0</span></span>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="game-canvas"></canvas>
+
+    <div class="overlay" id="overlay-splash">
+      <div class="overlay-emoji">&#x1F525;</div>
+      <div class="overlay-title">SalamanderY</div>
+      <div class="overlay-sub">
+        Two salamanders. One shared consciousness.<br>
+        Collect embers. Stay close to sync for 2x points.<br>
+        Avoid the void zones. Survive together.
+      </div>
+      <div class="overlay-hint">Press Space or click Start</div>
+      <button class="btn" id="btn-start">Start Game</button>
+    </div>
+
+    <div class="overlay hidden" id="overlay-gameover">
+      <div class="overlay-emoji">&#x1F4A8;</div>
+      <div class="overlay-title">Flame Out</div>
+      <div class="overlay-score-block">
+        <div class="overlay-score-item">
+          <span class="overlay-score-label">Score</span>
+          <span class="overlay-score-val" id="go-score">0</span>
+        </div>
+        <div class="overlay-score-item">
+          <span class="overlay-score-label">Best</span>
+          <span class="overlay-score-val hi" id="go-hi">0</span>
+        </div>
+      </div>
+      <div class="overlay-hint">Press Space or click to try again</div>
+      <button class="btn" id="btn-restart">Play Again</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    P1: <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    P2: <kbd>&uarr;</kbd> <kbd>&darr;</kbd> <kbd>&larr;</kbd> <kbd>&rarr;</kbd>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    Start / Restart: <kbd>Space</kbd>
+  </div>
+</main>
+
+<footer>
+  &copy; 2026 ystackai &mdash; shared consciousness since day one
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Constants ──────────────────────────────────────────────────────────────
+  const COLS = 20;
+  const ROWS = 20;
+  const CELL = 24;
+  const CANVAS_PX = 480;
+  const TICK_MS = 160;
+  const LS_KEY = 'salamandery_hi';
+  const SYNC_DIST = 3;
+  const MAX_VOIDS = 8;
+  const EMBER_COUNT = 3;
+
+  const DELTA = Object.freeze({
+    up:    { x:  0, y: -1 },
+    down:  { x:  0, y:  1 },
+    left:  { x: -1, y:  0 },
+    right: { x:  1, y:  0 },
+  });
+
+  const OPPOSITE = Object.freeze({
+    up: 'down', down: 'up', left: 'right', right: 'left',
+  });
+
+  // ── DOM refs ───────────────────────────────────────────────────────────────
+  const canvas     = document.getElementById('game-canvas');
+  const ctx        = canvas.getContext('2d');
+  const splash     = document.getElementById('overlay-splash');
+  const gameover   = document.getElementById('overlay-gameover');
+  const btnStart   = document.getElementById('btn-start');
+  const btnRestart = document.getElementById('btn-restart');
+  const elScoreP1  = document.getElementById('score-p1');
+  const elScoreP2  = document.getElementById('score-p2');
+  const elScoreT   = document.getElementById('score-total');
+  const elSync     = document.getElementById('sync-indicator');
+  const elGoScore  = document.getElementById('go-score');
+  const elGoHi     = document.getElementById('go-hi');
+
+  // ── HiDPI canvas ──────────────────────────────────────────────────────────
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = CANVAS_PX * dpr;
+  canvas.height = CANVAS_PX * dpr;
+  ctx.scale(dpr, dpr);
+
+  // ── State ──────────────────────────────────────────────────────────────────
+  let state;
+  let rafId = null;
+  let lastTime = 0;
+  let accumulator = 0;
+
+  function loadHi() {
+    try { return parseInt(localStorage.getItem(LS_KEY), 10) || 0; } catch { return 0; }
+  }
+  function saveHi(v) {
+    try { localStorage.setItem(LS_KEY, v); } catch {}
+  }
+
+  function randomFreeCell(occupied) {
+    let x, y, tries = 0;
+    do {
+      x = Math.floor(Math.random() * COLS);
+      y = Math.floor(Math.random() * ROWS);
+      tries++;
+    } while (tries < 500 && occupied.some(function (c) { return c.x === x && c.y === y; }));
+    return { x: x, y: y };
+  }
+
+  function allOccupied() {
+    var cells = [];
+    cells.push(state.p1.pos);
+    cells.push(state.p2.pos);
+    for (var i = 0; i < state.p1.tail.length; i++) cells.push(state.p1.tail[i]);
+    for (var i = 0; i < state.p2.tail.length; i++) cells.push(state.p2.tail[i]);
+    for (var i = 0; i < state.voids.length; i++) cells.push(state.voids[i]);
+    for (var i = 0; i < state.embers.length; i++) cells.push(state.embers[i]);
+    return cells;
+  }
+
+  function initState() {
+    state = {
+      phase: 'idle',
+      p1: {
+        pos: { x: 4, y: 10 },
+        dir: 'right',
+        dirQueue: [],
+        tail: [{ x: 3, y: 10 }, { x: 2, y: 10 }],
+        score: 0,
+      },
+      p2: {
+        pos: { x: 15, y: 10 },
+        dir: 'left',
+        dirQueue: [],
+        tail: [{ x: 16, y: 10 }, { x: 17, y: 10 }],
+        score: 0,
+      },
+      embers: [],
+      voids: [],
+      synced: false,
+      level: 1,
+      hi: loadHi(),
+    };
+    // place initial embers
+    for (var i = 0; i < EMBER_COUNT; i++) {
+      state.embers.push(randomFreeCell(allOccupied()));
+    }
+    // place initial void zones
+    for (var i = 0; i < 3; i++) {
+      state.voids.push(randomFreeCell(allOccupied()));
+    }
+    syncGameState();
+  }
+
+  // ── Input ──────────────────────────────────────────────────────────────────
+  const P1_MAP = { KeyW: 'up', KeyS: 'down', KeyA: 'left', KeyD: 'right' };
+  const P2_MAP = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right' };
+
+  function enqueueDir(player, dir) {
+    var queue = player.dirQueue;
+    var last = queue.length > 0 ? queue[queue.length - 1] : player.dir;
+    if (dir !== last && dir !== OPPOSITE[last]) {
+      if (queue.length < 2) queue.push(dir);
+    }
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (state.phase === 'idle') startGame();
+      else if (state.phase === 'dead') startGame();
+      return;
+    }
+    if (state.phase !== 'playing') return;
+    if (P1_MAP[e.code]) { e.preventDefault(); enqueueDir(state.p1, P1_MAP[e.code]); }
+    if (P2_MAP[e.code]) { e.preventDefault(); enqueueDir(state.p2, P2_MAP[e.code]); }
+  });
+
+  btnStart.addEventListener('click', function () { if (state.phase === 'idle') startGame(); });
+  btnRestart.addEventListener('click', function () { if (state.phase === 'dead') startGame(); });
+
+  // ── Game logic ─────────────────────────────────────────────────────────────
+  function startGame() {
+    initState();
+    state.phase = 'playing';
+    splash.classList.add('hidden');
+    gameover.classList.add('hidden');
+    lastTime = 0;
+    accumulator = 0;
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function dist(a, b) {
+    return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+  }
+
+  function movePlayer(p) {
+    if (p.dirQueue.length > 0) p.dir = p.dirQueue.shift();
+    var d = DELTA[p.dir];
+    var newPos = { x: p.pos.x + d.x, y: p.pos.y + d.y };
+    // wrap edges
+    if (newPos.x < 0) newPos.x = COLS - 1;
+    if (newPos.x >= COLS) newPos.x = 0;
+    if (newPos.y < 0) newPos.y = ROWS - 1;
+    if (newPos.y >= ROWS) newPos.y = 0;
+    p.tail.unshift({ x: p.pos.x, y: p.pos.y });
+    p.pos = newPos;
+    return newPos;
+  }
+
+  function checkCollisions(p, other) {
+    // hit own tail
+    for (var i = 0; i < p.tail.length; i++) {
+      if (p.tail[i].x === p.pos.x && p.tail[i].y === p.pos.y) return true;
+    }
+    // hit other player's tail
+    for (var i = 0; i < other.tail.length; i++) {
+      if (other.tail[i].x === p.pos.x && other.tail[i].y === p.pos.y) return true;
+    }
+    // hit other player head
+    if (other.pos.x === p.pos.x && other.pos.y === p.pos.y) return true;
+    // hit void zone
+    for (var i = 0; i < state.voids.length; i++) {
+      if (state.voids[i].x === p.pos.x && state.voids[i].y === p.pos.y) return true;
+    }
+    return false;
+  }
+
+  function tick() {
+    movePlayer(state.p1);
+    movePlayer(state.p2);
+
+    // check sync
+    state.synced = dist(state.p1.pos, state.p2.pos) <= SYNC_DIST;
+    var multiplier = state.synced ? 2 : 1;
+
+    // check ember collection
+    var ate1 = false, ate2 = false;
+    for (var i = state.embers.length - 1; i >= 0; i--) {
+      var e = state.embers[i];
+      if (e.x === state.p1.pos.x && e.y === state.p1.pos.y) {
+        state.p1.score += multiplier;
+        state.embers.splice(i, 1);
+        ate1 = true;
+      } else if (e.x === state.p2.pos.x && e.y === state.p2.pos.y) {
+        state.p2.score += multiplier;
+        state.embers.splice(i, 1);
+        ate2 = true;
+      }
+    }
+
+    // trim tails if didn't eat
+    if (!ate1) state.p1.tail.pop();
+    if (!ate2) state.p2.tail.pop();
+
+    // replenish embers
+    while (state.embers.length < EMBER_COUNT) {
+      state.embers.push(randomFreeCell(allOccupied()));
+    }
+
+    // level up every 10 total points — add a void
+    var totalScore = state.p1.score + state.p2.score;
+    var newLevel = 1 + Math.floor(totalScore / 10);
+    if (newLevel > state.level && state.voids.length < MAX_VOIDS) {
+      state.level = newLevel;
+      state.voids.push(randomFreeCell(allOccupied()));
+    }
+
+    // check death
+    if (checkCollisions(state.p1, state.p2) || checkCollisions(state.p2, state.p1)) {
+      state.phase = 'dead';
+      var total = state.p1.score + state.p2.score;
+      if (total > state.hi) {
+        state.hi = total;
+        saveHi(total);
+      }
+      elGoScore.textContent = total;
+      elGoHi.textContent = state.hi;
+      gameover.classList.remove('hidden');
+    }
+
+    syncGameState();
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────────
+  function draw() {
+    // background
+    ctx.fillStyle = '#0a0a0f';
+    ctx.fillRect(0, 0, CANVAS_PX, CANVAS_PX);
+
+    // grid lines
+    ctx.strokeStyle = 'rgba(251, 146, 60, 0.04)';
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i <= COLS; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * CELL, 0);
+      ctx.lineTo(i * CELL, CANVAS_PX);
+      ctx.stroke();
+    }
+    for (var i = 0; i <= ROWS; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, i * CELL);
+      ctx.lineTo(CANVAS_PX, i * CELL);
+      ctx.stroke();
+    }
+
+    // void zones
+    for (var i = 0; i < state.voids.length; i++) {
+      var v = state.voids[i];
+      ctx.fillStyle = 'rgba(239, 68, 68, 0.25)';
+      ctx.fillRect(v.x * CELL + 1, v.y * CELL + 1, CELL - 2, CELL - 2);
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(v.x * CELL + 1, v.y * CELL + 1, CELL - 2, CELL - 2);
+    }
+
+    // embers
+    for (var i = 0; i < state.embers.length; i++) {
+      var e = state.embers[i];
+      ctx.fillStyle = '#fbbf24';
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(e.x * CELL + CELL / 2, e.y * CELL + CELL / 2, CELL / 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // sync beam
+    if (state.synced && state.phase === 'playing') {
+      ctx.strokeStyle = 'rgba(74, 222, 128, 0.3)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(state.p1.pos.x * CELL + CELL / 2, state.p1.pos.y * CELL + CELL / 2);
+      ctx.lineTo(state.p2.pos.x * CELL + CELL / 2, state.p2.pos.y * CELL + CELL / 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // draw salamander
+    drawSalamander(state.p1, '#fb923c', '#fdba74');
+    drawSalamander(state.p2, '#3b82f6', '#93c5fd');
+
+    // update scoreboard
+    elScoreP1.textContent = state.p1.score;
+    elScoreP2.textContent = state.p2.score;
+    elScoreT.textContent = state.p1.score + state.p2.score;
+    if (state.synced && state.phase === 'playing') {
+      elSync.classList.add('active');
+    } else {
+      elSync.classList.remove('active');
+    }
+  }
+
+  function drawSalamander(p, headColor, tailColor) {
+    // tail segments
+    for (var i = p.tail.length - 1; i >= 0; i--) {
+      var t = p.tail[i];
+      var alpha = 0.4 + 0.6 * ((p.tail.length - i) / p.tail.length);
+      ctx.fillStyle = tailColor;
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.roundRect(t.x * CELL + 2, t.y * CELL + 2, CELL - 4, CELL - 4, 4);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // head
+    ctx.fillStyle = headColor;
+    ctx.shadowColor = headColor;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.roundRect(p.pos.x * CELL + 1, p.pos.y * CELL + 1, CELL - 2, CELL - 2, 6);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // eyes
+    ctx.fillStyle = '#0a0a0f';
+    var ex = p.pos.x * CELL;
+    var ey = p.pos.y * CELL;
+    if (p.dir === 'right' || p.dir === 'left') {
+      ctx.beginPath();
+      ctx.arc(ex + CELL / 2, ey + CELL / 3, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + CELL / 2, ey + 2 * CELL / 3, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.beginPath();
+      ctx.arc(ex + CELL / 3, ey + CELL / 2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex + 2 * CELL / 3, ey + CELL / 2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // ── Game loop ──────────────────────────────────────────────────────────────
+  function loop(timestamp) {
+    if (state.phase !== 'playing') return;
+    if (lastTime === 0) lastTime = timestamp;
+    var dt = timestamp - lastTime;
+    lastTime = timestamp;
+    accumulator += dt;
+    while (accumulator >= TICK_MS) {
+      tick();
+      accumulator -= TICK_MS;
+      if (state.phase !== 'playing') break;
+    }
+    draw();
+    rafId = requestAnimationFrame(loop);
+  }
+
+  // ── Expose window.gameState for automated testing ─────────────────────────
+  window.gameState = {
+    score: 0,
+    alive: false,
+    gameOver: false,
+    level: 1,
+    player: { x: 4, y: 10 },
+    player2: { x: 15, y: 10 },
+    highScore: 0,
+    phase: 'idle',
+    synced: false,
+    p1Score: 0,
+    p2Score: 0,
+  };
+
+  function syncGameState() {
+    var total = state.p1.score + state.p2.score;
+    window.gameState.score     = total;
+    window.gameState.alive     = state.phase === 'playing';
+    window.gameState.gameOver  = state.phase === 'dead';
+    window.gameState.level     = state.level;
+    window.gameState.player    = { x: state.p1.pos.x, y: state.p1.pos.y };
+    window.gameState.player2   = { x: state.p2.pos.x, y: state.p2.pos.y };
+    window.gameState.highScore = state.hi;
+    window.gameState.phase     = state.phase;
+    window.gameState.synced    = state.synced;
+    window.gameState.p1Score   = state.p1.score;
+    window.gameState.p2Score   = state.p2.score;
+  }
+
+  // ── Visibility pause ──────────────────────────────────────────────────────
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state.phase === 'playing') {
+      // just stop the loop; resume on next raf
+    }
+  });
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  initState();
+  draw();
+
+})();
+</script>
+
+</body>
+</html>
