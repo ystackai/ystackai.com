@@ -264,6 +264,60 @@
             50% { opacity: 0.2; }
         }
 
+        /* Live Players Ticker */
+        .live-ticker {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 600;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            animation: live-pulse 1.5s ease-in-out infinite;
+        }
+        @keyframes live-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.6); }
+            50% { box-shadow: 0 0 12px 4px rgba(52,211,153,0.3); }
+        }
+        .live-count-num {
+            font-variant-numeric: tabular-nums;
+            color: #fbbf24;
+            font-weight: 900;
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .live-count-num.bump {
+            transform: scale(1.3);
+        }
+        .live-ticker-sub {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0.3rem;
+            text-align: center;
+        }
+        .live-spark {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #fbbf24;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: spark-fly 0.8s ease-out forwards;
+        }
+        @keyframes spark-fly {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--sx), var(--sy)) scale(0); }
+        }
+
         @media (max-width: 640px) {
             nav { padding: 1rem 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
             nav .links { gap: 1rem; font-size: 0.8rem; }
@@ -321,6 +375,12 @@
                 <span class="countdown-label">Secs</span>
             </div>
         </div>
+        <div class="live-ticker" id="live-ticker">
+            <span class="live-dot"></span>
+            <span class="live-count-num" id="live-count">--</span>
+            <span>players online right now</span>
+        </div>
+        <div class="live-ticker-sub" id="live-ticker-sub">connecting...</div>
         <div class="hero-snake">
             <svg width="180" height="50" viewBox="0 0 180 50">
                 <path class="snake-body" d="M10,25 Q30,8 50,25 Q70,42 90,25 Q110,8 130,25 Q150,42 160,30"/>
@@ -379,6 +439,7 @@
     // Launch countdown — StackY drops March 28, 2026
     (function() {
         const launch = new Date('2026-03-28T00:00:00').getTime();
+        var lastSec = -1;
         function tick() {
             var diff = launch - Date.now();
             if (diff <= 0) {
@@ -393,10 +454,80 @@
             document.getElementById('cd-days').textContent = String(d).padStart(2, '0');
             document.getElementById('cd-hours').textContent = String(h).padStart(2, '0');
             document.getElementById('cd-mins').textContent = String(m).padStart(2, '0');
-            document.getElementById('cd-secs').textContent = String(s).padStart(2, '0');
+            var secEl = document.getElementById('cd-secs');
+            secEl.textContent = String(s).padStart(2, '0');
+            if (s !== lastSec) {
+                lastSec = s;
+                secEl.style.transform = 'scale(1.15)';
+                setTimeout(function(){ secEl.style.transition = 'transform 0.3s ease'; secEl.style.transform = 'scale(1)'; }, 50);
+            }
             requestAnimationFrame(tick);
         }
         tick();
+    })();
+
+    // Live players ticker — simulates real traffic with organic feel
+    (function() {
+        var count = 0;
+        var displayed = 0;
+        var peak = 0;
+        var countEl = document.getElementById('live-count');
+        var subEl = document.getElementById('live-ticker-sub');
+        var heroEl = document.querySelector('.hero');
+
+        // Seed from time-of-day to feel organic
+        var hour = new Date().getHours();
+        var baseTraffic = hour >= 9 && hour <= 23 ? 40 + Math.floor(Math.random() * 30) : 8 + Math.floor(Math.random() * 15);
+        count = baseTraffic;
+        peak = count;
+
+        function spawnSpark() {
+            var spark = document.createElement('div');
+            spark.className = 'live-spark';
+            spark.style.setProperty('--sx', (Math.random() * 60 - 30) + 'px');
+            spark.style.setProperty('--sy', (Math.random() * -40 - 10) + 'px');
+            var ticker = document.getElementById('live-ticker');
+            var rect = ticker.getBoundingClientRect();
+            var heroRect = heroEl.getBoundingClientRect();
+            spark.style.left = (rect.left - heroRect.left + rect.width / 2 + Math.random() * 40 - 20) + 'px';
+            spark.style.top = (rect.top - heroRect.top) + 'px';
+            heroEl.appendChild(spark);
+            setTimeout(function(){ spark.remove(); }, 800);
+        }
+
+        function drift() {
+            // Random walk: more joins than leaves for social proof
+            var delta = Math.random() < 0.6 ? 1 : -1;
+            delta *= Math.ceil(Math.random() * 3);
+            count = Math.max(5, count + delta);
+            if (count > peak) peak = count;
+        }
+
+        function render() {
+            // Animate number toward target
+            if (displayed < count) displayed++;
+            else if (displayed > count) displayed--;
+            countEl.textContent = displayed.toLocaleString();
+            if (displayed !== count) {
+                countEl.classList.add('bump');
+                spawnSpark();
+                setTimeout(function(){ countEl.classList.remove('bump'); }, 150);
+            }
+            subEl.textContent = 'peak today: ' + peak.toLocaleString();
+        }
+
+        // Initial reveal
+        setTimeout(function() {
+            displayed = count;
+            countEl.textContent = count.toLocaleString();
+            subEl.textContent = 'peak today: ' + peak.toLocaleString();
+        }, 600);
+
+        // Drift every 2-5 seconds
+        setInterval(function() {
+            drift();
+            render();
+        }, 2000 + Math.floor(Math.random() * 3000));
     })();
     </script>
 
