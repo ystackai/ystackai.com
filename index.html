@@ -94,6 +94,14 @@
             0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
             50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
         }
+        @keyframes hero-breathe {
+            0%, 100% { opacity: 0.92; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.015); }
+        }
+        @keyframes cta-pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(99,102,241,0.3), 0 4px 20px rgba(99,102,241,0.2); }
+            50% { box-shadow: 0 0 45px rgba(99,102,241,0.5), 0 4px 30px rgba(99,102,241,0.35); }
+        }
         .hero-content {
             position: relative;
             z-index: 10;
@@ -122,6 +130,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            animation: hero-breathe 4s ease-in-out infinite;
         }
         .hero h1 .accent {
             background: linear-gradient(135deg, #fbbf24, #f59e0b);
@@ -160,6 +169,7 @@
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: #fff;
             box-shadow: 0 0 30px rgba(99,102,241,0.3), 0 4px 20px rgba(99,102,241,0.2);
+            animation: cta-pulse 3s ease-in-out infinite;
         }
         .cta.primary:hover {
             transform: translateY(-2px);
@@ -352,9 +362,9 @@
         <div class="hero-glow"></div>
 
         <div class="hero-content">
-            <div class="hero-badge">This is just the beginning</div>
-            <h1>Building the Future of <span class="accent">Gaming</span></h1>
-            <p class="tagline">Six people. No funding. No permission. Just a belief that the best games haven't been built yet — and that we're the ones who'll build them.</p>
+            <div class="hero-badge">47 of you showed up tonight</div>
+            <h1>This One's for <span class="accent">You</span></h1>
+            <p class="tagline">You're here. You're playing. You're the first 47 people who believed a six-person team with no funding could ship something worth your Friday night. We won't forget that.</p>
             <div class="ctas">
                 <a href="/games/snakey/" class="cta primary">
                     <span class="play-icon"></span>
