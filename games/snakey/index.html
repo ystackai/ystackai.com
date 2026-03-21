@@ -1333,13 +1333,13 @@
 
   window.gameState = {
     score: 0,
-    alive: true,
+    alive: false,
     gameOver: false,
     level: 1,
     player: { x: 10, y: 10 },
     highScore: state.hi,
     phase: state.phase,
-    snakeLength: 3,
+    snakeLength: 0,
     tronMode: tronMode,
     mode: 'classic',
     trailLength: 0,
@@ -1388,6 +1388,10 @@
   die = function() { _origDie(); trackGameEnd(); syncGameState(); };
   const _origStartGame = startGame;
   startGame = function() { _origStartGame(); trackGameStart(); syncGameState(); };
+
+  // Initialize gameState on load so it's never empty
+  initGame();
+  syncGameState();
 
   // ── Initial decorative draw ──────────────────────────────────────────────
 
