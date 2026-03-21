@@ -588,33 +588,6 @@
 
   // ── Exposed game state for automated testing ────────────────────────────
 
-  /**
-   * window.gameState — a reactive projection of internal state, updated
-   * every frame and on every state transition. Required by the Schneider
-   * Automated Test Protocol for external test harness introspection.
-   */
-  function syncGameState() {
-    window.gameState = {
-      score:    state.score,
-      hi:       state.hi,
-      alive:    state.phase === 'playing' || state.phase === 'paused',
-      gameOver: state.phase === 'dead',
-      phase:    state.phase,
-      level:    Math.floor(state.score / 5) + 1,
-      player:   state.snake.length > 0
-        ? { x: state.snake[0].x, y: state.snake[0].y }
-        : { x: 0, y: 0 },
-      snakeLength: state.snake.length,
-      segments:    state.snake.map(function (s) { return { x: s.x, y: s.y }; }),
-      direction:   state.dir,
-      food:        { x: state.food.x, y: state.food.y },
-      gridCols:    COLS,
-      gridRows:    ROWS,
-      tickMs:      TICK_MS,
-    };
-  }
-  syncGameState();
-
   // ── UI element references ────────────────────────────────────────────────
 
   const scoreEl    = /** @type {HTMLElement} */ (document.getElementById('score-display'));
@@ -649,6 +622,11 @@
     gridCols: COLS,
     gridRows: ROWS,
     hi: state.hi,
+    highScore: state.hi,
+    snakeLength: 0,
+    tronMode: tronMode,
+    mode: 'classic',
+    trailLength: 0,
     dirQueueLength: 0,
   };
 
@@ -659,14 +637,20 @@
     window.gameState.alive          = state.phase === 'playing' || state.phase === 'paused';
     window.gameState.gameOver       = state.phase === 'dead';
     window.gameState.phase          = state.phase;
-    window.gameState.level          = 1; // SnakeY has no levels — constant 1
+    window.gameState.level          = 1;
     window.gameState.player         = { x: head.x, y: head.y };
     window.gameState.snake          = state.snake.map(s => ({ x: s.x, y: s.y }));
     window.gameState.food           = { x: state.food.x, y: state.food.y };
     window.gameState.dir            = state.dir;
     window.gameState.hi             = state.hi;
+    window.gameState.highScore      = state.hi;
+    window.gameState.snakeLength    = state.snake.length;
+    window.gameState.tronMode       = tronMode;
+    window.gameState.mode           = tronMode ? 'lightcycle' : 'classic';
+    window.gameState.trailLength    = tronMode ? state.snake.length - 1 : 0;
     window.gameState.dirQueueLength = dirQueue.length;
   }
+  syncGameState();
 
   // ── Direction queue ──────────────────────────────────────────────────────
 
@@ -875,6 +859,7 @@
   /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
   function die() {
     state.phase = 'dead';
+    trackGameEnd();
     // Update game-over overlay for mode
     if (tronMode) {
       goEmojiEl.textContent = '\u26A1';
@@ -910,6 +895,7 @@
     initGame();
     state.phase = 'playing';
     syncGameState();
+    trackGameStart();
     startLoop();
   }
 
@@ -1331,36 +1317,6 @@
 
   // ── Expose window.gameState for automated testing / dashboard ────────────
 
-  window.gameState = {
-    score: 0,
-    alive: false,
-    gameOver: false,
-    level: 1,
-    player: { x: 10, y: 10 },
-    highScore: state.hi,
-    phase: state.phase,
-    snakeLength: 0,
-    tronMode: tronMode,
-    mode: 'classic',
-    trailLength: 0,
-  };
-
-  /** Sync window.gameState with internal state — called every tick & on death. */
-  function syncGameState() {
-    const head = state.snake.length > 0 ? state.snake[0] : { x: 0, y: 0 };
-    window.gameState.score       = state.score;
-    window.gameState.alive       = state.phase === 'playing' || state.phase === 'paused';
-    window.gameState.gameOver    = state.phase === 'dead';
-    window.gameState.level       = tronMode ? 1 : 1 + Math.floor(state.score / 10);
-    window.gameState.player      = { x: head.x, y: head.y };
-    window.gameState.highScore   = state.hi;
-    window.gameState.phase       = state.phase;
-    window.gameState.snakeLength = state.snake.length;
-    window.gameState.tronMode    = tronMode;
-    window.gameState.mode        = tronMode ? 'lightcycle' : 'classic';
-    window.gameState.trailLength = tronMode ? state.snake.length - 1 : 0;
-  }
-
   // ── Local metrics for launch dashboard ──────────────────────────────────
   let gameStartedAt = null;
 
@@ -1381,13 +1337,7 @@
     }
   }
 
-  // Patch tick, die, and startGame to auto-sync gameState + track metrics
-  const _origTick = tick;
-  tick = function() { _origTick(); syncGameState(); };
-  const _origDie = die;
-  die = function() { _origDie(); trackGameEnd(); syncGameState(); };
-  const _origStartGame = startGame;
-  startGame = function() { _origStartGame(); trackGameStart(); syncGameState(); };
+  // Metrics tracking is integrated directly into startGame() and die().
 
   // Initialize gameState on load so it's never empty
   initGame();
