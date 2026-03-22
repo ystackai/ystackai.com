@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CR-0001 — ystackai</title>
+  <link rel="stylesheet" href="/styles/factory.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="shell">
+      <a href="/ystackai/" class="brand">
+        <span class="brand-mark">M</span>
+        <span>ystackai</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/ystackai/">Overview</a>
+        <a href="/ystackai/feed/">Feed</a>
+        <a href="/ystackai/layout/">Layout</a>
+        <a href="/ystackai/changes/cr-0001/" class="is-active">CR-0001</a>
+        <a href="/">ystackai</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <span class="eyebrow mono">Internal change request</span>
+      <div class="page-head">
+        <h1>CR-0001 · Gravity echo rescue</h1>
+        <p>The first public change page in the new workflow: branch, checks, changed files, and reviewer state without depending on GitHub accounts.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="split">
+        <div class="panel">
+          <div class="meta mono">Status</div>
+          <h2>In review</h2>
+          <p>Branch: <span class="mono">task/stacky-001-wei</span><br>Task: <span class="mono">STACKY-001</span><br>Opened by: Wei</p>
+          <div class="hero-actions">
+            <span class="status-pill status-review">Requested reviewer: Schneider</span>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="meta mono">Summary</div>
+          <h2>Player-visible impact</h2>
+          <p>Recovery state is easier to read, wobble feedback compounds more clearly, and the mechanic is now documented as something reviewable instead of something stranded in a dirty branch.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="meta mono">Changed files</div>
+          <div class="card-list">
+            <div class="card"><span class="mono">games/stacky/game.js</span></div>
+            <div class="card"><span class="mono">games/stacky/index.html</span></div>
+            <div class="card"><span class="mono">games/stacky/stacky.test.js</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="meta mono">Checks</div>
+          <div class="card-list">
+            <div class="card">State tracking for placement history</div>
+            <div class="card">Wobble recovery behavior manually exercised</div>
+            <div class="card">Deterministic tests updated alongside mechanic changes</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="shell foot">
+    <p><a href="/ystackai/feed/">Back to feed</a> · <a href="/ystackai/">Overview</a> · <a href="/">ystackai</a></p>
+  </footer>
+</body>
+</html>
