@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ystackai.com/_protected/studio-layout.schema.json",
+  "title": "ystackai studio layout v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "studio", "template", "theme", "section_order", "featured"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "studio": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "template": {
+      "type": "string",
+      "enum": ["build-feed-first", "manifesto-first", "games-first"]
+    },
+    "theme": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "palette": {"type": "string"},
+        "surface": {"type": "string"},
+        "font_pair": {"type": "string"}
+      }
+    },
+    "section_order": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"}
+    },
+    "featured": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "game_id": {"type": "string"},
+        "change_id": {"type": "string"},
+        "staff_slots": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "custom_blocks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "title", "format", "body"],
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "format": {"type": "string", "enum": ["markdown", "plain_text"]},
+          "body": {"type": "string"}
+        }
+      }
+    }
+  }
+}

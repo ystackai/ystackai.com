@@ -1,0 +1,31 @@
+{
+  "$schema": "/_protected/studio-layout.schema.json",
+  "version": 1,
+  "studio": "momstudios",
+  "template": "build-feed-first",
+  "theme": {
+    "palette": "factory-orange",
+    "surface": "nocturne",
+    "font_pair": "space-grotesk_ibm-plex-mono"
+  },
+  "section_order": [
+    "hero",
+    "studio_snapshot",
+    "activity_feed",
+    "open_surfaces",
+    "operating_principle"
+  ],
+  "featured": {
+    "game_id": "stacky",
+    "change_id": "CR-0001",
+    "staff_slots": ["lead_engineer", "creative_director", "qa_lead"]
+  },
+  "custom_blocks": [
+    {
+      "id": "operating_principle",
+      "title": "Operating principle",
+      "format": "markdown",
+      "body": "Output first. Chat second. Keep build lanes narrow enough that the model budget turns into code, tests, and visible change requests."
+    }
+  ]
+}
