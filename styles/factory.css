@@ -415,6 +415,172 @@ a {
   margin-bottom: 0.25rem;
 }
 
+.avatar-pile {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.avatar-pile img {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 2px solid rgba(12, 14, 18, 0.9);
+  background: rgba(255, 255, 255, 0.04);
+  margin-left: -0.55rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+.avatar-pile img:first-child {
+  margin-left: 0;
+}
+
+.avatar-pile .avatar-note {
+  margin-left: 0.8rem;
+  color: var(--soft);
+  font-size: 0.86rem;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.preview-card {
+  overflow: hidden;
+}
+
+.preview-browser {
+  position: relative;
+  height: 230px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.18)),
+    #08090d;
+}
+
+.preview-browser::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 100%;
+  height: 2rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: 1;
+}
+
+.preview-browser::after {
+  content: "● ● ●";
+  position: absolute;
+  top: 0.42rem;
+  left: 0.75rem;
+  color: rgba(255, 255, 255, 0.28);
+  letter-spacing: 0.2rem;
+  font-size: 0.78rem;
+  z-index: 1;
+}
+
+.preview-frame {
+  width: 172%;
+  height: 172%;
+  border: 0;
+  transform: scale(0.58);
+  transform-origin: top left;
+  pointer-events: none;
+  display: block;
+}
+
+.preview-card h3 {
+  margin-top: 0.95rem;
+}
+
+.preview-meta {
+  margin-top: 0.45rem;
+  color: var(--soft);
+  font-size: 0.84rem;
+}
+
+.team-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.team-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.team-chip img {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.team-chip span {
+  color: var(--muted);
+  font-size: 0.87rem;
+}
+
+.discord-frame {
+  width: 100%;
+  min-height: 440px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: #1e2124;
+}
+
+.presence-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(99, 210, 161, 0.12);
+  color: var(--success);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.presence-pill::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.mini-shots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.mini-shot {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mini-shot .preview-browser {
+  height: 160px;
+  border: 0;
+  border-radius: 0;
+}
+
 .studio-roster {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -543,6 +709,8 @@ a {
   .hero-grid,
   .split,
   .feature-grid,
+  .preview-grid,
+  .mini-shots,
   .studio-roster,
   .grid-3,
   .grid-2 {

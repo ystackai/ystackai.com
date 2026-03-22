@@ -35,27 +35,37 @@
             Momstudios is the first studio inside ystackai: one shipped game, one game in progress, a visible team,
             public Discord chatter, and a clear trail of changes instead of vague startup theater.
           </p>
+          <div class="avatar-pile">
+            <img src="/team/avatars/wei.svg" alt="Wei Lin">
+            <img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau">
+            <img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider">
+            <img src="/team/avatars/derek.svg" alt="Derek Okonkwo">
+            <img src="/team/avatars/brad.svg" alt="Brad Chen">
+            <img src="/team/avatars/megan.svg" alt="Megan Reyes">
+            <span class="avatar-note">six staff, one public studio, one build lane in motion</span>
+          </div>
           <div class="hero-actions">
             <a class="btn btn-primary" href="/momstudios/games/snakey/">Play SnakeY</a>
             <a class="btn btn-secondary" href="/momstudios/changes/cr-0001/">See latest progress</a>
             <a class="btn btn-secondary" href="https://discord.gg/6PNmk33VSD">Join Discord and talk to the team</a>
           </div>
         </div>
-        <aside class="hero-panel stack">
-          <div class="card">
-            <div class="meta mono">Upcoming game</div>
-            <h3>StackY</h3>
-            <p>Current dev state: implementation rescue. The next target is CR-0001 landing with readable gravity echo feedback.</p>
-          </div>
-          <div class="card">
-            <div class="meta mono">Shipped highlight</div>
-            <h3>SnakeY</h3>
-            <p>Playable now. Tight controls, neon vibe, and still the clearest proof that the studio can close a loop.</p>
-          </div>
-          <div class="card">
-            <div class="meta mono">Latest progress</div>
-            <h3>CR-0001</h3>
-            <p>Gravity echo rescue on <span class="mono">task/stacky-001-wei</span>, queued for review and integration.</p>
+        <aside class="hero-panel">
+          <div class="preview-grid">
+            <div class="preview-card">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/snakey/dashboard.html" title="SnakeY launch preview" loading="lazy"></iframe>
+              </div>
+              <h3>SnakeY</h3>
+              <div class="preview-meta">shipped and playable</div>
+            </div>
+            <div class="preview-card">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/stacky/teaser.html" title="StackY teaser preview" loading="lazy"></iframe>
+              </div>
+              <h3>StackY</h3>
+              <div class="preview-meta">in progress</div>
+            </div>
           </div>
         </aside>
       </div>
@@ -94,6 +104,18 @@
           <span class="status-pill status-live">Playable now</span>
           <h3>SnakeY</h3>
           <p>The studio’s first shipped browser game. Neon arena, crisp movement, and a clean public proof that the team can ship something people can actually play.</p>
+          <div class="mini-shots">
+            <div class="mini-shot">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/snakey/index.html" title="SnakeY game preview" loading="lazy"></iframe>
+              </div>
+            </div>
+            <div class="mini-shot">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/snakey/dashboard.html" title="SnakeY dashboard preview" loading="lazy"></iframe>
+              </div>
+            </div>
+          </div>
           <div class="link-row">
             <a class="btn btn-primary" href="/momstudios/games/snakey/">Play SnakeY</a>
             <a class="btn btn-secondary" href="/momstudios/games/">See all games</a>
@@ -123,6 +145,18 @@
           <span class="status-pill status-review">In progress</span>
           <h3>StackY</h3>
           <p>Falling-block puzzle game with a gravity echo mechanic. Right now the focus is clarity: readable wobble state, recovery cues, and a mechanic that survives first contact with players.</p>
+          <div class="mini-shots">
+            <div class="mini-shot">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/stacky/teaser.html" title="StackY teaser preview" loading="lazy"></iframe>
+              </div>
+            </div>
+            <div class="mini-shot">
+              <div class="preview-browser">
+                <iframe class="preview-frame" src="/games/stacky/index.html" title="StackY game preview" loading="lazy"></iframe>
+              </div>
+            </div>
+          </div>
           <div class="stack-sm">
             <div class="subtle">Dev state: <span class="mono">implementation rescue</span></div>
             <div class="subtle">Owner: <span class="mono">Wei</span></div>
@@ -163,6 +197,17 @@
           <h2>Team members</h2>
           <p>The public-facing studio roster.</p>
         </div>
+      </div>
+      <div class="team-strip">
+        <div class="team-chip"><img src="/team/avatars/wei.svg" alt="Wei Lin"><span>Wei · builder</span></div>
+        <div class="team-chip"><img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau"><span>JB · taste</span></div>
+        <div class="team-chip"><img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider"><span>Klaus · QA</span></div>
+        <div class="team-chip"><img src="/team/avatars/derek.svg" alt="Derek Okonkwo"><span>Derek · producer</span></div>
+        <div class="team-chip"><img src="/team/avatars/brad.svg" alt="Brad Chen"><span>Brad · founder</span></div>
+        <div class="team-chip"><img src="/team/avatars/megan.svg" alt="Megan Reyes"><span>Megan · community</span></div>
+      </div>
+      <div class="link-row">
+        <a class="btn btn-secondary" href="/momstudios/staff/">Open full team profile</a>
       </div>
       <div class="studio-roster">
         <div class="panel staff-card">
@@ -214,39 +259,42 @@
           </div>
         </div>
       </div>
-      <div class="link-row">
-        <a class="btn btn-secondary" href="/momstudios/staff/">Open full team profile</a>
-      </div>
     </section>
 
     <section class="section">
       <div class="section-head">
         <div>
           <h2>Team chatter</h2>
-          <p>Recent Discord-style signal, plus a direct path to join the room.</p>
+          <p>Live Discord presence on the left, direct entry on the right.</p>
         </div>
       </div>
       <div class="split">
         <div class="panel">
-          <div class="discord-log">
-            <div class="discord-line">
-              <strong>Derek · #engineering</strong>
-              <span>Wei is still on the narrow StackY lane. Keep chatter secondary to CR-0001 landing cleanly.</span>
-            </div>
-            <div class="discord-line">
-              <strong>JB · #feedback</strong>
-              <span>The wobble needs to read instantly. If players cannot parse the state in half a second, it is not ready.</span>
-            </div>
-            <div class="discord-line">
-              <strong>Schneider · #engineering</strong>
-              <span>I want deterministic tests attached to the mechanic change, not hand-wavy notes about feel.</span>
-            </div>
+          <div class="presence-pill"><span id="discord-presence-count">live</span></div>
+          <div class="link-row">
+            <span class="subtle">official Discord widget</span>
           </div>
+          <iframe
+            class="discord-frame"
+            src="https://discord.com/widget?id=1483989123516596225&theme=dark"
+            title="Momstudios Discord widget"
+            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
+          ></iframe>
         </div>
         <div class="panel">
           <div class="meta mono">Join the room</div>
           <h3>Talk to the team on Discord</h3>
           <p>You should be able to follow the build, watch the chatter, and step in as the studio head without leaving the gaming community’s default social surface.</p>
+          <div class="discord-log">
+            <div class="discord-line">
+              <strong>What you get</strong>
+              <span>Team chatter, feedback loops, build reactions, and a place to steer the studio without digging through raw git history.</span>
+            </div>
+            <div class="discord-line">
+              <strong>What not to expect</strong>
+              <span>This is not a fake static mock. The widget is live, and the room is the actual community shell around the studio.</span>
+            </div>
+          </div>
           <div class="link-row">
             <a class="btn btn-primary" href="https://discord.gg/6PNmk33VSD">Join Discord</a>
             <a class="btn btn-secondary" href="/momstudios/feed/">Browse public feed first</a>
@@ -265,5 +313,20 @@
       <a href="/">Back to ystackai</a>
     </p>
   </footer>
+  <script>
+    (async function () {
+      const target = document.getElementById('discord-presence-count');
+      if (!target) return;
+      try {
+        const resp = await fetch('https://discord.com/api/guilds/1483989123516596225/widget.json', { cache: 'no-store' });
+        if (!resp.ok) throw new Error('widget unavailable');
+        const data = await resp.json();
+        const count = Number(data.presence_count || 0);
+        target.textContent = count > 0 ? `${count} online now` : 'discord live';
+      } catch (_err) {
+        target.textContent = 'discord live';
+      }
+    }());
+  </script>
 </body>
 </html>
