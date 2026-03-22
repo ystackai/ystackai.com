@@ -21,6 +21,12 @@ var StackyGame = (function () {
   var CHOCOLATE_INTERVAL = 30000;    // ms between chocolate row rises
   var CHOCOLATE_GAPS = 2;            // random gaps per chocolate row
 
+  // Gravity echo memory constants
+  var ECHO_WINDOW_MS = 5000;         // store 5 seconds of placement data
+  var ECHO_MAX_DRIFT = 0.6;          // max horizontal drift per gravity tick (cells)
+  var ECHO_COMPOUND_FACTOR = 1.3;    // compounding multiplier per stacked echo
+  var ECHO_DECAY_POWER = 2;          // older echoes decay by (age/window)^power
+
   // Wobble physics constants
   var WOBBLE_MAX_TILT = 15;          // max tilt angle in degrees
   var WOBBLE_DANGER_THRESHOLD = 10;  // tilt degrees that trigger danger state
@@ -76,6 +82,10 @@ var StackyGame = (function () {
       // Chocolate river state
       lastChocolateTime: 0,
       chocolateRowsRisen: 0,
+      // Gravity echo memory state
+      echoMemory: [],              // array of { timestamp, centerX, centerY }
+      echoOffset: 0,               // current computed echo drift (signed, cells)
+      echoDriftAccum: 0,           // fractional drift accumulator for sub-cell movement
       // Wobble physics state
       wobble: {
         centerOfMass: { x: COLS / 2, y: ROWS / 2 },  // current center of mass
@@ -167,6 +177,9 @@ var StackyGame = (function () {
     state.nextPiece = null;
     state.lastChocolateTime = 0;
     state.chocolateRowsRisen = 0;
+    state.echoMemory = [];
+    state.echoOffset = 0;
+    state.echoDriftAccum = 0;
     state.wobble = {
       centerOfMass: { x: COLS / 2, y: ROWS / 2 },
       massOffset: 0,
@@ -378,11 +391,96 @@ var StackyGame = (function () {
     state.wobble.danger = absTilt >= WOBBLE_DANGER_THRESHOLD;
   }
 
+  /**
+   * Record a placement into the echo memory buffer.
+   * Stores the center of the placed piece cells and the current timestamp.
+   * @param {object} state - Game state
+   * @param {{ x: number, y: number }[]} cells - Absolute cell positions of locked piece
+   * @param {number} timestamp - Current time in ms
+   */
+  function recordEcho(state, cells, timestamp) {
+    var sumX = 0;
+    var sumY = 0;
+    for (var i = 0; i < cells.length; i++) {
+      sumX += cells[i].x + 0.5;
+      sumY += cells[i].y + 0.5;
+    }
+    state.echoMemory.push({
+      timestamp: timestamp,
+      centerX: sumX / cells.length,
+      centerY: sumY / cells.length,
+    });
+  }
+
+  /**
+   * Prune echo memory entries older than ECHO_WINDOW_MS.
+   * @param {object} state - Game state
+   * @param {number} now - Current timestamp in ms
+   */
+  function pruneEchoMemory(state, now) {
+    var cutoff = now - ECHO_WINDOW_MS;
+    while (state.echoMemory.length > 0 && state.echoMemory[0].timestamp < cutoff) {
+      state.echoMemory.shift();
+    }
+  }
+
+  /**
+   * Calculate the gravity echo offset from placement history.
+   * Recent placements weigh more (time-decay). Multiple placements on
+   * the same side compound the drift via ECHO_COMPOUND_FACTOR.
+   *
+   * Returns a signed offset in cells: negative = drift left, positive = drift right.
+   *
+   * @param {object} state - Game state
+   * @param {number} now - Current timestamp in ms
+   * @returns {number} Signed echo offset
+   */
+  function calculateEchoOffset(state, now) {
+    if (state.echoMemory.length === 0) return 0;
+
+    var boardCenterX = COLS / 2;
+    var weightedSum = 0;
+    var totalWeight = 0;
+
+    for (var i = 0; i < state.echoMemory.length; i++) {
+      var echo = state.echoMemory[i];
+      var age = now - echo.timestamp;
+      // Time-decay: newer echoes have weight closer to 1, older approach 0
+      var ageFraction = age / ECHO_WINDOW_MS;
+      var weight = 1 - Math.pow(ageFraction, ECHO_DECAY_POWER);
+      if (weight < 0) weight = 0;
+
+      var offset = echo.centerX - boardCenterX;
+      weightedSum += offset * weight;
+      totalWeight += weight;
+    }
+
+    if (totalWeight === 0) return 0;
+
+    var avgOffset = weightedSum / totalWeight;
+
+    // Compounding: more echoes in the buffer amplify the drift
+    var compoundScale = Math.pow(ECHO_COMPOUND_FACTOR, Math.min(state.echoMemory.length, 10) - 1);
+
+    var drift = avgOffset * compoundScale;
+
+    // Clamp to max drift
+    if (drift > ECHO_MAX_DRIFT) drift = ECHO_MAX_DRIFT;
+    if (drift < -ECHO_MAX_DRIFT) drift = -ECHO_MAX_DRIFT;
+
+    return Math.round(drift * 10000) / 10000;
+  }
+
   /** Lock piece into grid and handle line clears. */
   function lockPiece(state) {
     if (!state.activePiece) return;
     var cells = P.getCells(state.activePiece);
     var colorIndex = P.TYPES.indexOf(state.activePiece.type) + 1;
+
+    // Record echo before writing to grid
+    var now = state.lastDropTime || Date.now();
+    recordEcho(state, cells, now);
+
     for (var i = 0; i < cells.length; i++) {
       var c = cells[i];
       if (c.y >= 0 && c.y < ROWS && c.x >= 0 && c.x < COLS) {
@@ -553,8 +651,40 @@ var StackyGame = (function () {
       updateWobble(state);
     }
 
+    // Prune stale echo memory and compute current echo offset
+    pruneEchoMemory(state, timestamp);
+    state.echoOffset = calculateEchoOffset(state, timestamp);
+
     if (timestamp - state.lastDropTime >= state.dropInterval) {
       state.lastDropTime = timestamp;
+
+      // Apply echo gravity drift: accumulate fractional offset, nudge when >= 1 cell
+      if (state.echoOffset !== 0) {
+        state.echoDriftAccum += state.echoOffset;
+        var nudge = 0;
+        if (state.echoDriftAccum >= 1) {
+          nudge = 1;
+          state.echoDriftAccum -= 1;
+        } else if (state.echoDriftAccum <= -1) {
+          nudge = -1;
+          state.echoDriftAccum += 1;
+        }
+        if (nudge !== 0) {
+          var driftCandidate = {
+            type: state.activePiece.type,
+            rotation: state.activePiece.rotation,
+            x: state.activePiece.x + nudge,
+            y: state.activePiece.y,
+          };
+          if (!checkCollision(state.grid, driftCandidate)) {
+            state.activePiece.x = driftCandidate.x;
+          } else {
+            // Blocked — reset accumulator to prevent repeated nudge attempts
+            state.echoDriftAccum = 0;
+          }
+        }
+      }
+
       var candidate = {
         type: state.activePiece.type,
         rotation: state.activePiece.rotation,
@@ -637,6 +767,8 @@ var StackyGame = (function () {
       } : null,
       chocolateRowsRisen: state.chocolateRowsRisen,
       chocolateCell: CHOCOLATE_CELL,
+      echoMemoryCount: state.echoMemory.length,
+      echoOffset: state.echoOffset,
       wobble: {
         centerOfMass: { x: state.wobble.centerOfMass.x, y: state.wobble.centerOfMass.y },
         massOffset: state.wobble.massOffset,
@@ -671,6 +803,14 @@ var StackyGame = (function () {
     ROWS: ROWS,
     CHOCOLATE_CELL: CHOCOLATE_CELL,
     CHOCOLATE_INTERVAL: CHOCOLATE_INTERVAL,
+    // Gravity echo memory
+    recordEcho: recordEcho,
+    pruneEchoMemory: pruneEchoMemory,
+    calculateEchoOffset: calculateEchoOffset,
+    ECHO_WINDOW_MS: ECHO_WINDOW_MS,
+    ECHO_MAX_DRIFT: ECHO_MAX_DRIFT,
+    ECHO_COMPOUND_FACTOR: ECHO_COMPOUND_FACTOR,
+    ECHO_DECAY_POWER: ECHO_DECAY_POWER,
     // Wobble physics
     calculateCenterOfMass: calculateCenterOfMass,
     updateWobble: updateWobble,
