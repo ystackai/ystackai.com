@@ -284,6 +284,44 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
     }
 
+    /* ── Stress meter ─────────────────────────────────────────────────── */
+    .stress-meter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .stress-track {
+      width: 120px;
+      height: 8px;
+      background: rgba(30, 30, 46, 0.6);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .stress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 4px;
+      background: #34d399;
+      transition: width 0.15s ease, background 0.3s ease;
+    }
+    .stress-fill.warn { background: #fbbf24; }
+    .stress-fill.danger { background: #f87171; }
+
+    /* ── Wobble tilt on canvas ────────────────────────────────────────── */
+    .canvas-wrapper.wobble-danger {
+      border-color: rgba(248, 113, 113, 0.5);
+      box-shadow:
+        0 0 0 1px rgba(248, 113, 113, 0.2),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(248, 113, 113, 0.15);
+    }
+
     @media (max-width: 520px) {
       .mobile-note { display: block; }
       .controls { display: none; }
@@ -305,7 +343,7 @@
 <!-- ── Header band ─────────────────────────────────────────────────────── -->
 <div class="hero">
   <h1>StackY</h1>
-  <p>Classic block stacking. SRS rotation. Progressive speed.</p>
+  <p>Stack blocks. Fight the wobble. Recover or collapse.</p>
 </div>
 
 <!-- ── Main ────────────────────────────────────────────────────────────── -->
@@ -331,6 +369,15 @@
     </div>
   </div>
 
+  <!-- Stress meter -->
+  <div class="stress-meter">
+    <span>Stress</span>
+    <div class="stress-track">
+      <div class="stress-fill" id="stress-fill"></div>
+    </div>
+    <span id="stress-pct">0%</span>
+  </div>
+
   <!-- Game area: hold panel + board + next panel -->
   <div class="game-area">
 
@@ -350,9 +397,9 @@
       <div class="overlay" id="overlay-splash">
         <div class="overlay-title">StackY</div>
         <div class="overlay-sub">
-          Stack tetrominoes. Clear lines.<br>
-          SRS rotation with wall kicks.<br>
-          Speed increases every 10 lines.
+          Stack blocks. Bad placements make the tower wobble.<br>
+          Center your pieces to recover stability.<br>
+          Near-collapses earn recovery bonuses.
         </div>
         <div class="overlay-hint">Press Space or tap to play</div>
         <button class="btn" id="btn-start">Start Game</button>
@@ -479,11 +526,15 @@
 
   var wrapper = document.getElementById('canvas-wrapper');
 
+  var responsiveScale = 1;
   function applyResponsiveScale() {
     var available = window.innerWidth * 0.55;
-    var scale = available < CANVAS_W ? available / CANVAS_W : 1;
-    wrapper.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
-    wrapper.style.marginBottom = scale < 1 ? (CANVAS_H * scale - CANVAS_H) + 'px' : '';
+    responsiveScale = available < CANVAS_W ? available / CANVAS_W : 1;
+    wrapper.style.marginBottom = responsiveScale < 1 ? (CANVAS_H * responsiveScale - CANVAS_H) + 'px' : '';
+    // Transform is applied in updateScoreUI to combine with tilt
+    if (state.phase !== 'playing') {
+      wrapper.style.transform = responsiveScale < 1 ? 'scale(' + responsiveScale + ')' : '';
+    }
   }
 
   // ── UI refs ────────────────────────────────────────────────────────────
@@ -499,6 +550,8 @@
   var goHiEl = document.getElementById('go-hi');
   var btnStart = document.getElementById('btn-start');
   var btnRestart = document.getElementById('btn-restart');
+  var stressFill = document.getElementById('stress-fill');
+  var stressPct = document.getElementById('stress-pct');
 
   // ── Game state ─────────────────────────────────────────────────────────
 
@@ -515,6 +568,24 @@
     hiEl.textContent = String(state.hi);
     levelEl.textContent = String(state.level);
     linesEl.textContent = String(state.linesCleared);
+
+    // Stress meter: normalized 0–1 from wobble absTilt / max tilt
+    var stress = Math.min(state.wobble.absTilt / StackyGame.WOBBLE_MAX_TILT, 1);
+    var pct = Math.round(stress * 100);
+    stressFill.style.width = pct + '%';
+    stressPct.textContent = pct + '%';
+    stressFill.className = 'stress-fill' +
+      (stress >= 0.67 ? ' danger' : stress >= 0.33 ? ' warn' : '');
+
+    // Visual wobble tilt on canvas wrapper (combined with responsive scale)
+    var tiltDeg = state.wobble.tilt * 0.3; // scale down for subtle visual
+    var scaleStr = responsiveScale < 1 ? 'scale(' + responsiveScale + ') ' : '';
+    wrapper.style.transform = scaleStr + 'rotate(' + tiltDeg + 'deg)';
+    if (state.wobble.danger) {
+      wrapper.classList.add('wobble-danger');
+    } else {
+      wrapper.classList.remove('wobble-danger');
+    }
   }
 
   // ── State transitions ─────────────────────────────────────────────────

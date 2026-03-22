@@ -780,6 +780,8 @@ var StackyGame = (function () {
       echoMemoryCount: state.echoMemory.length,
       echoOffset: state.echoOffset,
       placementHistory: state.placementHistory.slice(),
+      // stackStress: normalized 0–1 stress value (absTilt / max tilt)
+      stackStress: Math.min(state.wobble.absTilt / WOBBLE_MAX_TILT, 1),
       wobble: {
         centerOfMass: { x: state.wobble.centerOfMass.x, y: state.wobble.centerOfMass.y },
         massOffset: state.wobble.massOffset,
