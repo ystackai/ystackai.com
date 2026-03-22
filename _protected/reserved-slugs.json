@@ -1,0 +1,32 @@
+{
+  "reserved_slugs": [
+    "app",
+    "api",
+    "admin",
+    "auth",
+    "login",
+    "signup",
+    "settings",
+    "billing",
+    "pricing",
+    "about",
+    "blog",
+    "games",
+    "docs",
+    "support",
+    "privacy",
+    "terms",
+    "robots.txt",
+    "sitemap.xml",
+    "favicon.ico",
+    "studios",
+    "create",
+    "explore",
+    "jobs",
+    "careers",
+    "discord",
+    "team",
+    "products",
+    "momstudios"
+  ]
+}

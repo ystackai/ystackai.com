@@ -1,128 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games — ystackai</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #1a1a1a;
-            line-height: 1.6;
-            background: #fafafa;
-        }
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-            background: #fff;
-            border-bottom: 1px solid #eee;
-        }
-        nav .logo { font-size: 1.4rem; font-weight: 700; color: #1a1a1a; text-decoration: none; }
-        nav .logo span { color: #6366f1; }
-        nav .links { display: flex; gap: 2rem; }
-        nav .links a { text-decoration: none; color: #555; font-size: 0.95rem; font-weight: 500; }
-        nav .links a:hover { color: #1a1a1a; }
-
-        .page-header { text-align: center; padding: 4rem 2rem 2rem; }
-        .page-header h1 { font-size: 2.5rem; font-weight: 800; }
-        .page-header p { color: #555; font-size: 1.1rem; margin-top: 0.5rem; max-width: 600px; margin-left: auto; margin-right: auto; }
-
-        .games { max-width: 800px; margin: 2rem auto 4rem; padding: 0 2rem; }
-        .game {
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 2.5rem;
-            margin-bottom: 2rem;
-        }
-        .game h2 { font-size: 1.5rem; margin-bottom: 0.25rem; }
-        .game .tagline { color: #6366f1; font-weight: 600; font-size: 0.95rem; margin-bottom: 1rem; }
-        .game p { color: #555; font-size: 1rem; margin-bottom: 0.75rem; }
-        .status-badge {
-            display: inline-block;
-            padding: 0.3rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-top: 0.5rem;
-        }
-        .status-badge.building { background: #dbeafe; color: #1e40af; }
-        .status-badge.shipped { background: #dcfce7; color: #166534; }
-        .status-badge.next { background: #f3f4f6; color: #6b7280; }
-
-        .long-term {
-            max-width: 800px;
-            margin: 0 auto 4rem;
-            padding: 2.5rem;
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .long-term h2 { font-size: 1.3rem; margin-bottom: 0.75rem; }
-        .long-term p { color: #555; font-size: 0.95rem; font-style: italic; }
-
-        footer { text-align: center; padding: 3rem 2rem; color: #999; font-size: 0.85rem; border-top: 1px solid #eee; }
-        footer a { color: #6366f1; text-decoration: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=/app/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to the app</title>
+  <link rel="stylesheet" href="/styles/factory.css">
+  <script>window.location.replace('/app/');</script>
 </head>
-<body>
-    <nav>
-        <a href="/" class="logo">ystack<span>ai</span></a>
-        <div class="links">
-            <a href="/team/">Team</a>
-            <a href="/blog/">Blog</a>
-            <a href="/games/">Games</a>
-            <a href="https://discord.gg/6PNmk33VSD">Discord</a>
-            <a href="https://github.com/ystackai">GitHub</a>
-        </div>
-    </nav>
-
-    <div class="page-header">
-        <h1>Games</h1>
-        <p>We build one game at a time. Ship it. Play it. Move on to the next one. All playable in your browser.</p>
-    </div>
-
-    <div class="games">
-        <div class="game">
-            <h2>SnakeY</h2>
-            <div class="tagline">Classic snake, built from scratch</div>
-            <p>Canvas-based rendering, progressive difficulty, high score tracking. Our first game as a team.</p>
-            <span class="status-badge shipped">Shipped</span>
-        </div>
-
-        <div class="game">
-            <h2>StackY</h2>
-            <div class="tagline">Block stacking perfection</div>
-            <p>The timeless classic. Up next.</p>
-            <span class="status-badge next">Up Next</span>
-        </div>
-
-        <div class="game">
-            <h2>BreakoutY</h2>
-            <div class="tagline">Paddle, bricks, ball</div>
-            <p>Simple, satisfying, and endlessly replayable.</p>
-            <span class="status-badge next">Backlog</span>
-        </div>
-    </div>
-
-    <div class="long-term" style="max-width: 760px; margin-left: auto; margin-right: auto; padding-left: 2rem; padding-right: 2rem;">
-        <h2>The Long Game: LeoEats</h2>
-        <p>Once the solar system is colonized, someone has to deliver goods to people in space. That's the real thesis. Until the market is ready, we're building products to get there. Games today. Orbital commerce tomorrow.</p>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 ystackai. Bootstrapped. No funding yet.</p>
-        <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/ystackai">GitHub</a> ·
-            <a href="https://discord.gg/6PNmk33VSD">Discord</a> ·
-            <a href="/blog/">Blog</a>
-        </p>
-        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ccc;">Made with 🤍 on an NVIDIA B200</p>
-    </footer>
+<body class="redirect-wrap">
+  <main class="redirect-card">
+    <h1>Products became the app surface</h1>
+    <p>The platform now treats authenticated and operational controls as part of the app namespace.</p>
+    <p><a class="btn btn-primary" href="/app/">Go to /app/</a></p>
+  </main>
 </body>
 </html>

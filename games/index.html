@@ -1,139 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Games — ystackai</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #1a1a1a;
-            line-height: 1.6;
-            background: #fafafa;
-        }
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-            background: #fff;
-            border-bottom: 1px solid #eee;
-        }
-        nav .logo {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            text-decoration: none;
-        }
-        nav .logo span { color: #6366f1; }
-        nav .links { display: flex; gap: 2rem; }
-        nav .links a {
-            text-decoration: none;
-            color: #555;
-            font-size: 0.95rem;
-            font-weight: 500;
-        }
-        nav .links a:hover { color: #1a1a1a; }
-
-        .page-header {
-            text-align: center;
-            padding: 4rem 2rem 2rem;
-        }
-        .page-header h1 { font-size: 2.5rem; font-weight: 800; }
-        .page-header p { color: #555; font-size: 1.1rem; margin-top: 0.5rem; }
-
-        .games-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            max-width: 1000px;
-            margin: 2rem auto 4rem;
-            padding: 0 2rem;
-        }
-        .game-card {
-            background: #fff;
-            border: 1px solid #eee;
-            border-radius: 12px;
-            padding: 2rem;
-        }
-        .game-card h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
-        .game-card p { color: #555; font-size: 0.95rem; margin-bottom: 1rem; }
-        .game-card a {
-            color: #6366f1;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        .game-card a:hover { text-decoration: underline; }
-        .status-badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-        }
-        .status-badge.playable { background: #dcfce7; color: #166534; }
-        .status-badge.coming-soon { background: #f3f4f6; color: #6b7280; }
-
-        footer {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: #999;
-            font-size: 0.85rem;
-            border-top: 1px solid #eee;
-        }
-        footer a { color: #6366f1; text-decoration: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0; url=/momstudios/games/">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to Momstudios games</title>
+  <link rel="stylesheet" href="/styles/factory.css">
+  <script>window.location.replace('/momstudios/games/');</script>
 </head>
-<body>
-    <nav>
-        <a href="/" class="logo">ystack<span>ai</span></a>
-        <div class="links">
-            <a href="/team/">Team</a>
-            <a href="/blog/">Blog</a>
-            <a href="/games/">Games</a>
-            <a href="https://discord.gg/6PNmk33VSD">Discord</a>
-            <a href="https://github.com/ystackai">GitHub</a>
-        </div>
-    </nav>
-
-    <div class="page-header">
-        <h1>Games</h1>
-        <p>Play our games. Built by the team, one at a time.</p>
-    </div>
-
-    <div class="games-grid">
-        <div class="game-card">
-            <span class="status-badge playable">Playable</span>
-            <h3>SnakeY</h3>
-            <p>Classic snake game. Canvas-based, responsive, with high scores. Our first game.</p>
-            <a href="/games/snakey/">Play SnakeY &rarr;</a>
-            <a href="https://discord.gg/6PNmk33VSD" style="margin-left: 1rem; color: #999;">Give feedback</a>
-        </div>
-
-        <div class="game-card">
-            <span class="status-badge coming-soon">Coming Soon</span>
-            <h3>StackY</h3>
-            <p>The classic block-stacking game. Up next.</p>
-        </div>
-
-        <div class="game-card">
-            <span class="status-badge coming-soon">Coming Soon</span>
-            <h3>BreakoutY</h3>
-            <p>Paddle, bricks, ball. Simple and satisfying.</p>
-        </div>
-    </div>
-
-    <footer>
-        <p>&copy; 2026 ystackai. Bootstrapped. Building games today, orbital commerce tomorrow.</p>
-        <p style="margin-top: 0.5rem;">
-            <a href="https://github.com/ystackai">GitHub</a> ·
-            <a href="https://discord.gg/6PNmk33VSD">Discord</a> ·
-            <a href="/blog/">Blog</a>
-        </p>
-        <p style="margin-top: 1rem; font-size: 0.75rem; color: #ccc;">Made with 🤍 on an NVIDIA B200</p>
-    </footer>
+<body class="redirect-wrap">
+  <main class="redirect-card">
+    <h1>Games moved to Momstudios</h1>
+    <p>The old ystackai games index now lives under the featured studio.</p>
+    <p><a class="btn btn-primary" href="/momstudios/games/">Go to /momstudios/games/</a></p>
+  </main>
 </body>
 </html>
