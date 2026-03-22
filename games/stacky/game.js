@@ -521,9 +521,33 @@ var StackyGame = (function () {
     }
   }
 
+  /**
+   * Compute danger level based on stack height.
+   * 0 = safe, 1 = warning (top 6 rows), 2 = critical (top 3 rows).
+   */
+  function getDangerLevel(grid) {
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        if (grid[y][x] !== 0) return y < 3 ? 2 : y < 6 ? 1 : 0;
+      }
+    }
+    return 0;
+  }
+
+  /** Apply tilt CSS classes to the board canvas. */
+  function applyTiltVisual(danger) {
+    var el = document.getElementById('game-canvas');
+    if (!el) return;
+    el.classList.toggle('tilt-warn', danger === 1);
+    el.classList.toggle('tilt-danger', danger === 2);
+  }
+
   /** Sync window.gameState for automated testing. */
   function syncGameState(state) {
+    var danger = getDangerLevel(state.grid);
+    applyTiltVisual(danger);
     window.gameState = {
+      tiltLevel: danger,
       score: state.score,
       hi: state.hi,
       level: state.level,

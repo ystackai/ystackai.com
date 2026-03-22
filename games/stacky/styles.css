@@ -7,6 +7,21 @@ canvas#board { border-radius: 12px; box-shadow: 0 0 40px rgba(200, 100, 255, .25
 .panel h3 { font-size: .7rem; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.4); margin-bottom: .4rem; }
 .panel .val { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg,#f472b6,#a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .next-canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; background: rgba(0,0,0,.2); }
+/* Tilt / danger visual feedback */
+canvas#board.tilt-warn {
+  box-shadow: 0 0 40px rgba(251, 191, 36, .4), inset 0 0 60px rgba(251, 191, 36, .1);
+  animation: tilt-wobble 0.6s ease-in-out infinite;
+}
+canvas#board.tilt-danger {
+  box-shadow: 0 0 50px rgba(239, 68, 68, .5), inset 0 0 60px rgba(239, 68, 68, .15);
+  animation: tilt-wobble 0.3s ease-in-out infinite;
+}
+@keyframes tilt-wobble {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-1.5px); }
+  75% { transform: translateX(1.5px); }
+}
+
 .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 1rem; backdrop-filter: blur(4px); z-index: 10; }
 .overlay h2 { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg,#f472b6,#c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .overlay p { color: rgba(255,255,255,.5); font-size: .9rem; }
