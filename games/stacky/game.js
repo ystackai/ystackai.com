@@ -70,6 +70,8 @@ var StackyGame = (function () {
       lastChocolateTime: 0,
       chocolateRowsRisen: 0,
       lastBoundaryCheck: 0,
+      // Wave animation phase (0–2π, advances each tick for renderer use)
+      chocolateWavePhase: 0,
     };
   }
 
@@ -152,6 +154,7 @@ var StackyGame = (function () {
     state.lastChocolateTime = 0;
     state.chocolateRowsRisen = 0;
     state.lastBoundaryCheck = 0;
+    state.chocolateWavePhase = 0;
     spawnPiece(state);
     syncGameState(state);
   }
@@ -486,6 +489,9 @@ var StackyGame = (function () {
       }
     }
 
+    // Advance chocolate wave animation phase (~1 cycle per 2 seconds)
+    state.chocolateWavePhase = (timestamp * 0.003) % (Math.PI * 2);
+
     if (timestamp - state.lastDropTime >= state.dropInterval) {
       state.lastDropTime = timestamp;
       var candidate = {
@@ -570,6 +576,7 @@ var StackyGame = (function () {
       } : null,
       chocolateRowsRisen: state.chocolateRowsRisen,
       chocolateCell: CHOCOLATE_CELL,
+      chocolateWavePhase: state.chocolateWavePhase,
     };
   }
 
