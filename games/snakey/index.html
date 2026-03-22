@@ -725,7 +725,17 @@
     state.score     = 0;
     state.tronTrail = [];
     dirQueue.length = 0;
-    if (!tronMode) placeFood();
+    if (tronMode) {
+      // Seed the trail with initial body segments so they're visible and collidable
+      const now = Date.now();
+      for (let i = state.snake.length - 1; i >= 1; i--) {
+        state.tronTrail.push({ x: state.snake[i].x, y: state.snake[i].y, placedAt: now });
+      }
+      // Trim snake to just the head — trail handles the rest
+      state.snake = [state.snake[0]];
+    } else {
+      placeFood();
+    }
     updateScoreUI();
     syncGameState();
   }
@@ -797,37 +807,33 @@
     const head    = state.snake[0];
     const newHead = { x: head.x + dx, y: head.y + dy };
 
-    // 3. Prepend new head
-    state.snake.unshift(newHead);
-
     if (tronMode) {
       // ── Light Cycle mode: persistent trail wall, survival scoring ──
+
+      // Expire trail segments older than TRAIL_LIFETIME_MS (before collision check)
       const now = Date.now();
-
-      // Add old head position to persistent trail
-      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
-
-      // Expire trail segments older than TRAIL_LIFETIME_MS
       while (state.tronTrail.length > 0 && now - state.tronTrail[0].placedAt > TRAIL_LIFETIME_MS) {
         state.tronTrail.shift();
       }
 
-      // Keep snake short (just head) — trail is the separate array
-      if (state.snake.length > 1) state.snake.pop();
-
-      // Wall collision
+      // Wall collision — check BEFORE moving
       if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
         die();
         return;
       }
 
-      // Trail collision — hit your own persistent trail and you derez
+      // Trail collision — check BEFORE moving; hit your own persistent trail and you derez
       for (let i = 0; i < state.tronTrail.length; i++) {
         if (state.tronTrail[i].x === newHead.x && state.tronTrail[i].y === newHead.y) {
           die();
           return;
         }
       }
+
+      // All clear — commit the move
+      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
+      // Keep snake as just the head — trail is the separate array
+      state.snake = [newHead];
 
       // Survival score — every tick you're alive earns a point
       state.score += 1;
@@ -838,6 +844,9 @@
       updateScoreUI();
     } else {
       // ── Classic Snake mode ──
+
+      // 3. Prepend new head
+      state.snake.unshift(newHead);
 
       // 4. Food check
       const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
@@ -1411,23 +1420,6 @@
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(head.x * CELL + 3, head.y * CELL + 3, CELL - 6, CELL - 6);
-
-      // Orange neon food
-      const fc  = { x: 13, y: 10 };
-      const fcx = fc.x * CELL + CELL / 2;
-      const fcy = fc.y * CELL + CELL / 2;
-      const fr  = CELL / 2 - 3;
-      ctx.shadowColor = '#ff6600';
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = '#ff6600';
-      ctx.beginPath();
-      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(fcx, fcy, fr * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
     } else {
       demoSegs.forEach((seg, i) => {
         const t = dLen > 1 ? i / (dLen - 1) : 0;
