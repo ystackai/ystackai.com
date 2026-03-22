@@ -14,6 +14,25 @@ var StackyPieces = (function () {
   var TYPES = ['I', 'O', 'T', 'S', 'Z', 'L', 'J'];
 
   /**
+   * Wonka candy color palette — maps piece type index (1-based) to hex color.
+   * Index 0 = empty, index 8 = chocolate cell.
+   * Colors: purple, gold, green, red, pink, deep-purple, cyan.
+   */
+  var CANDY_COLORS = [
+    null,       // 0 = empty
+    '#c084fc',  // 1 = I (purple / grape candy)
+    '#fbbf24',  // 2 = O (gold / golden ticket)
+    '#34d399',  // 3 = T (green / mint)
+    '#f87171',  // 4 = S (red / cherry)
+    '#f472b6',  // 5 = Z (pink / strawberry)
+    '#a78bfa',  // 6 = L (deep purple / violet)
+    '#22d3ee',  // 7 = J (cyan / blue raspberry)
+  ];
+
+  /** Chocolate river block color (brown). */
+  var CHOCOLATE_COLOR = '#7c4a2d';
+
+  /**
    * Piece shapes — each type has 4 rotation states (0–3, clockwise).
    * Each state is an array of [row, col] offsets relative to the piece origin.
    */
@@ -129,6 +148,8 @@ var StackyPieces = (function () {
     ROWS: ROWS,
     TYPES: TYPES,
     SHAPES: SHAPES,
+    CANDY_COLORS: CANDY_COLORS,
+    CHOCOLATE_COLOR: CHOCOLATE_COLOR,
     getCells: getCells,
     getKicks: getKicks,
   };

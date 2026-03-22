@@ -1,144 +1,376 @@
-// StackY renderer — candy theme, ghost piece, line clear animations
-// Imports state from game.js: { board, piece, nextPiece, score, level, lines, gameOver, cols, rows, drop(), reset() }
-import { state, COLS, ROWS, CELL, drop, reset } from './game.js';
+/**
+ * StackY Renderer — connects StackyGame engine to canvas display.
+ *
+ * Depends on: pieces.js (StackyPieces), game.js (StackyGame), input.js (StackyInput)
+ * Loaded after all three in index.html.
+ */
+'use strict';
 
-const CANDY = ['#f472b6','#a78bfa','#38bdf8','#34d399','#fbbf24','#fb923c','#f87171'];
-const BG = '#1a1025';
-const GRID_LINE = 'rgba(255,255,255,.04)';
+(function () {
 
-// --- canvas setup ---
-const canvas = document.getElementById('board');
-const ctx = canvas.getContext('2d');
-canvas.width = COLS * CELL;
-canvas.height = ROWS * CELL;
+  // ── Constants ──────────────────────────────────────────────────────────
 
-const nextCanvas = document.getElementById('next');
-const nctx = nextCanvas.getContext('2d');
-nextCanvas.width = nextCanvas.height = 4 * CELL;
+  var COLS = StackyGame.COLS;
+  var ROWS = StackyGame.ROWS;
+  var CANVAS_W = 300;
+  var CANVAS_H = 600;
+  var CELL = CANVAS_W / COLS;  // 30px per cell
 
-const scoreEl = document.getElementById('score');
-const levelEl = document.getElementById('level');
-const linesEl = document.getElementById('lines');
-const overlay = document.getElementById('overlay');
+  /** Color palette for piece types (indexed by TYPES order + 1). */
+  var PIECE_COLORS = [
+    null,       // 0 = empty
+    '#00f0f0',  // 1 = I (cyan)
+    '#f0f000',  // 2 = O (yellow)
+    '#a000f0',  // 3 = T (purple)
+    '#00f000',  // 4 = S (green)
+    '#f00000',  // 5 = Z (red)
+    '#f0a000',  // 6 = L (orange)
+    '#0000f0',  // 7 = J (blue)
+  ];
 
-// --- line clear flash state ---
-let clearingRows = [];
-let clearFlash = 0;
-const FLASH_FRAMES = 12;
+  var GHOST_ALPHA = 0.2;
 
-export function triggerLineClear(rows) {
-  clearingRows = rows;
-  clearFlash = FLASH_FRAMES;
-}
+  // ── Canvas setup ───────────────────────────────────────────────────────
 
-// --- ghost piece ---
-function ghostY() {
-  const p = state.piece;
-  if (!p) return null;
-  let gy = p.y;
-  while (canPlace(p.shape, p.x, gy + 1)) gy++;
-  return gy;
-}
-function canPlace(shape, px, py) {
-  for (let r = 0; r < shape.length; r++)
-    for (let c = 0; c < shape[r].length; c++)
-      if (shape[r][c]) {
-        const x = px + c, y = py + r;
-        if (x < 0 || x >= COLS || y >= ROWS) return false;
-        if (y >= 0 && state.board[y][x]) return false;
-      }
-  return true;
-}
+  var canvas = document.getElementById('game-canvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_W * dpr;
+  canvas.height = CANVAS_H * dpr;
+  canvas.style.width = CANVAS_W + 'px';
+  canvas.style.height = CANVAS_H + 'px';
+  ctx.scale(dpr, dpr);
 
-// --- draw helpers ---
-function drawCell(context, x, y, color, alpha = 1) {
-  const px = x * CELL, py = y * CELL, pad = 1;
-  context.globalAlpha = alpha;
-  context.fillStyle = color;
-  context.beginPath();
-  context.roundRect(px + pad, py + pad, CELL - pad * 2, CELL - pad * 2, 4);
-  context.fill();
-  // candy highlight
-  context.fillStyle = 'rgba(255,255,255,.25)';
-  context.beginPath();
-  context.roundRect(px + pad + 2, py + pad + 2, CELL - pad * 2 - 4, (CELL - pad * 2) * .35, [3, 3, 0, 0]);
-  context.fill();
-  context.globalAlpha = 1;
-}
+  // Side panel canvases
+  var holdCanvas = document.getElementById('hold-canvas');
+  var holdCtx = holdCanvas.getContext('2d');
+  var nextCanvas = document.getElementById('next-canvas');
+  var nextCtx = nextCanvas.getContext('2d');
 
-// --- main draw ---
-function draw() {
-  ctx.fillStyle = BG;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Scale side panels for HiDPI
+  function setupSmallCanvas(c, cx) {
+    var w = c.width; var h = c.height;
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    cx.scale(dpr, dpr);
+    return { w: w, h: h };
+  }
+  var holdSize = setupSmallCanvas(holdCanvas, holdCtx);
+  var nextSize = setupSmallCanvas(nextCanvas, nextCtx);
 
-  // grid
-  ctx.strokeStyle = GRID_LINE;
-  ctx.lineWidth = 1;
-  for (let x = 1; x < COLS; x++) { ctx.beginPath(); ctx.moveTo(x * CELL, 0); ctx.lineTo(x * CELL, canvas.height); ctx.stroke(); }
-  for (let y = 1; y < ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * CELL); ctx.lineTo(canvas.width, y * CELL); ctx.stroke(); }
+  // ── Responsive scaling ─────────────────────────────────────────────────
 
-  // board
-  for (let r = 0; r < ROWS; r++)
-    for (let c = 0; c < COLS; c++)
-      if (state.board[r][c]) {
-        const flashing = clearFlash > 0 && clearingRows.includes(r);
-        if (flashing && Math.floor(clearFlash / 2) % 2)
-          drawCell(ctx, c, r, '#fff');
-        else
-          drawCell(ctx, c, r, CANDY[(state.board[r][c] - 1) % CANDY.length]);
-      }
+  var wrapper = document.getElementById('canvas-wrapper');
 
-  // ghost piece
-  const p = state.piece;
-  if (p && !state.gameOver) {
-    const gy = ghostY();
-    if (gy !== p.y)
-      for (let r = 0; r < p.shape.length; r++)
-        for (let c = 0; c < p.shape[r].length; c++)
-          if (p.shape[r][c]) drawCell(ctx, p.x + c, gy + r, CANDY[(p.color - 1) % CANDY.length], .2);
-
-    // active piece
-    for (let r = 0; r < p.shape.length; r++)
-      for (let c = 0; c < p.shape[r].length; c++)
-        if (p.shape[r][c]) drawCell(ctx, p.x + c, p.y + r, CANDY[(p.color - 1) % CANDY.length]);
+  function applyResponsiveScale() {
+    var available = window.innerWidth * 0.55;
+    var scale = available < CANVAS_W ? available / CANVAS_W : 1;
+    wrapper.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
+    wrapper.style.marginBottom = scale < 1 ? (CANVAS_H * scale - CANVAS_H) + 'px' : '';
   }
 
-  // flash countdown
-  if (clearFlash > 0) clearFlash--;
-  if (clearFlash === 0) clearingRows = [];
+  // ── UI refs ────────────────────────────────────────────────────────────
 
-  // side panel
-  scoreEl.textContent = state.score;
-  levelEl.textContent = state.level;
-  linesEl.textContent = state.lines;
+  var scoreEl = document.getElementById('score-display');
+  var hiEl = document.getElementById('hi-display');
+  var levelEl = document.getElementById('level-display');
+  var linesEl = document.getElementById('lines-display');
+  var splashEl = document.getElementById('overlay-splash');
+  var pausedEl = document.getElementById('overlay-paused');
+  var gameoverEl = document.getElementById('overlay-gameover');
+  var goScoreEl = document.getElementById('go-score');
+  var goHiEl = document.getElementById('go-hi');
+  var btnStart = document.getElementById('btn-start');
+  var btnRestart = document.getElementById('btn-restart');
 
-  // next piece preview
-  nctx.fillStyle = 'transparent';
-  nctx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
-  if (state.nextPiece) {
-    const np = state.nextPiece;
-    const ox = Math.floor((4 - np.shape[0].length) / 2);
-    const oy = Math.floor((4 - np.shape.length) / 2);
-    for (let r = 0; r < np.shape.length; r++)
-      for (let c = 0; c < np.shape[r].length; c++)
-        if (np.shape[r][c]) drawCell(nctx, ox + c, oy + r, CANDY[(np.color - 1) % CANDY.length]);
+  // ── Game state ─────────────────────────────────────────────────────────
+
+  var state = StackyGame.createState();
+  var rafId = null;
+  var inputCleanup = null;
+
+  hiEl.textContent = String(state.hi);
+
+  // ── Score UI ───────────────────────────────────────────────────────────
+
+  function updateScoreUI() {
+    scoreEl.textContent = String(state.score);
+    hiEl.textContent = String(state.hi);
+    levelEl.textContent = String(state.level);
+    linesEl.textContent = String(state.linesCleared);
   }
 
-  // overlay
-  overlay.style.display = state.gameOver ? 'flex' : 'none';
+  // ── State transitions ─────────────────────────────────────────────────
 
-  // expose gameState for automated testing
-  window.gameState = {
-    score: state.score,
-    alive: !state.gameOver,
-    gameOver: state.gameOver,
-    level: state.level,
-    lines: state.lines,
-    player: state.piece ? { x: state.piece.x, y: state.piece.y } : null
-  };
+  function startGame() {
+    splashEl.classList.add('hidden');
+    gameoverEl.classList.add('hidden');
+    pausedEl.classList.add('hidden');
+    StackyGame.start(state);
+    updateScoreUI();
+    startLoop();
+  }
 
-  requestAnimationFrame(draw);
-}
+  function restartGame() {
+    startGame();
+  }
 
-// start render loop
-draw();
+  // ── RAF loop ───────────────────────────────────────────────────────────
+
+  var lastTs = null;
+
+  function startLoop() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    lastTs = null;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stopLoop() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    lastTs = null;
+  }
+
+  function loop(ts) {
+    if (lastTs === null) lastTs = ts;
+
+    // Run gravity tick
+    StackyGame.tick(state, ts);
+
+    // Check phase transitions
+    if (state.phase === 'gameOver') {
+      onGameOver();
+      draw();
+      StackyGame.syncGameState(state);
+      return;
+    }
+
+    if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
+      draw();
+      StackyGame.syncGameState(state);
+      // Keep looping to detect resume
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
+
+    pausedEl.classList.add('hidden');
+    updateScoreUI();
+    draw();
+    drawHoldPanel();
+    drawNextPanel();
+    StackyGame.syncGameState(state);
+
+    lastTs = ts;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function onGameOver() {
+    goScoreEl.textContent = String(state.score);
+    goHiEl.textContent = String(state.hi);
+    gameoverEl.classList.remove('hidden');
+    stopLoop();
+  }
+
+  // ── Rendering ──────────────────────────────────────────────────────────
+
+  function draw() {
+    // Background
+    ctx.fillStyle = '#0d0d14';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    for (var x = 1; x < COLS; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * CELL, 0);
+      ctx.lineTo(x * CELL, CANVAS_H);
+      ctx.stroke();
+    }
+    for (var y = 1; y < ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL);
+      ctx.lineTo(CANVAS_W, y * CELL);
+      ctx.stroke();
+    }
+
+    // Locked blocks
+    for (var row = 0; row < ROWS; row++) {
+      for (var col = 0; col < COLS; col++) {
+        if (state.grid[row][col] !== 0) {
+          drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], 1);
+        }
+      }
+    }
+
+    // Ghost piece
+    if (state.activePiece && state.phase === 'playing') {
+      var ghostY = StackyGame.getGhostY(state);
+      var ghostPiece = {
+        type: state.activePiece.type,
+        rotation: state.activePiece.rotation,
+        x: state.activePiece.x,
+        y: ghostY,
+      };
+      var ghostCells = StackyPieces.getCells(ghostPiece);
+      var colorIdx = StackyPieces.TYPES.indexOf(state.activePiece.type) + 1;
+      for (var i = 0; i < ghostCells.length; i++) {
+        var gc = ghostCells[i];
+        if (gc.y >= 0) {
+          drawCell(ctx, gc.x, gc.y, PIECE_COLORS[colorIdx], GHOST_ALPHA);
+        }
+      }
+    }
+
+    // Active piece
+    if (state.activePiece) {
+      var cells = StackyPieces.getCells(state.activePiece);
+      var ci = StackyPieces.TYPES.indexOf(state.activePiece.type) + 1;
+      for (var j = 0; j < cells.length; j++) {
+        var c = cells[j];
+        if (c.y >= 0) {
+          drawCell(ctx, c.x, c.y, PIECE_COLORS[ci], 1);
+        }
+      }
+    }
+  }
+
+  function drawCell(context, col, row, color, alpha) {
+    var x = col * CELL;
+    var y = row * CELL;
+    var inset = 1;
+
+    context.save();
+    context.globalAlpha = alpha;
+
+    // Main fill
+    context.fillStyle = color;
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, CELL - inset * 2);
+
+    // Top highlight
+    context.fillStyle = 'rgba(255,255,255,0.2)';
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, 2);
+
+    // Left highlight
+    context.fillStyle = 'rgba(255,255,255,0.1)';
+    context.fillRect(x + inset, y + inset, 2, CELL - inset * 2);
+
+    // Bottom shadow
+    context.fillStyle = 'rgba(0,0,0,0.3)';
+    context.fillRect(x + inset, y + CELL - inset - 2, CELL - inset * 2, 2);
+
+    context.restore();
+  }
+
+  // ── Side panel rendering ───────────────────────────────────────────────
+
+  function drawPiecePreview(context, size, type) {
+    context.clearRect(0, 0, size.w, size.h);
+    context.fillStyle = '#1a1a2e';
+    context.fillRect(0, 0, size.w, size.h);
+
+    if (!type) return;
+
+    var piece = { type: type, rotation: 0, x: 0, y: 0 };
+    var cells = StackyPieces.getCells(piece);
+    var colorIdx = StackyPieces.TYPES.indexOf(type) + 1;
+
+    // Find bounding box
+    var minX = 99, maxX = -1, minY = 99, maxY = -1;
+    for (var i = 0; i < cells.length; i++) {
+      if (cells[i].x < minX) minX = cells[i].x;
+      if (cells[i].x > maxX) maxX = cells[i].x;
+      if (cells[i].y < minY) minY = cells[i].y;
+      if (cells[i].y > maxY) maxY = cells[i].y;
+    }
+
+    var pw = maxX - minX + 1;
+    var ph = maxY - minY + 1;
+    var cellSize = Math.min((size.w - 20) / pw, (size.h - 20) / ph, 20);
+    var offsetX = (size.w - pw * cellSize) / 2;
+    var offsetY = (size.h - ph * cellSize) / 2;
+
+    for (var j = 0; j < cells.length; j++) {
+      var cx = offsetX + (cells[j].x - minX) * cellSize;
+      var cy = offsetY + (cells[j].y - minY) * cellSize;
+
+      context.fillStyle = PIECE_COLORS[colorIdx];
+      context.fillRect(cx + 1, cy + 1, cellSize - 2, cellSize - 2);
+
+      context.fillStyle = 'rgba(255,255,255,0.2)';
+      context.fillRect(cx + 1, cy + 1, cellSize - 2, 2);
+    }
+  }
+
+  function drawHoldPanel() {
+    drawPiecePreview(holdCtx, holdSize, state.heldPiece);
+  }
+
+  function drawNextPanel() {
+    drawPiecePreview(nextCtx, nextSize, state.nextPiece);
+  }
+
+  // ── Input setup ────────────────────────────────────────────────────────
+
+  function handleStateChange() {
+    updateScoreUI();
+    draw();
+    drawHoldPanel();
+    drawNextPanel();
+    StackyGame.syncGameState(state);
+
+    // Handle overlay transitions triggered by input
+    if (state.phase === 'gameOver') {
+      onGameOver();
+    } else if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
+    } else if (state.phase === 'playing') {
+      pausedEl.classList.add('hidden');
+    }
+  }
+
+  inputCleanup = StackyInput.attach(state, {
+    onStart: startGame,
+    onRestart: restartGame,
+    onStateChange: handleStateChange,
+  });
+
+  // Button handlers
+  btnStart.addEventListener('click', function () { startGame(); });
+  btnRestart.addEventListener('click', function () { restartGame(); });
+
+  // ── Responsive ─────────────────────────────────────────────────────────
+
+  window.addEventListener('resize', applyResponsiveScale);
+  applyResponsiveScale();
+
+  // ── Cleanup for HMR ───────────────────────────────────────────────────
+
+  function cleanup() {
+    stopLoop();
+    if (inputCleanup) { inputCleanup(); inputCleanup = null; }
+    window.removeEventListener('resize', applyResponsiveScale);
+    state.phase = 'idle';
+    state.alive = true;
+    StackyGame.syncGameState(state);
+    window._stackyInitialized = false;
+  }
+
+  if (typeof window.stackyDestroy === 'function' && window._stackyInitialized) {
+    window.stackyDestroy();
+  }
+  window.stackyDestroy = cleanup;
+  window._stackyInitialized = true;
+  window.addEventListener('beforeunload', cleanup);
+
+  // ── Initial state ──────────────────────────────────────────────────────
+
+  StackyGame.syncGameState(state);
+  draw();
+  drawHoldPanel();
+  drawNextPanel();
+
+}());

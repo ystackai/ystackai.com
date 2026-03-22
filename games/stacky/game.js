@@ -455,7 +455,10 @@ var StackyGame = (function () {
     }
     if (timestamp - state.lastChocolateTime >= CHOCOLATE_INTERVAL) {
       state.lastChocolateTime = timestamp;
-      if (!riseChocolateRow(state)) return; // game over from chocolate
+      // Rise 2 chocolate rows per interval ("bottom 2 rows fill")
+      for (var cr = 0; cr < 2; cr++) {
+        if (!riseChocolateRow(state)) return; // game over from chocolate
+      }
     }
 
     if (timestamp - state.lastDropTime >= state.dropInterval) {
