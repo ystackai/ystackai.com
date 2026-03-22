@@ -49,9 +49,22 @@
     osc.start();
     osc2.start();
 
+    function beep(freq, end, dur, type) {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, ctx.currentTime);
+      o.frequency.linearRampToValueAtTime(end, ctx.currentTime + dur);
+      g.gain.setValueAtTime(muted ? 0 : 0.12, ctx.currentTime);
+      g.gain.linearRampToValueAtTime(0, ctx.currentTime + dur);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime + dur);
+    }
+
     window.snakeyAudio = {
       ctx: ctx,
       master: master,
+      food: function () { beep(440, 880, 0.1); },
+      crash: function () { beep(200, 60, 0.35, 'sawtooth'); },
       toggle: function () {
         muted = !muted;
         master.gain.setTargetAtTime(muted ? 0 : 0.06, ctx.currentTime, 0.1);
