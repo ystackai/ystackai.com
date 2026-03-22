@@ -21,6 +21,13 @@ var StackyGame = (function () {
   var CHOCOLATE_INTERVAL = 30000;    // ms between chocolate row rises
   var CHOCOLATE_GAPS = 2;            // random gaps per chocolate row
 
+  // Wobble physics constants
+  var WOBBLE_MAX_TILT = 15;          // max tilt angle in degrees
+  var WOBBLE_DANGER_THRESHOLD = 10;  // tilt degrees that trigger danger state
+  var WOBBLE_TILT_BONUS_MULT = 1.5;  // score multiplier for clears during danger
+  var WOBBLE_DAMPING = 0.85;         // per-tick damping (smooths tilt changes)
+  var WOBBLE_SENSITIVITY = 3.0;      // degrees of tilt per unit of mass offset
+
   // localStorage key
   var LS_KEY = 'stacky_hi';
 
@@ -69,6 +76,16 @@ var StackyGame = (function () {
       // Chocolate river state
       lastChocolateTime: 0,
       chocolateRowsRisen: 0,
+      // Wobble physics state
+      wobble: {
+        centerOfMass: { x: COLS / 2, y: ROWS / 2 },  // current center of mass
+        massOffset: 0,           // horizontal offset from board center (signed)
+        rawTilt: 0,              // raw tilt from mass offset (degrees, signed)
+        tilt: 0,                 // smoothed tilt angle (degrees, signed)
+        absTilt: 0,              // absolute tilt value
+        danger: false,           // true when |tilt| >= WOBBLE_DANGER_THRESHOLD
+        totalMass: 0,            // total number of filled cells
+      },
     };
   }
 
@@ -150,6 +167,15 @@ var StackyGame = (function () {
     state.nextPiece = null;
     state.lastChocolateTime = 0;
     state.chocolateRowsRisen = 0;
+    state.wobble = {
+      centerOfMass: { x: COLS / 2, y: ROWS / 2 },
+      massOffset: 0,
+      rawTilt: 0,
+      tilt: 0,
+      absTilt: 0,
+      danger: false,
+      totalMass: 0,
+    };
     spawnPiece(state);
     syncGameState(state);
   }
@@ -293,6 +319,65 @@ var StackyGame = (function () {
     return ghostY;
   }
 
+  /**
+   * Calculate center of mass from all filled cells on the grid.
+   * Returns { x, y, totalMass } where x/y are weighted averages.
+   * Deterministic: pure function of grid state, no randomness.
+   */
+  function calculateCenterOfMass(grid) {
+    var sumX = 0;
+    var sumY = 0;
+    var mass = 0;
+    for (var y = 0; y < ROWS; y++) {
+      for (var x = 0; x < COLS; x++) {
+        if (grid[y][x] !== 0) {
+          sumX += x + 0.5;  // cell center
+          sumY += y + 0.5;
+          mass++;
+        }
+      }
+    }
+    if (mass === 0) {
+      return { x: COLS / 2, y: ROWS / 2, totalMass: 0 };
+    }
+    return { x: sumX / mass, y: sumY / mass, totalMass: mass };
+  }
+
+  /**
+   * Update wobble physics state. Called after any grid mutation.
+   * Tilt is derived deterministically from horizontal mass offset.
+   * Uses damping to smooth frame-to-frame tilt transitions.
+   */
+  function updateWobble(state) {
+    var com = calculateCenterOfMass(state.grid);
+    var boardCenterX = COLS / 2;
+
+    // Horizontal offset from board center (positive = right-heavy)
+    var offset = com.x - boardCenterX;
+
+    // Raw tilt: proportional to offset, clamped to max
+    var raw = offset * WOBBLE_SENSITIVITY;
+    if (raw > WOBBLE_MAX_TILT) raw = WOBBLE_MAX_TILT;
+    if (raw < -WOBBLE_MAX_TILT) raw = -WOBBLE_MAX_TILT;
+
+    // Smooth tilt with damping: tilt moves toward raw each tick
+    var prevTilt = state.wobble.tilt;
+    var smoothed = prevTilt * WOBBLE_DAMPING + raw * (1 - WOBBLE_DAMPING);
+
+    // Round to 4 decimal places for determinism across platforms
+    smoothed = Math.round(smoothed * 10000) / 10000;
+
+    var absTilt = Math.abs(smoothed);
+
+    state.wobble.centerOfMass = { x: com.x, y: com.y };
+    state.wobble.totalMass = com.totalMass;
+    state.wobble.massOffset = Math.round(offset * 10000) / 10000;
+    state.wobble.rawTilt = Math.round(raw * 10000) / 10000;
+    state.wobble.tilt = smoothed;
+    state.wobble.absTilt = Math.round(absTilt * 10000) / 10000;
+    state.wobble.danger = absTilt >= WOBBLE_DANGER_THRESHOLD;
+  }
+
   /** Lock piece into grid and handle line clears. */
   function lockPiece(state) {
     if (!state.activePiece) return;
@@ -312,6 +397,7 @@ var StackyGame = (function () {
     } else {
       state.comboCounter = 0;
     }
+    updateWobble(state);
     spawnPiece(state);
   }
 
@@ -404,6 +490,14 @@ var StackyGame = (function () {
     if (chocoCleared > 0) {
       points += (LINE_SCORES[chocoCleared] || chocoCleared * 100) * state.level;
     }
+    // Wobble tilt bonus: clearing lines during danger state grants bonus
+    if (state.wobble.danger) {
+      var tiltBonus = Math.floor(points * (WOBBLE_TILT_BONUS_MULT - 1));
+      points += tiltBonus;
+      state.wobble._lastTiltBonus = tiltBonus;
+    } else {
+      state.wobble._lastTiltBonus = 0;
+    }
     state.score += points;
 
     // Golden Ticket: 4-line clear (Tetris)
@@ -456,6 +550,7 @@ var StackyGame = (function () {
     if (timestamp - state.lastChocolateTime >= CHOCOLATE_INTERVAL) {
       state.lastChocolateTime = timestamp;
       if (!riseChocolateRow(state)) return; // game over from chocolate
+      updateWobble(state);
     }
 
     if (timestamp - state.lastDropTime >= state.dropInterval) {
@@ -542,6 +637,14 @@ var StackyGame = (function () {
       } : null,
       chocolateRowsRisen: state.chocolateRowsRisen,
       chocolateCell: CHOCOLATE_CELL,
+      wobble: {
+        centerOfMass: { x: state.wobble.centerOfMass.x, y: state.wobble.centerOfMass.y },
+        massOffset: state.wobble.massOffset,
+        tilt: state.wobble.tilt,
+        absTilt: state.wobble.absTilt,
+        danger: state.wobble.danger,
+        totalMass: state.wobble.totalMass,
+      },
     };
   }
 
@@ -568,6 +671,14 @@ var StackyGame = (function () {
     ROWS: ROWS,
     CHOCOLATE_CELL: CHOCOLATE_CELL,
     CHOCOLATE_INTERVAL: CHOCOLATE_INTERVAL,
+    // Wobble physics
+    calculateCenterOfMass: calculateCenterOfMass,
+    updateWobble: updateWobble,
+    WOBBLE_MAX_TILT: WOBBLE_MAX_TILT,
+    WOBBLE_DANGER_THRESHOLD: WOBBLE_DANGER_THRESHOLD,
+    WOBBLE_TILT_BONUS_MULT: WOBBLE_TILT_BONUS_MULT,
+    WOBBLE_DAMPING: WOBBLE_DAMPING,
+    WOBBLE_SENSITIVITY: WOBBLE_SENSITIVITY,
   };
 })();
 
