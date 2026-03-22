@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game 003 — ystackai</title>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a0f;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10, 10, 15, 0.95);
+      border-bottom: 1px solid rgba(0, 255, 65, 0.15);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+    nav .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    nav .logo span { color: #00ff41; }
+    nav .home-link {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+    nav .home-link:hover {
+      color: #00ff41;
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.08);
+    }
+
+    /* ── Header band ──────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(
+        135deg,
+        rgba(0, 255, 65, 0.1) 0%,
+        rgba(0, 180, 50, 0.05) 50%,
+        rgba(0, 255, 65, 0.02) 100%
+      );
+      border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+      padding: 1.75rem 2rem 1.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #00ff41, #b4ffc8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
+    }
+    .hero p {
+      font-size: 0.875rem;
+      color: #4a6a4f;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ── Main layout ──────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      gap: 1.25rem;
+    }
+
+    /* ── Score bar ────────────────────────────────────────────────────── */
+    .score-bar {
+      display: flex;
+      gap: 2.5rem;
+    }
+    .score-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .score-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4a6a4f;
+      font-weight: 700;
+    }
+    .score-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #00ff41;
+      font-variant-numeric: tabular-nums;
+      min-width: 3ch;
+      text-align: center;
+    }
+    .score-value.high { color: #b4ffc8; }
+    .score-value.level { color: #34d399; }
+
+    /* ── Canvas wrapper ───────────────────────────────────────────────── */
+    .canvas-wrapper {
+      position: relative;
+      width: 400px;
+      height: 600px;
+      border: 2px solid rgba(0, 255, 65, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(0, 255, 65, 0.1),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(0, 255, 65, 0.05);
+      transform-origin: top center;
+    }
+
+    canvas#game-canvas {
+      display: block;
+      width: 400px;
+      height: 600px;
+    }
+
+    /* ── Overlays ─────────────────────────────────────────────────────── */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(5, 5, 10, 0.88);
+      backdrop-filter: blur(4px);
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+    .overlay.hidden { display: none; }
+
+    .overlay-title {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #00ff41, #b4ffc8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .overlay-sub {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .overlay-hint {
+      font-size: 0.8rem;
+      color: #4a6a4f;
+      margin-top: 0.25rem;
+      font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+    .overlay-score-block {
+      display: flex;
+      gap: 2rem;
+      margin: 0.25rem 0;
+    }
+    .overlay-score-item { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+    .overlay-score-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #4a6a4f;
+      font-weight: 700;
+    }
+    .overlay-score-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #00ff41;
+      font-variant-numeric: tabular-nums;
+    }
+    .overlay-score-val.hi { color: #b4ffc8; }
+
+    .mashup-badge {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(0, 255, 65, 0.15);
+      color: #00ff41;
+      border: 1px solid rgba(0, 255, 65, 0.3);
+      letter-spacing: 0.05em;
+    }
+
+    .btn {
+      margin-top: 0.5rem;
+      padding: 0.65rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      background: linear-gradient(135deg, #00cc33, #009926);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { opacity: 1; transform: translateY(0); }
+
+    /* ── Controls reference ────────────────────────────────────────────── */
+    .controls {
+      font-size: 0.8rem;
+      color: #4a6a4f;
+      text-align: center;
+      line-height: 2;
+    }
+    .controls kbd {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      background: #0f1a12;
+      border: 1px solid #1a3a1f;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      color: #00ff41;
+    }
+
+    /* ── Mashup indicator ─────────────────────────────────────────────── */
+    #mashup-indicator {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #4a6a4f;
+      transition: color 0.3s ease;
+    }
+    #mashup-indicator.active {
+      color: #00ff41;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    }
+
+    /* ── Footer ───────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: #1a2a1d;
+      border-top: 1px solid rgba(0, 255, 65, 0.05);
+    }
+
+    @media (max-width: 520px) {
+      .controls { display: none; }
+      .canvas-wrapper { width: 300px; height: 450px; }
+      canvas#game-canvas { width: 300px; height: 450px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────── -->
+<nav>
+  <a href="/" class="logo">ystack<span>ai</span></a>
+  <a href="/games/" class="home-link">&larr; Games</a>
+</nav>
+
+<!-- ── Header band ─────────────────────────────────────────────────────── -->
+<div class="hero">
+  <h1>Game 003</h1>
+  <p>// stacky_meets_the_matrix.exe</p>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Score bar -->
+  <div class="score-bar">
+    <div class="score-item">
+      <span class="score-label">Score</span>
+      <span class="score-value" id="score-display">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Best</span>
+      <span class="score-value high" id="hi-display">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Level</span>
+      <span class="score-value level" id="level-display">1</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Lines</span>
+      <span class="score-value" id="lines-display" style="color:#fbbf24;">0</span>
+    </div>
+  </div>
+
+  <!-- Mashup mode indicator -->
+  <div id="mashup-indicator">mode: normal</div>
+
+  <!-- Canvas + overlays -->
+  <div class="canvas-wrapper" id="canvas-wrapper">
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Splash overlay -->
+    <div class="overlay" id="overlay-splash">
+      <div class="overlay-title">Game 003</div>
+      <div class="overlay-sub">
+        Block dropping meets The Matrix.<br>
+        Clear lines. Survive the code rain.<br>
+        <span class="mashup-badge">mashup engine v0.1</span>
+      </div>
+      <div class="overlay-hint">press [space] to jack in</div>
+      <button class="btn" id="btn-start">Enter the Matrix</button>
+    </div>
+
+    <!-- Paused overlay -->
+    <div class="overlay hidden" id="overlay-paused">
+      <div class="overlay-title">Paused</div>
+      <div class="overlay-hint">press [esc] to resume</div>
+    </div>
+
+    <!-- Game over overlay -->
+    <div class="overlay hidden" id="overlay-gameover">
+      <div class="overlay-title">System Crash</div>
+      <div class="overlay-score-block">
+        <div class="overlay-score-item">
+          <span class="overlay-score-label">Score</span>
+          <span class="overlay-score-val" id="go-score">0</span>
+        </div>
+        <div class="overlay-score-item">
+          <span class="overlay-score-label">Best</span>
+          <span class="overlay-score-val hi" id="go-hi">0</span>
+        </div>
+      </div>
+      <div class="overlay-hint">press [space] to reboot</div>
+      <button class="btn" id="btn-restart">Reboot</button>
+    </div>
+  </div>
+
+  <!-- Keyboard hint -->
+  <div class="controls">
+    Move: <kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>A</kbd><kbd>D</kbd> &nbsp;
+    Soft drop: <kbd>&darr;</kbd> &nbsp;
+    Hard drop: <kbd>Space</kbd> &nbsp;
+    Pause: <kbd>Esc</kbd>
+  </div>
+
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer>
+  &copy; 2026 ystackai &mdash; game 003 // the matrix remix
+</footer>
+
+<script src="game.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  Game 003 — Renderer + Input + Main Loop
+// ═══════════════════════════════════════════════════════════════════════════
+
+(function () {
+  'use strict';
+
+  var G = Game003;
+  var CANVAS_W = G.CANVAS_W;
+  var CANVAS_H = G.CANVAS_H;
+  var COLS = G.COLS;
+  var ROWS = G.ROWS;
+  var CELL = G.CELL;
+
+  // ── Color palette ─────────────────────────────────────────────────────
+
+  var PIECE_COLORS = [
+    null,
+    '#00ff41',  // 1 — Matrix green
+    '#00cc33',  // 2 — darker green
+    '#33ff66',  // 3 — light green
+    '#009926',  // 4 — deep green
+    '#66ffaa',  // 5 — mint
+  ];
+
+  var GHOST_ALPHA = 0.15;
+
+  // ── Canvas setup ──────────────────────────────────────────────────────
+
+  var canvas = document.getElementById('game-canvas');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_W * dpr;
+  canvas.height = CANVAS_H * dpr;
+  canvas.style.width = CANVAS_W + 'px';
+  canvas.style.height = CANVAS_H + 'px';
+  ctx.scale(dpr, dpr);
+
+  // ── Responsive scaling ────────────────────────────────────────────────
+
+  var wrapper = document.getElementById('canvas-wrapper');
+
+  function applyResponsiveScale() {
+    var available = window.innerWidth * 0.6;
+    var scale = available < CANVAS_W ? available / CANVAS_W : 1;
+    wrapper.style.transform = scale < 1 ? 'scale(' + scale + ')' : '';
+    wrapper.style.marginBottom = scale < 1 ? (CANVAS_H * scale - CANVAS_H) + 'px' : '';
+  }
+
+  // ── UI refs ───────────────────────────────────────────────────────────
+
+  var scoreEl     = document.getElementById('score-display');
+  var hiEl        = document.getElementById('hi-display');
+  var levelEl     = document.getElementById('level-display');
+  var linesEl     = document.getElementById('lines-display');
+  var mashupEl    = document.getElementById('mashup-indicator');
+  var splashEl    = document.getElementById('overlay-splash');
+  var pausedEl    = document.getElementById('overlay-paused');
+  var gameoverEl  = document.getElementById('overlay-gameover');
+  var goScoreEl   = document.getElementById('go-score');
+  var goHiEl      = document.getElementById('go-hi');
+  var btnStart    = document.getElementById('btn-start');
+  var btnRestart  = document.getElementById('btn-restart');
+
+  // ── Game state ────────────────────────────────────────────────────────
+
+  var state = G.createState();
+  var rafId = null;
+
+  hiEl.textContent = String(state.hi);
+
+  // ── Score UI ──────────────────────────────────────────────────────────
+
+  function updateScoreUI() {
+    scoreEl.textContent = String(state.score);
+    hiEl.textContent    = String(state.hi);
+    levelEl.textContent = String(state.level);
+    linesEl.textContent = String(state.linesCleared);
+
+    // Mashup indicator
+    mashupEl.textContent = 'mode: ' + state.mashupMode;
+    if (state.mashupMode !== 'normal') {
+      mashupEl.classList.add('active');
+    } else {
+      mashupEl.classList.remove('active');
+    }
+  }
+
+  // ── State transitions ─────────────────────────────────────────────────
+
+  function startGame() {
+    splashEl.classList.add('hidden');
+    gameoverEl.classList.add('hidden');
+    pausedEl.classList.add('hidden');
+    G.startGame(state);
+    updateScoreUI();
+    startLoop();
+  }
+
+  // ── RAF loop ──────────────────────────────────────────────────────────
+
+  var lastTs = null;
+
+  function startLoop() {
+    if (rafId !== null) cancelAnimationFrame(rafId);
+    lastTs = null;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function stopLoop() {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+    lastTs = null;
+  }
+
+  function loop(ts) {
+    if (lastTs === null) lastTs = ts;
+
+    G.tick(state, ts);
+
+    if (state.phase === 'gameOver') {
+      onGameOver();
+      draw();
+      G.syncGameState(state);
+      return;
+    }
+
+    if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
+      draw();
+      G.syncGameState(state);
+      rafId = requestAnimationFrame(loop);
+      return;
+    }
+
+    pausedEl.classList.add('hidden');
+    updateScoreUI();
+    draw();
+    G.syncGameState(state);
+
+    lastTs = ts;
+    rafId = requestAnimationFrame(loop);
+  }
+
+  function onGameOver() {
+    goScoreEl.textContent = String(state.score);
+    goHiEl.textContent    = String(state.hi);
+    gameoverEl.classList.remove('hidden');
+    stopLoop();
+  }
+
+  // ── Rendering ─────────────────────────────────────────────────────────
+
+  function draw() {
+    // Background — darker during matrix mode
+    var bgAlpha = 0.92 + state.matrixIntensity * 0.08;
+    ctx.fillStyle = 'rgba(5, 5, 10, ' + bgAlpha + ')';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    // Render entities (Matrix rain) behind the grid
+    state.entities.render(ctx, state);
+
+    // Grid lines
+    var gridAlpha = 0.04 + state.matrixIntensity * 0.03;
+    ctx.strokeStyle = 'rgba(0, 255, 65, ' + gridAlpha + ')';
+    ctx.lineWidth = 0.5;
+    for (var x = 1; x < COLS; x++) {
+      ctx.beginPath();
+      ctx.moveTo(x * CELL, 0);
+      ctx.lineTo(x * CELL, CANVAS_H);
+      ctx.stroke();
+    }
+    for (var y = 1; y < ROWS; y++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y * CELL);
+      ctx.lineTo(CANVAS_W, y * CELL);
+      ctx.stroke();
+    }
+
+    // Locked blocks
+    for (var row = 0; row < ROWS; row++) {
+      for (var col = 0; col < COLS; col++) {
+        if (state.grid[row][col] !== 0) {
+          drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]] || '#00ff41', 1);
+        }
+      }
+    }
+
+    // Ghost piece
+    if (state.activePiece && state.phase === 'playing') {
+      var ghostY = G.getGhostY(state.grid, state.activePiece);
+      var ghostPiece = { shape: state.activePiece.shape, x: state.activePiece.x, y: ghostY, colorIndex: state.activePiece.colorIndex };
+      var ghostCells = G.getPieceCells(ghostPiece);
+      for (var gi = 0; gi < ghostCells.length; gi++) {
+        var gc = ghostCells[gi];
+        if (gc.y >= 0) {
+          drawCell(ctx, gc.x, gc.y, PIECE_COLORS[state.activePiece.colorIndex] || '#00ff41', GHOST_ALPHA);
+        }
+      }
+    }
+
+    // Active piece
+    if (state.activePiece) {
+      var cells = G.getPieceCells(state.activePiece);
+      var color = PIECE_COLORS[state.activePiece.colorIndex] || '#00ff41';
+      for (var ci = 0; ci < cells.length; ci++) {
+        var c = cells[ci];
+        if (c.y >= 0) {
+          drawCell(ctx, c.x, c.y, color, 1);
+        }
+      }
+    }
+
+    // Matrix mode scanline effect
+    if (state.matrixIntensity > 0) {
+      drawScanlines(state.matrixIntensity);
+    }
+  }
+
+  function drawCell(context, col, row, color, alpha) {
+    var x = col * CELL;
+    var y = row * CELL;
+    var inset = 1;
+
+    context.save();
+    context.globalAlpha = alpha;
+
+    // Main fill
+    context.fillStyle = color;
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, CELL - inset * 2);
+
+    // Glow effect
+    context.shadowColor = color;
+    context.shadowBlur = 4;
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, CELL - inset * 2);
+    context.shadowBlur = 0;
+
+    // Top highlight
+    context.fillStyle = 'rgba(255, 255, 255, 0.15)';
+    context.fillRect(x + inset, y + inset, CELL - inset * 2, 2);
+
+    // Bottom shadow
+    context.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    context.fillRect(x + inset, y + CELL - inset - 2, CELL - inset * 2, 2);
+
+    context.restore();
+  }
+
+  function drawScanlines(intensity) {
+    ctx.save();
+    ctx.globalAlpha = intensity * 0.08;
+    for (var y = 0; y < CANVAS_H; y += 3) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, y, CANVAS_W, 1);
+    }
+    ctx.restore();
+  }
+
+  // ── Input handling ────────────────────────────────────────────────────
+
+  function onKeyDown(e) {
+    var key = e.key;
+
+    // Prevent page scroll for game keys
+    if (['ArrowLeft', 'ArrowRight', 'ArrowDown', 'ArrowUp', ' '].indexOf(key) !== -1) {
+      e.preventDefault();
+    }
+
+    if (state.phase === 'splash') {
+      if (key === ' ' || key === 'Enter') {
+        startGame();
+        return;
+      }
+    }
+
+    if (state.phase === 'gameOver') {
+      if (key === ' ' || key === 'Enter') {
+        startGame();
+        return;
+      }
+    }
+
+    G.processInput(state, key);
+
+    // Immediate visual feedback
+    if (state.phase === 'playing') {
+      updateScoreUI();
+      draw();
+      G.syncGameState(state);
+    }
+    if (state.phase === 'paused') {
+      pausedEl.classList.remove('hidden');
+    }
+    if (state.phase === 'playing') {
+      pausedEl.classList.add('hidden');
+    }
+  }
+
+  document.addEventListener('keydown', onKeyDown);
+
+  // Touch input (basic)
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  canvas.addEventListener('touchstart', function (e) {
+    e.preventDefault();
+    var t = e.touches[0];
+    touchStartX = t.clientX;
+    touchStartY = t.clientY;
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', function (e) {
+    e.preventDefault();
+    var t = e.changedTouches[0];
+    var dx = t.clientX - touchStartX;
+    var dy = t.clientY - touchStartY;
+    var absDx = Math.abs(dx);
+    var absDy = Math.abs(dy);
+
+    if (state.phase === 'splash' || state.phase === 'gameOver') {
+      startGame();
+      return;
+    }
+
+    if (absDx < 10 && absDy < 10) {
+      // Tap — treat as hard drop
+      G.processInput(state, ' ');
+    } else if (absDx > absDy) {
+      G.processInput(state, dx > 0 ? 'ArrowRight' : 'ArrowLeft');
+    } else {
+      if (dy > 0) {
+        G.processInput(state, 'ArrowDown');
+      }
+    }
+
+    updateScoreUI();
+    draw();
+    G.syncGameState(state);
+  }, { passive: false });
+
+  // Button handlers
+  btnStart.addEventListener('click', function () { startGame(); });
+  btnRestart.addEventListener('click', function () { startGame(); });
+
+  // ── Responsive ────────────────────────────────────────────────────────
+
+  window.addEventListener('resize', applyResponsiveScale);
+  applyResponsiveScale();
+
+  // ── Initial state ─────────────────────────────────────────────────────
+
+  G.syncGameState(state);
+  draw();
+
+}());
+</script>
+</body>
+</html>
