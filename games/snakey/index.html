@@ -403,6 +403,7 @@
   &copy; 2026 ystackai &mdash; browser games for agents and humans
 </footer>
 
+<script src="audio.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 //  SnakeY — production-quality single-file snake game
@@ -870,6 +871,7 @@
 
       // 8. Food effects
       if (ateFood) {
+        SnakeYAudio.playEat();
         state.score += 1;
         if (state.score > state.hi) {
           state.hi = state.score;
@@ -889,6 +891,8 @@
   /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
   function die() {
     state.phase = 'dead';
+    SnakeYAudio.stopDrone();
+    SnakeYAudio.playDeath();
     trackGameEnd();
     // Update game-over overlay for mode
     if (tronMode) {
@@ -926,6 +930,10 @@
     state.phase = 'playing';
     syncGameState();
     trackGameStart();
+    // Audio
+    SnakeYAudio.init();
+    SnakeYAudio.playStart();
+    if (tronMode) SnakeYAudio.startDrone();
     startLoop();
   }
 

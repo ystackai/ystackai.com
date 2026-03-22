@@ -10,11 +10,10 @@
 
   // ── Constants ──────────────────────────────────────────────────────────
 
-  var COLS = StackyGame.COLS;
-  var ROWS = StackyGame.ROWS;
+  var P = StackyPieces;
   var CANVAS_W = 300;
   var CANVAS_H = 600;
-  var CELL = CANVAS_W / COLS;  // 30px per cell
+  var CELL = CANVAS_W / P.COLS;  // 30px per cell
 
   /** Color palette — use Wonka candy colors from pieces.js, plus chocolate. */
   var PIECE_COLORS = StackyPieces.CANDY_COLORS.slice();
@@ -195,13 +194,13 @@
     // Grid lines
     ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 0.5;
-    for (var x = 1; x < COLS; x++) {
+    for (var x = 1; x < P.COLS; x++) {
       ctx.beginPath();
       ctx.moveTo(x * CELL, 0);
       ctx.lineTo(x * CELL, CANVAS_H);
       ctx.stroke();
     }
-    for (var y = 1; y < ROWS; y++) {
+    for (var y = 1; y < P.ROWS; y++) {
       ctx.beginPath();
       ctx.moveTo(0, y * CELL);
       ctx.lineTo(CANVAS_W, y * CELL);
@@ -209,8 +208,8 @@
     }
 
     // Locked blocks
-    for (var row = 0; row < ROWS; row++) {
-      for (var col = 0; col < COLS; col++) {
+    for (var row = 0; row < P.ROWS; row++) {
+      for (var col = 0; col < P.COLS; col++) {
         if (state.grid[row][col] !== 0) {
           drawCell(ctx, col, row, PIECE_COLORS[state.grid[row][col]], 1);
         }
