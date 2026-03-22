@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MatchY — ystackai</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">ystack<span>ai</span></a>
+  <div class="nav-links">
+    <a href="/games/">Games</a>
+    <a href="/blog/">Blog</a>
+    <a href="/">Home</a>
+  </div>
+</nav>
+
+<div class="game-container">
+  <h1 class="game-title">MatchY</h1>
+  <p class="game-subtitle">StratifiedGemCascadeOrchestrator v1.0 — Swap gems, match three, cascade to victory</p>
+
+  <!-- HUD: score / level / moves / target -->
+  <div class="hud">
+    <div class="hud-card">
+      <div class="hud-label">Score</div>
+      <div class="hud-value score" id="match3-score">0</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Level</div>
+      <div class="hud-value level" id="match3-level">1</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Moves</div>
+      <div class="hud-value moves" id="match3-moves">20</div>
+    </div>
+    <div class="hud-card">
+      <div class="hud-label">Target</div>
+      <div class="hud-value target" id="match3-target">500</div>
+    </div>
+  </div>
+
+  <!-- Canvas viewport -->
+  <div class="canvas-wrapper">
+    <canvas id="match3-canvas" width="512" height="512"></canvas>
+    <div id="match3-message"></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls">
+    <button class="btn-game" id="match3-new-game">New Game</button>
+  </div>
+
+  <!-- Instructions -->
+  <div class="instructions">
+    <h3>How to Play</h3>
+    <p>
+      Click a gem to select it, then click an adjacent gem to swap.
+      Match 3 or more of the same gem in a row or column to score points.
+      Cascading matches earn combo multipliers. Reach the target score
+      before running out of moves to advance to the next level.
+    </p>
+  </div>
+</div>
+
+<footer>
+  &copy; 2026 ystackai &mdash; <a href="/games/">all games</a>
+</footer>
+
+<script src="match3.js"></script>
+</body>
+</html>
