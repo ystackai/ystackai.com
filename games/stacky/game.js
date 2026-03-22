@@ -122,6 +122,7 @@ var StackyGame = (function () {
       state.alive = false;
       state.phase = 'gameOver';
       state.activePiece = null;
+      if (window.StackyAudio) window.StackyAudio.playGameOver();
       if (state.score > state.hi) {
         state.hi = state.score;
         saveHi(state.hi);
@@ -305,10 +306,12 @@ var StackyGame = (function () {
       }
     }
     state.activePiece = null;
+    if (window.StackyAudio) window.StackyAudio.playPieceLock();
     var cleared = clearLines(state);
     if (cleared > 0) {
       updateScore(state, cleared);
       state.comboCounter++;
+      if (window.StackyAudio) window.StackyAudio.playLineClear();
     } else {
       state.comboCounter = 0;
     }
@@ -342,6 +345,7 @@ var StackyGame = (function () {
       if (state.grid[0][x] !== 0) {
         state.alive = false;
         state.phase = 'gameOver';
+        if (window.StackyAudio) window.StackyAudio.playGameOver();
         if (state.score > state.hi) {
           state.hi = state.score;
           saveHi(state.hi);
@@ -718,6 +722,7 @@ class StackYGameLogicKernel {
 
     if (this._collides(this.activePiece.cells, this.activePiece.x, this.activePiece.y)) {
       this.phase = 'gameOver';
+      if (typeof window !== 'undefined' && window.StackyAudio) window.StackyAudio.playGameOver();
       this._updateGameState();
       return false;
     }
@@ -760,14 +765,17 @@ class StackYGameLogicKernel {
     for (const [ax, ay] of absolute) {
       if (ay < 0) {
         this.phase = 'gameOver';
+        if (typeof window !== 'undefined' && window.StackyAudio) window.StackyAudio.playGameOver();
         this._updateGameState();
         return;
       }
       this.grid[ay][ax] = this.activePiece.type;
     }
 
+    if (typeof window !== 'undefined' && window.StackyAudio) window.StackyAudio.playPieceLock();
     const cleared = this._clearLines();
     this._updateScore(cleared);
+    if (cleared > 0 && typeof window !== 'undefined' && window.StackyAudio) window.StackyAudio.playLineClear();
     this.activePiece = null;
     this._spawnPiece();
   }
@@ -1150,9 +1158,10 @@ var StackyMinimal = (function () {
       for (var c = 0; c < p.shape[r].length; c++)
         if (p.shape[r][c]) {
           var y = p.y + r;
-          if (y < 0) { minimalState.gameOver = true; return; }
+          if (y < 0) { minimalState.gameOver = true; if (window.StackyAudio) window.StackyAudio.playGameOver(); return; }
           minimalState.board[y][p.x + c] = p.color;
         }
+    if (window.StackyAudio) window.StackyAudio.playPieceLock();
     clearLines();
     spawn();
   }
@@ -1162,6 +1171,7 @@ var StackyMinimal = (function () {
     for (var r = 0; r < _ROWS; r++)
       if (minimalState.board[r].every(function (c) { return c; })) full.push(r);
     if (!full.length) return;
+    if (window.StackyAudio) window.StackyAudio.playLineClear();
     if (minimalState.onLineClear) minimalState.onLineClear(full);
     var pts = [0, 100, 300, 500, 800];
     minimalState.score += (pts[full.length] || 800) * minimalState.level;
@@ -1178,6 +1188,7 @@ var StackyMinimal = (function () {
     minimalState.nextPiece = randomPiece();
     if (collides(minimalState.piece.shape, minimalState.piece.x, minimalState.piece.y)) {
       minimalState.gameOver = true;
+      if (window.StackyAudio) window.StackyAudio.playGameOver();
     }
   }
 
