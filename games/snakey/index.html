@@ -725,7 +725,17 @@
     state.score     = 0;
     state.tronTrail = [];
     dirQueue.length = 0;
-    if (!tronMode) placeFood();
+    if (tronMode) {
+      // Seed the trail with initial body segments so they're visible and collidable
+      const now = Date.now();
+      for (let i = state.snake.length - 1; i >= 1; i--) {
+        state.tronTrail.push({ x: state.snake[i].x, y: state.snake[i].y, placedAt: now });
+      }
+      // Trim snake to just the head — trail handles the rest
+      state.snake = [state.snake[0]];
+    } else {
+      placeFood();
+    }
     updateScoreUI();
     syncGameState();
   }
@@ -822,9 +832,8 @@
 
       // All clear — commit the move
       state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
-      state.snake.unshift(newHead);
-      // Keep snake short (just head) — trail is the separate array
-      if (state.snake.length > 1) state.snake.pop();
+      // Keep snake as just the head — trail is the separate array
+      state.snake = [newHead];
 
       // Survival score — every tick you're alive earns a point
       state.score += 1;
@@ -1411,23 +1420,6 @@
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(head.x * CELL + 3, head.y * CELL + 3, CELL - 6, CELL - 6);
-
-      // Orange neon food
-      const fc  = { x: 13, y: 10 };
-      const fcx = fc.x * CELL + CELL / 2;
-      const fcy = fc.y * CELL + CELL / 2;
-      const fr  = CELL / 2 - 3;
-      ctx.shadowColor = '#ff6600';
-      ctx.shadowBlur = 15;
-      ctx.fillStyle = '#ff6600';
-      ctx.beginPath();
-      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath();
-      ctx.arc(fcx, fcy, fr * 0.4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.shadowBlur = 0;
     } else {
       demoSegs.forEach((seg, i) => {
         const t = dLen > 1 ? i / (dLen - 1) : 0;
