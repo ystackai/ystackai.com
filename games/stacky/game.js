@@ -20,6 +20,8 @@ var StackyGame = (function () {
   var CHOCOLATE_CELL = 8;            // grid value for chocolate blocks
   var CHOCOLATE_INTERVAL = 30000;    // ms between chocolate row rises
   var CHOCOLATE_GAPS = 2;            // random gaps per chocolate row
+  var CHOCOLATE_CLEAR_BONUS = 500;   // flat bonus per chocolate row cleared
+  var BOUNDARY_CHECK_INTERVAL = 500; // ms between top-boundary collision checks
 
   // localStorage key
   var LS_KEY = 'stacky_hi';
@@ -69,6 +71,7 @@ var StackyGame = (function () {
       // Chocolate river state
       lastChocolateTime: 0,
       chocolateRowsRisen: 0,
+      lastBoundaryCheck: 0,
     };
   }
 
@@ -150,6 +153,7 @@ var StackyGame = (function () {
     state.nextPiece = null;
     state.lastChocolateTime = 0;
     state.chocolateRowsRisen = 0;
+    state.lastBoundaryCheck = 0;
     spawnPiece(state);
     syncGameState(state);
   }
@@ -305,6 +309,10 @@ var StackyGame = (function () {
       }
     }
     state.activePiece = null;
+    // Play lock click sound
+    if (typeof StackyAudio !== 'undefined') {
+      StackyAudio.playLock();
+    }
     var cleared = clearLines(state);
     if (cleared > 0) {
       updateScore(state, cleared);
@@ -399,10 +407,10 @@ var StackyGame = (function () {
   /** Update score based on lines cleared. */
   function updateScore(state, lines) {
     var points = (LINE_SCORES[lines] || 0) * state.level;
-    // Chocolate river bonus: 2x points for each chocolate row cleared
+    // Chocolate river bonus: flat 500 per chocolate row cleared
     var chocoCleared = state._lastChocolateCleared || 0;
     if (chocoCleared > 0) {
-      points += (LINE_SCORES[chocoCleared] || chocoCleared * 100) * state.level;
+      points += chocoCleared * CHOCOLATE_CLEAR_BONUS;
     }
     state.score += points;
 
@@ -458,6 +466,25 @@ var StackyGame = (function () {
       // Rise 2 chocolate rows per interval ("bottom 2 rows fill")
       for (var cr = 0; cr < 2; cr++) {
         if (!riseChocolateRow(state)) return; // game over from chocolate
+      }
+    }
+
+    // Periodic boundary check: detect if any locked block has been pushed
+    // into the top row by rising chocolate, triggering game over.
+    if (state.lastBoundaryCheck === 0) {
+      state.lastBoundaryCheck = timestamp;
+    }
+    if (timestamp - state.lastBoundaryCheck >= BOUNDARY_CHECK_INTERVAL) {
+      state.lastBoundaryCheck = timestamp;
+      // If active piece now collides after grid shift, end the game
+      if (state.activePiece && checkCollision(state.grid, state.activePiece)) {
+        state.alive = false;
+        state.phase = 'gameOver';
+        if (state.score > state.hi) {
+          state.hi = state.score;
+          saveHi(state.hi);
+        }
+        return;
       }
     }
 

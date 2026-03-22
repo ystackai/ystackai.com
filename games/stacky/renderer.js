@@ -16,17 +16,10 @@
   var CANVAS_H = 600;
   var CELL = CANVAS_W / COLS;  // 30px per cell
 
-  /** Color palette for piece types (indexed by TYPES order + 1). */
-  var PIECE_COLORS = [
-    null,       // 0 = empty
-    '#00f0f0',  // 1 = I (cyan)
-    '#f0f000',  // 2 = O (yellow)
-    '#a000f0',  // 3 = T (purple)
-    '#00f000',  // 4 = S (green)
-    '#f00000',  // 5 = Z (red)
-    '#f0a000',  // 6 = L (orange)
-    '#0000f0',  // 7 = J (blue)
-  ];
+  /** Color palette — use Wonka candy colors from pieces.js, plus chocolate. */
+  var PIECE_COLORS = StackyPieces.CANDY_COLORS.slice();
+  // Index 8 = chocolate cell
+  PIECE_COLORS[StackyGame.CHOCOLATE_CELL] = StackyPieces.CHOCOLATE_COLOR;
 
   var GHOST_ALPHA = 0.2;
 
@@ -102,11 +95,18 @@
 
   // ── State transitions ─────────────────────────────────────────────────
 
+  // ── Audio tracking state ──────────────────────────────────────────────
+  var prevLines = 0;
+  var prevChocolateRows = 0;
+
   function startGame() {
+    StackyAudio.init();
     splashEl.classList.add('hidden');
     gameoverEl.classList.add('hidden');
     pausedEl.classList.add('hidden');
     StackyGame.start(state);
+    prevLines = 0;
+    prevChocolateRows = 0;
     updateScoreUI();
     startLoop();
   }
@@ -139,8 +139,19 @@
     // Run gravity tick
     StackyGame.tick(state, ts);
 
+    // Audio triggers: detect line clears, chocolate rises, piece locks
+    if (state.linesCleared > prevLines) {
+      StackyAudio.playLineClear();
+      prevLines = state.linesCleared;
+    }
+    if (state.chocolateRowsRisen > prevChocolateRows) {
+      StackyAudio.playChocolateRumble();
+      prevChocolateRows = state.chocolateRowsRisen;
+    }
+
     // Check phase transitions
     if (state.phase === 'gameOver') {
+      StackyAudio.playGameOver();
       onGameOver();
       draw();
       StackyGame.syncGameState(state);
