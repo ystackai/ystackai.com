@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnakeY Launch Dashboard — ystackai</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a12;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(15, 15, 19, 0.95);
+            border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+            backdrop-filter: blur(8px);
+        }
+        nav .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            text-decoration: none;
+        }
+        nav .logo span { color: #6366f1; }
+        nav .nav-links { display: flex; gap: 1.5rem; }
+        nav .nav-links a {
+            font-size: 0.875rem;
+            color: #94a3b8;
+            text-decoration: none;
+            padding: 0.4rem 0.9rem;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        nav .nav-links a:hover {
+            color: #6366f1;
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .dashboard-header {
+            text-align: center;
+            padding: 2.5rem 2rem 1.5rem;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .dashboard-header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a5b4fc, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.35rem;
+        }
+        .dashboard-header p {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-indicator.pre-launch {
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            color: #fbbf24;
+        }
+        .status-indicator.live {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #22c55e;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        .pre-launch .status-dot { background: #fbbf24; }
+        .live .status-dot { background: #22c55e; }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .metric-card {
+            background: rgba(30, 30, 46, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 14px;
+            padding: 1.75rem;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+        .metric-card:hover {
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+        .metric-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #64748b;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            margin-bottom: 0.35rem;
+        }
+        .metric-value.purple { color: #a5b4fc; }
+        .metric-value.pink { color: #f472b6; }
+        .metric-value.green { color: #34d399; }
+        .metric-value.amber { color: #fbbf24; }
+        .metric-sub {
+            font-size: 0.75rem;
+            color: #475569;
+        }
+
+        .activity-section {
+            max-width: 960px;
+            margin: 0 auto 3rem;
+            padding: 0 2rem;
+        }
+        .activity-section h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 1rem;
+        }
+        .activity-feed {
+            background: rgba(30, 30, 46, 0.6);
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 14px;
+            padding: 1.25rem;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            font-size: 0.8rem;
+        }
+        .activity-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            display: flex;
+            gap: 1rem;
+            align-items: baseline;
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-time {
+            color: #475569;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            min-width: 70px;
+        }
+        .activity-msg { color: #94a3b8; }
+        .activity-msg .highlight { color: #a5b4fc; font-weight: 600; }
+
+        .countdown-section {
+            text-align: center;
+            padding: 2rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+        .countdown-section h2 {
+            font-size: 1rem;
+            color: #64748b;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-weight: 700;
+        }
+        .countdown-display {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .cd-unit { text-align: center; }
+        .cd-number {
+            display: block;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #fbbf24;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+        }
+        .cd-label {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #475569;
+            font-weight: 600;
+        }
+        .cd-sep {
+            font-size: 2rem;
+            font-weight: 900;
+            color: rgba(251, 191, 36, 0.3);
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.2; }
+        }
+
+        .live-banner {
+            display: none;
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(99, 102, 241, 0.1));
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            max-width: 960px;
+            margin: 2rem auto 0;
+            padding: 0 2rem;
+        }
+        .live-banner.visible { display: block; }
+        .live-banner p {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #22c55e;
+            padding: 1.25rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-size: 0.75rem;
+            color: #334155;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 640px) {
+            nav { padding: 1rem 1.25rem; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .metric-value { font-size: 1.8rem; }
+            .cd-number { font-size: 1.6rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" class="logo">ystack<span>ai</span></a>
+    <div class="nav-links">
+        <a href="/games/snakey/">Play SnakeY</a>
+        <a href="/games/">All Games</a>
+    </div>
+</nav>
+
+<div class="dashboard-header">
+    <h1>SnakeY Launch Dashboard</h1>
+    <p>Day 1 — Post-launch validation metrics</p>
+    <div class="status-indicator pre-launch" id="status-badge">
+        <span class="status-dot"></span>
+        <span id="status-text">Pre-Launch</span>
+    </div>
+</div>
+
+<div class="countdown-section" id="countdown-section">
+    <h2>Time to Launch</h2>
+    <div class="countdown-display" id="countdown-display">
+        <div class="cd-unit">
+            <span class="cd-number" id="cd-h">--</span>
+            <span class="cd-label">Hours</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+            <span class="cd-number" id="cd-m">--</span>
+            <span class="cd-label">Mins</span>
+        </div>
+        <span class="cd-sep">:</span>
+        <div class="cd-unit">
+            <span class="cd-number" id="cd-s">--</span>
+            <span class="cd-label">Secs</span>
+        </div>
+    </div>
+</div>
+
+<div class="live-banner" id="live-banner">
+    <p>SnakeY is LIVE</p>
+</div>
+
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-label">Current Players</div>
+        <div class="metric-value green" id="metric-players">--</div>
+        <div class="metric-sub">active sessions</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">All-Time High Score</div>
+        <div class="metric-value pink" id="metric-highscore">--</div>
+        <div class="metric-sub">top player</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Total Games Played</div>
+        <div class="metric-value purple" id="metric-games">--</div>
+        <div class="metric-sub">since launch</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-label">Total Time Played</div>
+        <div class="metric-value amber" id="metric-time">--</div>
+        <div class="metric-sub">aggregate player time</div>
+    </div>
+</div>
+
+<div class="activity-section">
+    <h2>Activity Feed</h2>
+    <div class="activity-feed" id="activity-feed">
+        <div style="color: #475569; text-align: center; padding: 2rem;">Waiting for launch data...</div>
+    </div>
+</div>
+
+<footer>
+    &copy; 2026 ystackai &mdash; Day 1 Launch Dashboard &mdash; Internal Tool
+</footer>
+
+<script>
+(function() {
+    'use strict';
+
+    // ── Launch time: March 20, 2026 at 9:00 PM Pacific ──────────────────
+    const LAUNCH_TIME = new Date('2026-03-20T21:00:00-07:00').getTime();
+    // Data starts flowing at 9:01 PM
+    const DATA_START  = new Date('2026-03-20T21:01:00-07:00').getTime();
+
+    // ── DOM refs ─────────────────────────────────────────────────────────
+    var statusBadge   = document.getElementById('status-badge');
+    var statusText    = document.getElementById('status-text');
+    var countdownSec  = document.getElementById('countdown-section');
+    var liveBanner    = document.getElementById('live-banner');
+    var metricPlayers = document.getElementById('metric-players');
+    var metricHigh    = document.getElementById('metric-highscore');
+    var metricGames   = document.getElementById('metric-games');
+    var metricTime    = document.getElementById('metric-time');
+    var activityFeed  = document.getElementById('activity-feed');
+
+    // ── State ────────────────────────────────────────────────────────────
+    var isLive    = false;
+    var dataReady = false;
+    var activities = [];
+
+    // ── Countdown ────────────────────────────────────────────────────────
+    function updateCountdown() {
+        var now  = Date.now();
+        var diff = LAUNCH_TIME - now;
+
+        if (diff <= 0) {
+            isLive = true;
+            countdownSec.style.display = 'none';
+            liveBanner.classList.add('visible');
+            statusBadge.classList.remove('pre-launch');
+            statusBadge.classList.add('live');
+            statusText.textContent = 'LIVE';
+            return;
+        }
+
+        var h = Math.floor(diff / 3600000);
+        var m = Math.floor((diff % 3600000) / 60000);
+        var s = Math.floor((diff % 60000) / 1000);
+        document.getElementById('cd-h').textContent = String(h).padStart(2, '0');
+        document.getElementById('cd-m').textContent = String(m).padStart(2, '0');
+        document.getElementById('cd-s').textContent = String(s).padStart(2, '0');
+    }
+
+    // ── Metrics fetching ─────────────────────────────────────────────────
+    // Tries /api/dashboard/snakey for real metrics.
+    // Falls back to localStorage aggregation if the API isn't available.
+    function fetchMetrics() {
+        if (!isLive) return;
+
+        fetch('/api/dashboard/snakey')
+            .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+            .then(function(data) {
+                renderMetrics(data);
+            })
+            .catch(function() {
+                // Fallback: build metrics from localStorage (single-client view)
+                renderLocalMetrics();
+            });
+    }
+
+    function renderMetrics(data) {
+        metricPlayers.textContent = String(data.currentPlayers || 0);
+        metricHigh.textContent    = String(data.highScore || 0);
+        metricGames.textContent   = String(data.totalGames || 0);
+        metricTime.textContent    = formatDuration(data.totalTimeSec || 0);
+
+        if (data.activities && data.activities.length) {
+            renderActivities(data.activities);
+        }
+    }
+
+    function renderLocalMetrics() {
+        // Read from localStorage — what we can see from this browser
+        var hi    = 0;
+        var games = 0;
+        var totalSec = 0;
+        try {
+            hi       = parseInt(localStorage.getItem('snakey_hi') || '0', 10) || 0;
+            games    = parseInt(localStorage.getItem('snakey_games') || '0', 10) || 0;
+            totalSec = parseInt(localStorage.getItem('snakey_total_sec') || '0', 10) || 0;
+        } catch(e) {}
+
+        metricPlayers.textContent = '1';
+        metricHigh.textContent    = String(hi);
+        metricGames.textContent   = String(games);
+        metricTime.textContent    = formatDuration(totalSec);
+
+        // Check if there's real activity
+        if (hi > 0 && activities.length === 0) {
+            addActivity('Local high score detected: ' + hi);
+        }
+    }
+
+    function formatDuration(totalSec) {
+        if (totalSec < 60) return totalSec + 's';
+        if (totalSec < 3600) return Math.floor(totalSec / 60) + 'm ' + (totalSec % 60) + 's';
+        var h = Math.floor(totalSec / 3600);
+        var m = Math.floor((totalSec % 3600) / 60);
+        return h + 'h ' + m + 'm';
+    }
+
+    // ── Activity feed ────────────────────────────────────────────────────
+    function addActivity(msg) {
+        var now = new Date();
+        var time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        activities.unshift({ time: time, msg: msg });
+        if (activities.length > 50) activities.pop();
+        renderActivityFeed();
+    }
+
+    function renderActivities(items) {
+        activities = items.map(function(item) {
+            var t = new Date(item.timestamp || Date.now());
+            return {
+                time: t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+                msg: item.message || item.msg || ''
+            };
+        });
+        renderActivityFeed();
+    }
+
+    function renderActivityFeed() {
+        if (activities.length === 0) {
+            activityFeed.innerHTML = '<div style="color: #475569; text-align: center; padding: 2rem;">No activity yet</div>';
+            return;
+        }
+        activityFeed.innerHTML = activities.map(function(a) {
+            return '<div class="activity-item">' +
+                '<span class="activity-time">' + a.time + '</span>' +
+                '<span class="activity-msg">' + escapeHtml(a.msg) + '</span>' +
+                '</div>';
+        }).join('');
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    // ── Launch detection & initial activity ──────────────────────────────
+    function checkLaunchState() {
+        updateCountdown();
+        if (isLive && !dataReady && Date.now() >= DATA_START) {
+            dataReady = true;
+            addActivity('Dashboard online — data collection started');
+            addActivity('SnakeY launched at 9:00 PM Pacific');
+        }
+    }
+
+    // ── Main loop ────────────────────────────────────────────────────────
+    // Check countdown every second
+    setInterval(checkLaunchState, 1000);
+    checkLaunchState();
+
+    // Fetch metrics every 10 seconds once live
+    setInterval(function() {
+        if (isLive && dataReady) fetchMetrics();
+    }, 10000);
+
+    // Initial fetch if already past launch
+    if (Date.now() >= DATA_START) {
+        isLive    = true;
+        dataReady = true;
+        checkLaunchState();
+        fetchMetrics();
+    }
+})();
+</script>
+</body>
+</html>

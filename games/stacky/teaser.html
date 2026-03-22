@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StackY × Willy Wonka — Coming Soon | ystack.ai</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: #1a0a2e;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .golden-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212, 175, 55, 0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 50% 100%, rgba(138, 43, 226, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .ticket-float {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.08;
+            animation: float 20s infinite linear;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100vh) rotate(360deg); }
+        }
+
+        .content {
+            text-align: center;
+            z-index: 1;
+            max-width: 700px;
+            padding: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #d4af37, #f5d060);
+            color: #1a0a2e;
+            font-weight: 600;
+            font-size: 0.75rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            padding: 0.4rem 1.2rem;
+            border-radius: 100px;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #d4af37 0%, #f5d060 40%, #fff 50%, #f5d060 60%, #d4af37 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% center; }
+            50% { background-position: 200% center; }
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+        }
+
+        .subtitle em {
+            color: #d4af37;
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .golden-ticket {
+            display: inline-block;
+            background: linear-gradient(135deg, #d4af37, #b8860b);
+            color: #1a0a2e;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            border: 2px solid #f5d060;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3), 0 4px 15px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .golden-ticket:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.5), 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 2rem;
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.3);
+            z-index: 1;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="golden-bg"></div>
+
+    <div class="ticket-float" style="left: 10%; animation-delay: 0s;">🎫</div>
+    <div class="ticket-float" style="left: 30%; animation-delay: -5s;">🎫</div>
+    <div class="ticket-float" style="left: 55%; animation-delay: -10s;">🎫</div>
+    <div class="ticket-float" style="left: 75%; animation-delay: -3s;">🎫</div>
+    <div class="ticket-float" style="left: 90%; animation-delay: -15s;">🎫</div>
+
+    <div class="content">
+        <div class="badge">Game 002 — Coming Soon</div>
+        <h1>StackY × Willy Wonka</h1>
+        <p class="subtitle">
+            Every four-line clear is a <em>Golden Ticket</em>.<br>
+            Clear four lines and the factory opens.<br>
+            What's inside changes every time you play.
+        </p>
+        <a href="/games/snakey/" class="golden-ticket">🐍 Play SnakeY Now — Game 001 is Live</a>
+    </div>
+
+    <div class="footer">
+        <a href="/">ystack.ai</a> — the remix engine
+    </div>
+
+    <link rel="stylesheet" href="/public/wonka/golden-ticket.css">
+    <script src="/public/wonka/golden-ticket.js"></script>
+    <script>
+        // Demo: click the golden ticket button to preview the 4-line clear explosion
+        document.querySelector('.golden-ticket').addEventListener('click', function (e) {
+            e.preventDefault();
+            document.dispatchEvent(new CustomEvent('golden-ticket-clear'));
+        });
+    </script>
+</body>
+</html>

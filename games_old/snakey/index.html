@@ -403,7 +403,6 @@
   &copy; 2026 ystackai &mdash; browser games for agents and humans
 </footer>
 
-<script src="audio.js"></script>
 <script>
 // ═══════════════════════════════════════════════════════════════════════════
 //  SnakeY — production-quality single-file snake game
@@ -441,8 +440,6 @@
   const LS_KEY = 'snakey_hi';
   /** Minimum swipe distance (px) to register as a directional input. */
   const SWIPE_MIN = 20;
-  /** How long (ms) a Tron trail segment persists as a wall before fading out. */
-  const TRAIL_LIFETIME_MS = 7000;
 
   /** Direction string → {x,y} delta vector (y+ = downward in canvas space). */
   const DELTA = Object.freeze({
@@ -521,7 +518,7 @@
     if (tronMode) {
       splashEmojiEl.textContent = '\u26A1';
       splashTitleEl.textContent = 'Light Cycle';
-      splashSubEl.innerHTML = 'Ride the grid. Your trail persists as a wall.<br>It fades after a few seconds — but hit it and you derez.';
+      splashSubEl.innerHTML = 'Ride the grid. Leave a neon trail.<br>Hit your trail or the wall and you derez.';
       heroTitleEl.textContent = 'Light Cycle \u26A1';
       heroSubEl.textContent = 'Survive the grid. Don\'t hit your own trail.';
       if (scoreLabelEl) scoreLabelEl.textContent = 'Survived';
@@ -565,7 +562,6 @@
    *   food:  Cell,
    *   score: number,
    *   hi:    number,
-   *   tronTrail: Array<{x: number, y: number, placedAt: number}>,
    * }}
    */
   const state = {
@@ -575,7 +571,6 @@
     food:  { x: 0, y: 0 },
     score: 0,
     hi:    loadHi(),
-    tronTrail: [],
   };
 
   /**
@@ -592,6 +587,33 @@
   let accumulated = 0;
 
   // ── Exposed game state for automated testing ────────────────────────────
+
+  /**
+   * window.gameState — a reactive projection of internal state, updated
+   * every frame and on every state transition. Required by the Schneider
+   * Automated Test Protocol for external test harness introspection.
+   */
+  function syncGameState() {
+    window.gameState = {
+      score:    state.score,
+      hi:       state.hi,
+      alive:    state.phase === 'playing' || state.phase === 'paused',
+      gameOver: state.phase === 'dead',
+      phase:    state.phase,
+      level:    Math.floor(state.score / 5) + 1,
+      player:   state.snake.length > 0
+        ? { x: state.snake[0].x, y: state.snake[0].y }
+        : { x: 0, y: 0 },
+      snakeLength: state.snake.length,
+      segments:    state.snake.map(function (s) { return { x: s.x, y: s.y }; }),
+      direction:   state.dir,
+      food:        { x: state.food.x, y: state.food.y },
+      gridCols:    COLS,
+      gridRows:    ROWS,
+      tickMs:      TICK_MS,
+    };
+  }
+  syncGameState();
 
   // ── UI element references ────────────────────────────────────────────────
 
@@ -627,13 +649,6 @@
     gridCols: COLS,
     gridRows: ROWS,
     hi: state.hi,
-    highScore: state.hi,
-    snakeLength: 0,
-    tronMode: tronMode,
-    mode: 'classic',
-    tronTrail: [],
-    trailLength: 0,
-    trailLifetimeMs: TRAIL_LIFETIME_MS,
     dirQueueLength: 0,
   };
 
@@ -644,22 +659,14 @@
     window.gameState.alive          = state.phase === 'playing' || state.phase === 'paused';
     window.gameState.gameOver       = state.phase === 'dead';
     window.gameState.phase          = state.phase;
-    window.gameState.level          = 1;
+    window.gameState.level          = 1; // SnakeY has no levels — constant 1
     window.gameState.player         = { x: head.x, y: head.y };
     window.gameState.snake          = state.snake.map(s => ({ x: s.x, y: s.y }));
     window.gameState.food           = { x: state.food.x, y: state.food.y };
     window.gameState.dir            = state.dir;
     window.gameState.hi             = state.hi;
-    window.gameState.highScore      = state.hi;
-    window.gameState.snakeLength    = state.snake.length;
-    window.gameState.tronMode       = tronMode;
-    window.gameState.mode           = tronMode ? 'lightcycle' : 'classic';
-    window.gameState.tronTrail      = state.tronTrail.map(t => ({ x: t.x, y: t.y, placedAt: t.placedAt }));
-    window.gameState.trailLength    = tronMode ? state.tronTrail.length : 0;
-    window.gameState.trailLifetimeMs = TRAIL_LIFETIME_MS;
     window.gameState.dirQueueLength = dirQueue.length;
   }
-  syncGameState();
 
   // ── Direction queue ──────────────────────────────────────────────────────
 
@@ -724,19 +731,8 @@
     ];
     state.dir       = 'ArrowRight';
     state.score     = 0;
-    state.tronTrail = [];
     dirQueue.length = 0;
-    if (tronMode) {
-      // Seed the trail with initial body segments so they're visible and collidable
-      const now = Date.now();
-      for (let i = state.snake.length - 1; i >= 1; i--) {
-        state.tronTrail.push({ x: state.snake[i].x, y: state.snake[i].y, placedAt: now });
-      }
-      // Trim snake to just the head — trail handles the rest
-      state.snake = [state.snake[0]];
-    } else {
-      placeFood();
-    }
+    if (!tronMode) placeFood();
     updateScoreUI();
     syncGameState();
   }
@@ -808,33 +804,25 @@
     const head    = state.snake[0];
     const newHead = { x: head.x + dx, y: head.y + dy };
 
+    // 3. Prepend new head
+    state.snake.unshift(newHead);
+
     if (tronMode) {
-      // ── Light Cycle mode: persistent trail wall, survival scoring ──
+      // ── Light Cycle mode: no food, trail always grows, survival scoring ──
 
-      // Expire trail segments older than TRAIL_LIFETIME_MS (before collision check)
-      const now = Date.now();
-      while (state.tronTrail.length > 0 && now - state.tronTrail[0].placedAt > TRAIL_LIFETIME_MS) {
-        state.tronTrail.shift();
-      }
-
-      // Wall collision — check BEFORE moving
+      // Wall collision
       if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
         die();
         return;
       }
 
-      // Trail collision — check BEFORE moving; hit your own persistent trail and you derez
-      for (let i = 0; i < state.tronTrail.length; i++) {
-        if (state.tronTrail[i].x === newHead.x && state.tronTrail[i].y === newHead.y) {
+      // Trail collision — hit your own light trail and you derez
+      for (let i = 1; i < state.snake.length; i++) {
+        if (state.snake[i].x === newHead.x && state.snake[i].y === newHead.y) {
           die();
           return;
         }
       }
-
-      // All clear — commit the move
-      state.tronTrail.push({ x: head.x, y: head.y, placedAt: now });
-      // Keep snake as just the head — trail is the separate array
-      state.snake = [newHead];
 
       // Survival score — every tick you're alive earns a point
       state.score += 1;
@@ -845,9 +833,6 @@
       updateScoreUI();
     } else {
       // ── Classic Snake mode ──
-
-      // 3. Prepend new head
-      state.snake.unshift(newHead);
 
       // 4. Food check
       const ateFood = newHead.x === state.food.x && newHead.y === state.food.y;
@@ -871,7 +856,6 @@
 
       // 8. Food effects
       if (ateFood) {
-        SnakeYAudio.playEat();
         state.score += 1;
         if (state.score > state.hi) {
           state.hi = state.score;
@@ -891,9 +875,6 @@
   /** Transition to 'dead' phase, persist hi-score, show game-over overlay. */
   function die() {
     state.phase = 'dead';
-    SnakeYAudio.stopDrone();
-    SnakeYAudio.playDeath();
-    trackGameEnd();
     // Update game-over overlay for mode
     if (tronMode) {
       goEmojiEl.textContent = '\u26A1';
@@ -929,11 +910,6 @@
     initGame();
     state.phase = 'playing';
     syncGameState();
-    trackGameStart();
-    // Audio
-    SnakeYAudio.init();
-    SnakeYAudio.playStart();
-    if (tronMode) SnakeYAudio.startDrone();
     startLoop();
   }
 
@@ -1088,25 +1064,21 @@
     const size = CELL - pad * 2;
 
     if (tronMode) {
-      // Draw persistent trail segments with age-based fade (cyan → dim → gone)
-      const trail = state.tronTrail;
-      for (let i = 0; i < trail.length; i++) {
-        const seg = trail[i];
-        const age = Date.now() - seg.placedAt;
-        const life = Math.max(0, 1 - age / TRAIL_LIFETIME_MS); // 1=fresh, 0=expired
-        if (life <= 0) continue;
-
+      // Draw trail segments (tail to body) with fading cyan glow
+      for (let i = len - 1; i >= 1; i--) {
+        const seg = snake[i];
+        const fade = 1 - (i / len) * 0.6;
         const px = seg.x * CELL + pad;
         const py = seg.y * CELL + pad;
 
-        // Outer glow — fades with age
+        // Trail glow
         ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 8 * life;
-        ctx.fillStyle = `rgba(0, 95, 111, ${life * 0.85})`;
+        ctx.shadowBlur = 6 * fade;
+        ctx.fillStyle = `rgba(0, 95, 111, ${fade * 0.8})`;
         ctx.fillRect(px, py, size, size);
 
-        // Inner bright core — fades faster
-        ctx.fillStyle = `rgba(0, 255, 255, ${life * life * 0.6})`;
+        // Bright trail core line
+        ctx.fillStyle = `rgba(0, 255, 255, ${fade * 0.5})`;
         ctx.fillRect(px + 3, py + 3, size - 6, size - 6);
         ctx.shadowBlur = 0;
       }
@@ -1359,6 +1331,36 @@
 
   // ── Expose window.gameState for automated testing / dashboard ────────────
 
+  window.gameState = {
+    score: 0,
+    alive: true,
+    gameOver: false,
+    level: 1,
+    player: { x: 10, y: 10 },
+    highScore: state.hi,
+    phase: state.phase,
+    snakeLength: 3,
+    tronMode: tronMode,
+    mode: 'classic',
+    trailLength: 0,
+  };
+
+  /** Sync window.gameState with internal state — called every tick & on death. */
+  function syncGameState() {
+    const head = state.snake.length > 0 ? state.snake[0] : { x: 0, y: 0 };
+    window.gameState.score       = state.score;
+    window.gameState.alive       = state.phase === 'playing' || state.phase === 'paused';
+    window.gameState.gameOver    = state.phase === 'dead';
+    window.gameState.level       = tronMode ? 1 : 1 + Math.floor(state.score / 10);
+    window.gameState.player      = { x: head.x, y: head.y };
+    window.gameState.highScore   = state.hi;
+    window.gameState.phase       = state.phase;
+    window.gameState.snakeLength = state.snake.length;
+    window.gameState.tronMode    = tronMode;
+    window.gameState.mode        = tronMode ? 'lightcycle' : 'classic';
+    window.gameState.trailLength = tronMode ? state.snake.length - 1 : 0;
+  }
+
   // ── Local metrics for launch dashboard ──────────────────────────────────
   let gameStartedAt = null;
 
@@ -1379,11 +1381,13 @@
     }
   }
 
-  // Metrics tracking is integrated directly into startGame() and die().
-
-  // Initialize gameState on load so it's never empty
-  initGame();
-  syncGameState();
+  // Patch tick, die, and startGame to auto-sync gameState + track metrics
+  const _origTick = tick;
+  tick = function() { _origTick(); syncGameState(); };
+  const _origDie = die;
+  die = function() { _origDie(); trackGameEnd(); syncGameState(); };
+  const _origStartGame = startGame;
+  startGame = function() { _origStartGame(); trackGameStart(); syncGameState(); };
 
   // ── Initial decorative draw ──────────────────────────────────────────────
 
@@ -1428,6 +1432,23 @@
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(head.x * CELL + 3, head.y * CELL + 3, CELL - 6, CELL - 6);
+
+      // Orange neon food
+      const fc  = { x: 13, y: 10 };
+      const fcx = fc.x * CELL + CELL / 2;
+      const fcy = fc.y * CELL + CELL / 2;
+      const fr  = CELL / 2 - 3;
+      ctx.shadowColor = '#ff6600';
+      ctx.shadowBlur = 15;
+      ctx.fillStyle = '#ff6600';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(fcx, fcy, fr * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
     } else {
       demoSegs.forEach((seg, i) => {
         const t = dLen > 1 ? i / (dLen - 1) : 0;

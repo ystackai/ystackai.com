@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StackY — ystackai</title>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e2e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Nav ───────────────────────────────────────────────────────────── */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(15, 15, 19, 0.95);
+      border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(8px);
+    }
+    nav .logo {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    nav .logo span { color: #6366f1; }
+    nav .home-link {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      text-decoration: none;
+      padding: 0.4rem 0.9rem;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 6px;
+      transition: all 0.15s ease;
+    }
+    nav .home-link:hover {
+      color: #6366f1;
+      border-color: #6366f1;
+      background: rgba(99, 102, 241, 0.08);
+    }
+
+    /* ── Header band ───────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(
+        135deg,
+        rgba(99, 102, 241, 0.15) 0%,
+        rgba(192, 132, 252, 0.08) 50%,
+        rgba(99, 102, 241, 0.05) 100%
+      );
+      border-bottom: 1px solid rgba(99, 102, 241, 0.12);
+      padding: 1.75rem 2rem 1.5rem;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      background: linear-gradient(135deg, #a5b4fc, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.35rem;
+    }
+    .hero p {
+      font-size: 0.875rem;
+      color: #64748b;
+    }
+
+    /* ── Main layout ───────────────────────────────────────────────────── */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 3rem;
+      gap: 1.25rem;
+    }
+
+    /* ── Score bar ─────────────────────────────────────────────────────── */
+    .score-bar {
+      display: flex;
+      gap: 2.5rem;
+    }
+    .score-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+    }
+    .score-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .score-value {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #a5b4fc;
+      font-variant-numeric: tabular-nums;
+      min-width: 3ch;
+      text-align: center;
+    }
+    .score-value.high { color: #c084fc; }
+
+    /* ── Game area ────────────────────────────────────────────────────── */
+    .game-area {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    /* ── Side panels (hold, next) ─────────────────────────────────────── */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .panel-box {
+      background: rgba(30, 30, 46, 0.5);
+      border: 1px solid rgba(99, 102, 241, 0.15);
+      border-radius: 8px;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    .panel-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #64748b;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .panel-canvas {
+      display: block;
+      margin: 0 auto;
+    }
+
+    /* ── Canvas wrapper ────────────────────────────────────────────────── */
+    .canvas-wrapper {
+      position: relative;
+      width: 300px;
+      height: 600px;
+      border: 2px solid rgba(99, 102, 241, 0.35);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(99, 102, 241, 0.15),
+        0 20px 60px rgba(0, 0, 0, 0.6),
+        0 0 80px rgba(99, 102, 241, 0.08);
+      transform-origin: top center;
+    }
+
+    canvas#game-canvas {
+      display: block;
+      width: 300px;
+      height: 600px;
+    }
+
+    /* ── Overlay panels ────────────────────────────────────────────────── */
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 10, 16, 0.88);
+      backdrop-filter: blur(4px);
+      gap: 1rem;
+      text-align: center;
+      padding: 2rem;
+    }
+    .overlay.hidden { display: none; }
+
+    .overlay-title {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #a5b4fc, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .overlay-sub {
+      font-size: 0.875rem;
+      color: #94a3b8;
+      line-height: 1.7;
+    }
+    .overlay-hint {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.25rem;
+    }
+    .overlay-score-block {
+      display: flex;
+      gap: 2rem;
+      margin: 0.25rem 0;
+    }
+    .overlay-score-item { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; }
+    .overlay-score-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #64748b;
+      font-weight: 700;
+    }
+    .overlay-score-val {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #a5b4fc;
+      font-variant-numeric: tabular-nums;
+    }
+    .overlay-score-val.hi { color: #c084fc; }
+
+    .btn {
+      margin-top: 0.5rem;
+      padding: 0.65rem 2rem;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      background: linear-gradient(135deg, #6366f1, #764ba2);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.15s ease, transform 0.1s ease;
+      letter-spacing: 0.01em;
+    }
+    .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn:active { opacity: 1; transform: translateY(0); }
+
+    /* ── Controls reference ────────────────────────────────────────────── */
+    .controls {
+      font-size: 0.8rem;
+      color: #64748b;
+      text-align: center;
+      line-height: 2;
+    }
+    .controls kbd {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      background: #1e1e2e;
+      border: 1px solid #334155;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      color: #94a3b8;
+    }
+
+    .mobile-note {
+      display: none;
+      font-size: 0.8rem;
+      color: #a5b4fc;
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 6px;
+      padding: 0.6rem 1rem;
+      text-align: center;
+      max-width: 360px;
+    }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.75rem;
+      color: #334155;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    @media (max-width: 520px) {
+      .mobile-note { display: block; }
+      .controls { display: none; }
+      .game-area { flex-direction: column; align-items: center; }
+      .side-panel { flex-direction: row; }
+      .canvas-wrapper { width: 250px; height: 500px; }
+      canvas#game-canvas { width: 250px; height: 500px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation ──────────────────────────────────────────────────────── -->
+<nav>
+  <a href="/" class="logo">yst<span>ackai</span></a>
+  <a href="/games/" class="home-link">&larr; Games</a>
+</nav>
+
+<!-- ── Header band ─────────────────────────────────────────────────────── -->
+<div class="hero">
+  <h1>StackY</h1>
+  <p>Classic block stacking. SRS rotation. Progressive speed.</p>
+</div>
+
+<!-- ── Main ────────────────────────────────────────────────────────────── -->
+<main>
+
+  <!-- Score bar -->
+  <div class="score-bar">
+    <div class="score-item">
+      <span class="score-label">Score</span>
+      <span class="score-value" id="score-display">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Best</span>
+      <span class="score-value high" id="hi-display">0</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Level</span>
+      <span class="score-value" id="level-display" style="color:#34d399;">1</span>
+    </div>
+    <div class="score-item">
+      <span class="score-label">Lines</span>
+      <span class="score-value" id="lines-display" style="color:#fbbf24;">0</span>
+    </div>
+  </div>
+
+  <!-- Game area: hold panel + board + next panel -->
+  <div class="game-area">
+
+    <!-- Hold panel -->
+    <div class="side-panel">
+      <div class="panel-box">
+        <div class="panel-label">Hold</div>
+        <canvas class="panel-canvas" id="hold-canvas" width="120" height="80"></canvas>
+      </div>
+    </div>
+
+    <!-- Canvas + overlays -->
+    <div class="canvas-wrapper" id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+
+      <!-- Splash overlay -->
+      <div class="overlay" id="overlay-splash">
+        <div class="overlay-title">StackY</div>
+        <div class="overlay-sub">
+          Stack tetrominoes. Clear lines.<br>
+          SRS rotation with wall kicks.<br>
+          Speed increases every 10 lines.
+        </div>
+        <div class="overlay-hint">Press Space or tap to play</div>
+        <button class="btn" id="btn-start">Start Game</button>
+      </div>
+
+      <!-- Paused overlay -->
+      <div class="overlay hidden" id="overlay-paused">
+        <div class="overlay-title">Paused</div>
+        <div class="overlay-hint">Press Esc or P to resume</div>
+      </div>
+
+      <!-- Game-over overlay -->
+      <div class="overlay hidden" id="overlay-gameover">
+        <div class="overlay-title">Game Over</div>
+        <div class="overlay-score-block">
+          <div class="overlay-score-item">
+            <span class="overlay-score-label">Score</span>
+            <span class="overlay-score-val" id="go-score">0</span>
+          </div>
+          <div class="overlay-score-item">
+            <span class="overlay-score-label">Best</span>
+            <span class="overlay-score-val hi" id="go-hi">0</span>
+          </div>
+        </div>
+        <div class="overlay-hint">Press Space or tap to restart</div>
+        <button class="btn" id="btn-restart">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Next panel -->
+    <div class="side-panel">
+      <div class="panel-box">
+        <div class="panel-label">Next</div>
+        <canvas class="panel-canvas" id="next-canvas" width="120" height="80"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Keyboard hint (desktop) -->
+  <div class="controls">
+    Move: <kbd>&larr;</kbd><kbd>&rarr;</kbd> or <kbd>A</kbd><kbd>D</kbd> &nbsp;
+    Rotate: <kbd>&uarr;</kbd> / <kbd>Z</kbd> &nbsp;
+    Soft drop: <kbd>&darr;</kbd> &nbsp;
+    Hard drop: <kbd>Space</kbd> &nbsp;
+    Hold: <kbd>C</kbd> &nbsp;
+    Pause: <kbd>Esc</kbd>
+  </div>
+
+  <!-- Touch hint (mobile) -->
+  <div class="mobile-note">
+    Swipe left/right to move, tap to rotate, swipe down to drop, swipe up to hold
+  </div>
+
+</main>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer>
+  &copy; 2026 ystackai &mdash; browser games for agents and humans
+</footer>
+
+<script src="pieces.js?v=1774148840"></script>
+<script src="game.js?v=1774148840"></script>
+<script src="input.js?v=1774148840"></script>
+<script src="audio.js?v=1774148840"></script>
+<script src="renderer.js?v=1774148840"></script>
+</body>
+</html>
