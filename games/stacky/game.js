@@ -10,8 +10,6 @@
 
 var StackyGame = (function () {
   var P = StackyPieces;
-  var COLS = P.COLS;
-  var ROWS = P.ROWS;
 
   // Scoring table (Guideline)
   var LINE_SCORES = { 1: 100, 2: 300, 3: 500, 4: 800 };
@@ -77,8 +75,8 @@ var StackyGame = (function () {
 
   function createEmptyGrid() {
     var grid = [];
-    for (var y = 0; y < ROWS; y++) {
-      grid.push(new Array(COLS).fill(0));
+    for (var y = 0; y < P.ROWS; y++) {
+      grid.push(new Array(P.COLS).fill(0));
     }
     return grid;
   }
@@ -91,8 +89,8 @@ var StackyGame = (function () {
     var cells = P.getCells(piece);
     for (var i = 0; i < cells.length; i++) {
       var c = cells[i];
-      if (c.x < 0 || c.x >= COLS) return true;
-      if (c.y < 0 || c.y >= ROWS) return true;
+      if (c.x < 0 || c.x >= P.COLS) return true;
+      if (c.y < 0 || c.y >= P.ROWS) return true;
       if (grid[c.y][c.x] !== 0) return true;
     }
     return false;
@@ -114,7 +112,7 @@ var StackyGame = (function () {
     state.activePiece = {
       type: type,
       rotation: 0,
-      x: Math.floor((COLS - 4) / 2),
+      x: Math.floor((P.COLS - 4) / 2),
       y: 0,
     };
     state.holdUsedThisTurn = false;
@@ -304,7 +302,7 @@ var StackyGame = (function () {
     var colorIndex = P.TYPES.indexOf(state.activePiece.type) + 1;
     for (var i = 0; i < cells.length; i++) {
       var c = cells[i];
-      if (c.y >= 0 && c.y < ROWS && c.x >= 0 && c.x < COLS) {
+      if (c.y >= 0 && c.y < P.ROWS && c.x >= 0 && c.x < P.COLS) {
         state.grid[c.y][c.x] = colorIndex;
       }
     }
@@ -327,11 +325,11 @@ var StackyGame = (function () {
    * Create a chocolate row: filled with CHOCOLATE_CELL except for random gaps.
    */
   function createChocolateRow() {
-    var row = new Array(COLS).fill(CHOCOLATE_CELL);
+    var row = new Array(P.COLS).fill(CHOCOLATE_CELL);
     // Punch random gaps so the row doesn't auto-clear
     var gaps = [];
     while (gaps.length < CHOCOLATE_GAPS) {
-      var g = Math.floor(Math.random() * COLS);
+      var g = Math.floor(Math.random() * P.COLS);
       if (gaps.indexOf(g) === -1) gaps.push(g);
     }
     for (var i = 0; i < gaps.length; i++) {
@@ -346,7 +344,7 @@ var StackyGame = (function () {
    */
   function riseChocolateRow(state) {
     // Check if top row has any blocks — if so, rising will push them off
-    for (var x = 0; x < COLS; x++) {
+    for (var x = 0; x < P.COLS; x++) {
       if (state.grid[0][x] !== 0) {
         state.alive = false;
         state.phase = 'gameOver';
@@ -381,20 +379,20 @@ var StackyGame = (function () {
   function clearLines(state) {
     var cleared = 0;
     var chocolateCleared = 0;
-    for (var y = ROWS - 1; y >= 0; y--) {
+    for (var y = P.ROWS - 1; y >= 0; y--) {
       var full = true;
-      for (var x = 0; x < COLS; x++) {
+      for (var x = 0; x < P.COLS; x++) {
         if (state.grid[y][x] === 0) { full = false; break; }
       }
       if (full) {
         // Check if this row had any chocolate cells
         var hasChocolate = false;
-        for (var cx = 0; cx < COLS; cx++) {
+        for (var cx = 0; cx < P.COLS; cx++) {
           if (state.grid[y][cx] === CHOCOLATE_CELL) { hasChocolate = true; break; }
         }
         if (hasChocolate) chocolateCleared++;
         state.grid.splice(y, 1);
-        state.grid.unshift(new Array(COLS).fill(0));
+        state.grid.unshift(new Array(P.COLS).fill(0));
         cleared++;
         y++; // re-check this row
       }
@@ -441,7 +439,7 @@ var StackyGame = (function () {
       state.activePiece = {
         type: state.heldPiece,
         rotation: 0,
-        x: Math.floor((COLS - 4) / 2),
+        x: Math.floor((P.COLS - 4) / 2),
         y: 0,
       };
       state.heldPiece = currentType;
@@ -594,8 +592,6 @@ var StackyGame = (function () {
     getGhostY: getGhostY,
     checkCollision: checkCollision,
     riseChocolateRow: riseChocolateRow,
-    COLS: COLS,
-    ROWS: ROWS,
     CHOCOLATE_CELL: CHOCOLATE_CELL,
     CHOCOLATE_INTERVAL: CHOCOLATE_INTERVAL,
   };
