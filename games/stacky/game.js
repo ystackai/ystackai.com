@@ -86,6 +86,8 @@ var StackyGame = (function () {
       echoMemory: [],              // array of { timestamp, centerX, centerY }
       echoOffset: 0,               // current computed echo drift (signed, cells)
       echoDriftAccum: 0,           // fractional drift accumulator for sub-cell movement
+      // Placement history for Gravity Echo memory tracking
+      placementHistory: [],          // array of { x, y, timestamp }
       // Wobble physics state
       wobble: {
         centerOfMass: { x: COLS / 2, y: ROWS / 2 },  // current center of mass
@@ -180,6 +182,7 @@ var StackyGame = (function () {
     state.echoMemory = [];
     state.echoOffset = 0;
     state.echoDriftAccum = 0;
+    state.placementHistory = [];
     state.wobble = {
       centerOfMass: { x: COLS / 2, y: ROWS / 2 },
       massOffset: 0,
@@ -481,6 +484,13 @@ var StackyGame = (function () {
     var now = state.lastDropTime || Date.now();
     recordEcho(state, cells, now);
 
+    // Record placement history for Gravity Echo memory tracking
+    state.placementHistory.push({
+      x: state.activePiece.x,
+      y: state.activePiece.y,
+      timestamp: now,
+    });
+
     for (var i = 0; i < cells.length; i++) {
       var c = cells[i];
       if (c.y >= 0 && c.y < ROWS && c.x >= 0 && c.x < COLS) {
@@ -769,6 +779,7 @@ var StackyGame = (function () {
       chocolateCell: CHOCOLATE_CELL,
       echoMemoryCount: state.echoMemory.length,
       echoOffset: state.echoOffset,
+      placementHistory: state.placementHistory.slice(),
       wobble: {
         centerOfMass: { x: state.wobble.centerOfMass.x, y: state.wobble.centerOfMass.y },
         massOffset: state.wobble.massOffset,
