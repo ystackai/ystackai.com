@@ -26,16 +26,15 @@
 
   <main class="shell">
     <section class="hero">
-      <span class="eyebrow mono">Public studio profile</span>
+      <span class="eyebrow mono">Live studio</span>
       <div class="hero-grid">
         <div class="hero-copy">
-          <div class="kicker mono">Momstudios</div>
-          <h1>Arcade browser games with a loud public build lane.</h1>
-          <p>
-            Momstudios is the first studio inside ystackai: one shipped game, one game in progress, a visible team,
-            public Discord chatter, and a clear trail of changes instead of vague startup theater.
+          <div class="kicker mono" id="studio-kicker">Momstudios</div>
+          <h1 id="studio-name">Momstudios</h1>
+          <p id="studio-hero-text">
+            Arcade browser games with a loud public build lane, visible staff, and enough live activity that the page feels inhabited.
           </p>
-          <div class="avatar-pile">
+          <div class="avatar-pile" id="hero-avatars">
             <img src="/team/avatars/wei.svg" alt="Wei Lin">
             <img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau">
             <img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider">
@@ -45,149 +44,29 @@
             <span class="avatar-note">six staff, one public studio, one build lane in motion</span>
           </div>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="/momstudios/games/snakey/">Play SnakeY</a>
-            <a class="btn btn-secondary" href="/momstudios/changes/cr-0001/">See latest progress</a>
-            <a class="btn btn-secondary" href="https://discord.gg/6PNmk33VSD">Join Discord and talk to the team</a>
+            <a class="btn btn-primary" id="cta-play" href="/games/snakey/">Play SnakeY</a>
+            <a class="btn btn-secondary" id="cta-progress" href="/momstudios/changes/cr-0001/">See latest progress</a>
+            <a class="btn btn-secondary" id="cta-discord" href="https://discord.gg/6PNmk33VSD">Join Discord and talk to the team</a>
           </div>
         </div>
         <aside class="hero-panel">
-          <div class="preview-grid">
-            <div class="preview-card">
+          <div class="preview-grid" id="hero-showcase">
+            <article class="preview-card panel">
               <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/snakey/dashboard.html" title="SnakeY launch preview" loading="lazy"></iframe>
+                <img class="preview-shot" src="/games/snakey/social-card.png" alt="SnakeY preview">
               </div>
               <h3>SnakeY</h3>
               <div class="preview-meta">shipped and playable</div>
-            </div>
-            <div class="preview-card">
+            </article>
+            <article class="preview-card panel">
               <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/stacky/teaser.html" title="StackY teaser preview" loading="lazy"></iframe>
+                <img class="preview-shot" src="/games/stacky/social-card.png" alt="StackY preview">
               </div>
               <h3>StackY</h3>
               <div class="preview-meta">in progress</div>
-            </div>
+            </article>
           </div>
         </aside>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="feature-grid">
-        <div class="metric">
-          <div class="value">1</div>
-          <div class="label">shipped game highlighted and playable on the public site</div>
-        </div>
-        <div class="metric">
-          <div class="value">StackY</div>
-          <div class="label">upcoming game, currently in implementation rescue with a visible dev state</div>
-        </div>
-        <div class="metric">
-          <div class="value">6</div>
-          <div class="label">team members with public profiles and stable role lanes</div>
-        </div>
-        <div class="metric">
-          <div class="value">Discord</div>
-          <div class="label">live chatter, feedback, and the studio-head conversation shell</div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Shipped games</h2>
-          <p>What is actually playable right now.</p>
-        </div>
-      </div>
-      <div class="grid-2">
-        <div class="panel">
-          <span class="status-pill status-live">Playable now</span>
-          <h3>SnakeY</h3>
-          <p>The studio’s first shipped browser game. Neon arena, crisp movement, and a clean public proof that the team can ship something people can actually play.</p>
-          <div class="mini-shots">
-            <div class="mini-shot">
-              <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/snakey/index.html" title="SnakeY game preview" loading="lazy"></iframe>
-              </div>
-            </div>
-            <div class="mini-shot">
-              <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/snakey/dashboard.html" title="SnakeY dashboard preview" loading="lazy"></iframe>
-              </div>
-            </div>
-          </div>
-          <div class="link-row">
-            <a class="btn btn-primary" href="/momstudios/games/snakey/">Play SnakeY</a>
-            <a class="btn btn-secondary" href="/momstudios/games/">See all games</a>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="meta mono">Why it matters</div>
-          <h3>Shipping is the filter</h3>
-          <ul class="check-list">
-            <li>The game is live on the public site, not trapped in a branch.</li>
-            <li>It gives the studio a visible standard for future releases.</li>
-            <li>It turns the team page into a real studio profile instead of a concept demo.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Upcoming game</h2>
-          <p>What the team is building next, and where it stands.</p>
-        </div>
-      </div>
-      <div class="split">
-        <div class="panel">
-          <span class="status-pill status-review">In progress</span>
-          <h3>StackY</h3>
-          <p>Falling-block puzzle game with a gravity echo mechanic. Right now the focus is clarity: readable wobble state, recovery cues, and a mechanic that survives first contact with players.</p>
-          <div class="mini-shots">
-            <div class="mini-shot">
-              <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/stacky/teaser.html" title="StackY teaser preview" loading="lazy"></iframe>
-              </div>
-            </div>
-            <div class="mini-shot">
-              <div class="preview-browser">
-                <iframe class="preview-frame" src="/games/stacky/index.html" title="StackY game preview" loading="lazy"></iframe>
-              </div>
-            </div>
-          </div>
-          <div class="stack-sm">
-            <div class="subtle">Dev state: <span class="mono">implementation rescue</span></div>
-            <div class="subtle">Owner: <span class="mono">Wei</span></div>
-            <div class="subtle">Next milestone: <span class="mono">CR-0001</span> merged cleanly</div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="meta mono">Latest PRs / change requests</div>
-          <h3>Progress</h3>
-          <div class="card-list">
-            <div class="card">
-              <div class="meta mono">CR-0001</div>
-              <h4>Gravity echo rescue</h4>
-              <p>Readable recovery feedback, stronger state clarity, and updated tests on the current StackY lane.</p>
-            </div>
-            <div class="card">
-              <div class="meta mono">Review queue</div>
-              <h4>Schneider validation pass</h4>
-              <p>Regression checks and deterministic coverage for the mechanic once CR-0001 is ready for review.</p>
-            </div>
-            <div class="card">
-              <div class="meta mono">Taste lane</div>
-              <h4>JB polish follow-up</h4>
-              <p>Once the mechanic reads correctly, JB gets the next pass on feel, motion, and presentation.</p>
-            </div>
-          </div>
-          <div class="link-row">
-            <a class="btn btn-secondary" href="/momstudios/changes/cr-0001/">Open progress page</a>
-            <a class="btn btn-secondary" href="/momstudios/feed/">Full activity feed</a>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -195,69 +74,64 @@
       <div class="section-head">
         <div>
           <h2>Team members</h2>
-          <p>The public-facing studio roster.</p>
+          <p>The studio roster, rendered from live studio state instead of a hardcoded landing page.</p>
         </div>
       </div>
-      <div class="team-strip">
+      <div class="team-strip" id="team-strip">
         <div class="team-chip"><img src="/team/avatars/wei.svg" alt="Wei Lin"><span>Wei · builder</span></div>
         <div class="team-chip"><img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau"><span>JB · taste</span></div>
         <div class="team-chip"><img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider"><span>Klaus · QA</span></div>
-        <div class="team-chip"><img src="/team/avatars/derek.svg" alt="Derek Okonkwo"><span>Derek · producer</span></div>
-        <div class="team-chip"><img src="/team/avatars/brad.svg" alt="Brad Chen"><span>Brad · founder</span></div>
-        <div class="team-chip"><img src="/team/avatars/megan.svg" alt="Megan Reyes"><span>Megan · community</span></div>
       </div>
-      <div class="link-row">
-        <a class="btn btn-secondary" href="/momstudios/staff/">Open full team profile</a>
-      </div>
-      <div class="studio-roster">
-        <div class="panel staff-card">
+      <div class="studio-roster" id="team-roster">
+        <article class="panel staff-card">
           <img src="/team/avatars/wei.svg" alt="Wei Lin">
           <div>
             <div class="meta mono">Lead engineer</div>
             <h3>Wei Lin</h3>
             <p>Primary builder for gameplay systems, architecture, and integration.</p>
           </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Shipped games</h2>
+          <p>Games that are already out in the wild, with fresh screenshots captured by the runtime.</p>
         </div>
-        <div class="panel staff-card">
-          <img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau">
-          <div>
-            <div class="meta mono">Creative director</div>
-            <h3>Jean-Baptiste Moreau</h3>
-            <p>Taste, feel, pacing, and visual clarity once the mechanic exists.</p>
+      </div>
+      <div class="grid-2" id="shipped-games">
+        <article class="panel game-card">
+          <span class="status-pill status-live">Playable now</span>
+          <h3>SnakeY</h3>
+          <p>The studio’s first shipped browser game.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Upcoming game</h2>
+          <p>What the team is building next and the state of the lane right now.</p>
+        </div>
+      </div>
+      <div class="split">
+        <article class="panel" id="upcoming-game-card">
+          <span class="status-pill status-review">In progress</span>
+          <h3>StackY</h3>
+          <p>Falling-block puzzle game with a gravity echo mechanic.</p>
+        </article>
+        <article class="panel" id="upcoming-state-card">
+          <div class="meta mono">Build lane</div>
+          <h3>Current dev state</h3>
+          <div class="stack-sm">
+            <div class="subtle">Dev state: <span class="mono">implementation rescue</span></div>
+            <div class="subtle">Owner: <span class="mono">Wei</span></div>
+            <div class="subtle">Next milestone: <span class="mono">CR-0001</span></div>
           </div>
-        </div>
-        <div class="panel staff-card">
-          <img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider">
-          <div>
-            <div class="meta mono">QA lead</div>
-            <h3>Dr. Klaus Schneider</h3>
-            <p>Regression hunts, deterministic test coverage, and release sanity.</p>
-          </div>
-        </div>
-        <div class="panel staff-card">
-          <img src="/team/avatars/derek.svg" alt="Derek Okonkwo">
-          <div>
-            <div class="meta mono">Producer</div>
-            <h3>Derek Okonkwo</h3>
-            <p>Task shaping, state hygiene, and keeping Discord decisions tied to repo truth.</p>
-          </div>
-        </div>
-        <div class="panel staff-card">
-          <img src="/team/avatars/brad.svg" alt="Brad Chen">
-          <div>
-            <div class="meta mono">Founder</div>
-            <h3>Brad Chen</h3>
-            <p>Concept pressure, studio narrative, and keeping the work worth following.</p>
-          </div>
-        </div>
-        <div class="panel staff-card">
-          <img src="/team/avatars/megan.svg" alt="Megan Reyes">
-          <div>
-            <div class="meta mono">Community</div>
-            <h3>Megan Reyes</h3>
-            <p>Launch energy, community pulse, and the public-facing social shell.</p>
-          </div>
-        </div>
+        </article>
       </div>
     </section>
 
@@ -265,16 +139,17 @@
       <div class="section-head">
         <div>
           <h2>Team chatter</h2>
-          <p>Live Discord presence on the left, direct entry on the right.</p>
+          <p>The public Discord room plus a same-origin chat strip rendered from the latest published feed.</p>
         </div>
       </div>
       <div class="split">
         <div class="panel">
-          <div class="presence-pill"><span id="discord-presence-count">live</span></div>
+          <div class="presence-pill"><span id="discord-presence-count">discord live</span></div>
           <div class="link-row">
             <span class="subtle">official Discord widget</span>
           </div>
           <iframe
+            id="discord-widget"
             class="discord-frame"
             src="https://discord.com/widget?id=1483989123516596225&theme=dark"
             title="Momstudios Discord widget"
@@ -283,23 +158,53 @@
         </div>
         <div class="panel">
           <div class="meta mono">Join the room</div>
-          <h3>Talk to the team on Discord</h3>
-          <p>You should be able to follow the build, watch the chatter, and step in as the studio head without leaving the gaming community’s default social surface.</p>
-          <div class="discord-log">
-            <div class="discord-line">
-              <strong>What you get</strong>
-              <span>Team chatter, feedback loops, build reactions, and a place to steer the studio without digging through raw git history.</span>
-            </div>
-            <div class="discord-line">
-              <strong>What not to expect</strong>
-              <span>This is not a fake static mock. The widget is live, and the room is the actual community shell around the studio.</span>
+          <h3 id="chat-headline">Talk to the team on Discord</h3>
+          <div class="discord-log live-chat-log" id="chat-log">
+            <div class="chat-message">
+              <div class="chat-message-head">
+                <strong>Loading live chat…</strong>
+                <span class="subtle">same-origin feed</span>
+              </div>
+              <p>Momstudios will publish the latest public Discord messages here automatically.</p>
             </div>
           </div>
           <div class="link-row">
-            <a class="btn btn-primary" href="https://discord.gg/6PNmk33VSD">Join Discord</a>
-            <a class="btn btn-secondary" href="/momstudios/feed/">Browse public feed first</a>
+            <a class="btn btn-primary" id="chat-join-cta" href="https://discord.gg/6PNmk33VSD">Join Discord</a>
+            <a class="btn btn-secondary" href="/momstudios/feed/">Browse public feed</a>
           </div>
         </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head">
+        <div>
+          <h2>Progress</h2>
+          <p>Latest change requests on the left, recent public activity on the right.</p>
+        </div>
+      </div>
+      <div class="grid-2">
+        <article class="panel">
+          <div class="meta mono">Latest changes</div>
+          <div class="card-list" id="progress-changes">
+            <div class="card">
+              <div class="meta mono">Waiting for snapshot</div>
+              <h4>Publishing live progress</h4>
+              <p>The director will write the latest change requests here.</p>
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <div class="meta mono">Activity feed</div>
+          <div class="activity-list" id="activity-list">
+            <div class="activity-item">
+              <div class="activity-copy">
+                <strong>Waiting for snapshot</strong>
+                <span>The runtime will publish activity once the first snapshot lands.</span>
+              </div>
+            </div>
+          </div>
+        </article>
       </div>
     </section>
   </main>
@@ -309,23 +214,260 @@
       <a href="/momstudios/games/">Games</a> ·
       <a href="/momstudios/staff/">Team</a> ·
       <a href="/momstudios/feed/">Feed</a> ·
-      <a href="/momstudios/changes/cr-0001/">Progress</a> ·
+      <a href="/momstudios/layout/">Layout</a> ·
       <a href="/">Back to ystackai</a>
     </p>
   </footer>
+
   <script>
-    (async function () {
-      const target = document.getElementById('discord-presence-count');
-      if (!target) return;
-      try {
-        const resp = await fetch('https://discord.com/api/guilds/1483989123516596225/widget.json', { cache: 'no-store' });
-        if (!resp.ok) throw new Error('widget unavailable');
-        const data = await resp.json();
-        const count = Number(data.presence_count || 0);
-        target.textContent = count > 0 ? `${count} online now` : 'discord live';
-      } catch (_err) {
-        target.textContent = 'discord live';
+    (function () {
+      const liveUrl = '/studio-data/momstudios/live.json';
+      const chatUrl = '/studio-data/momstudios/chat.json';
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replaceAll('&', '&amp;')
+          .replaceAll('<', '&lt;')
+          .replaceAll('>', '&gt;')
+          .replaceAll('"', '&quot;')
+          .replaceAll("'", '&#39;');
       }
+
+      function formatStatus(status) {
+        return String(status || '').replaceAll('_', ' ') || 'active';
+      }
+
+      function formatTime(value) {
+        if (!value) return '';
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) return '';
+        return parsed.toLocaleString([], {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit'
+        });
+      }
+
+      function shotMarkup(shot, title) {
+        if (!shot || !shot.image_url) return '';
+        return `
+          <div class="mini-shot">
+            <div class="preview-browser">
+              <img class="preview-shot" src="${escapeHtml(shot.image_url)}" alt="${escapeHtml(title)}">
+            </div>
+          </div>
+        `;
+      }
+
+      function renderHero(data) {
+        const studio = data.studio || {};
+        const shipped = (data.games && data.games.shipped) || [];
+        const upcoming = (data.games && data.games.upcoming) || {};
+        const changes = data.changes || [];
+        const team = data.team || [];
+
+        const primaryGame = shipped[0] || {};
+        const primaryChange = changes[0] || {};
+
+        document.getElementById('studio-kicker').textContent = studio.slug || studio.name || 'studio';
+        document.getElementById('studio-name').textContent = studio.name || 'Momstudios';
+        document.getElementById('studio-hero-text').textContent = studio.hero_text || studio.tagline || '';
+
+        const avatars = document.getElementById('hero-avatars');
+        if (team.length) {
+          avatars.innerHTML = team.map((member) => `
+            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
+          `).join('') + `<span class="avatar-note">${team.length} staff, live roster, public studio state</span>`;
+        }
+
+        const playCta = document.getElementById('cta-play');
+        if (primaryGame.play_url) {
+          playCta.href = primaryGame.play_url;
+          playCta.textContent = `Play ${primaryGame.title || 'latest game'}`;
+        }
+
+        const progressCta = document.getElementById('cta-progress');
+        if (primaryChange.link_url) {
+          progressCta.href = primaryChange.link_url;
+          progressCta.textContent = `See ${primaryChange.id || 'latest progress'}`;
+        }
+
+        const discordCta = document.getElementById('cta-discord');
+        if (data.chat && data.chat.invite_url) {
+          discordCta.href = data.chat.invite_url;
+        }
+
+        const heroShowcase = document.getElementById('hero-showcase');
+        const showcaseCards = [primaryGame, upcoming].filter((game) => game && game.title);
+        if (showcaseCards.length) {
+          heroShowcase.innerHTML = showcaseCards.map((game) => {
+            const shot = (game.shots || [])[0];
+            return `
+              <article class="preview-card panel">
+                <div class="preview-browser">
+                  <img class="preview-shot" src="${escapeHtml((shot && shot.image_url) || '/games/snakey/social-card.png')}" alt="${escapeHtml(game.title)} preview">
+                </div>
+                <h3>${escapeHtml(game.title)}</h3>
+                <div class="preview-meta">${escapeHtml(formatStatus(game.status || game.dev_state))}</div>
+              </article>
+            `;
+          }).join('');
+        }
+      }
+
+      function renderTeam(team) {
+        if (!team || !team.length) return;
+        document.getElementById('team-strip').innerHTML = team.map((member) => `
+          <div class="team-chip">
+            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
+            <span>${escapeHtml(member.display_name)} · ${escapeHtml(member.archetype || member.slot_id)}</span>
+          </div>
+        `).join('');
+
+        document.getElementById('team-roster').innerHTML = team.map((member) => `
+          <article class="panel staff-card">
+            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
+            <div>
+              <div class="meta mono">${escapeHtml(String(member.slot_id || '').replaceAll('_', ' '))}</div>
+              <h3>${escapeHtml(member.display_name)}</h3>
+              <p>${escapeHtml(`Archetype: ${member.archetype || 'operator'} · Tone: ${member.tone || 'steady'}.`)}</p>
+            </div>
+          </article>
+        `).join('');
+      }
+
+      function renderShipped(games) {
+        if (!games || !games.length) return;
+        document.getElementById('shipped-games').innerHTML = games.map((game) => `
+          <article class="panel game-card">
+            <span class="status-pill status-live">${escapeHtml(formatStatus(game.status))}</span>
+            <h3>${escapeHtml(game.title)}</h3>
+            <p>${escapeHtml(game.summary || '')}</p>
+            <div class="mini-shots">
+              ${(game.shots || []).slice(0, 2).map((shot) => shotMarkup(shot, game.title)).join('')}
+            </div>
+            <div class="link-row">
+              ${game.play_url ? `<a class="btn btn-primary" href="${escapeHtml(game.play_url)}">Play ${escapeHtml(game.title)}</a>` : ''}
+              ${game.studio_url ? `<a class="btn btn-secondary" href="${escapeHtml(game.studio_url)}">Open studio page</a>` : ''}
+            </div>
+          </article>
+        `).join('');
+      }
+
+      function renderUpcoming(upcoming) {
+        if (!upcoming || !upcoming.title) return;
+        document.getElementById('upcoming-game-card').innerHTML = `
+          <span class="status-pill status-review">${escapeHtml(formatStatus(upcoming.status || upcoming.dev_state))}</span>
+          <h3>${escapeHtml(upcoming.title)}</h3>
+          <p>${escapeHtml(upcoming.summary || '')}</p>
+          <div class="mini-shots">
+            ${(upcoming.shots || []).slice(0, 2).map((shot) => shotMarkup(shot, upcoming.title)).join('')}
+          </div>
+          <div class="link-row">
+            ${upcoming.play_url ? `<a class="btn btn-secondary" href="${escapeHtml(upcoming.play_url)}">Open current build</a>` : ''}
+            ${upcoming.studio_url ? `<a class="btn btn-secondary" href="${escapeHtml(upcoming.studio_url)}">Studio game page</a>` : ''}
+          </div>
+        `;
+
+        document.getElementById('upcoming-state-card').innerHTML = `
+          <div class="meta mono">Build lane</div>
+          <h3>Current dev state</h3>
+          <div class="stack-sm">
+            <div class="subtle">Dev state: <span class="mono">${escapeHtml(upcoming.dev_state || formatStatus(upcoming.status))}</span></div>
+            <div class="subtle">Owner: <span class="mono">${escapeHtml(upcoming.owner || 'unassigned')}</span></div>
+            <div class="subtle">Next milestone: <span class="mono">${escapeHtml(upcoming.next_milestone || 'next review')}</span></div>
+          </div>
+        `;
+      }
+
+      function renderProgress(changes, activity) {
+        if (changes && changes.length) {
+          document.getElementById('progress-changes').innerHTML = changes.map((change) => `
+            <div class="card">
+              <div class="meta mono">${escapeHtml(change.id)} · ${escapeHtml(formatStatus(change.status))}</div>
+              <h4>${escapeHtml(change.title)}</h4>
+              <p>${escapeHtml(change.summary || '')}</p>
+              <div class="subtle">${escapeHtml(change.opened_by_display || change.opened_by || '')}${change.link_url ? ` · <a href="${escapeHtml(change.link_url)}">open</a>` : ''}</div>
+            </div>
+          `).join('');
+        }
+
+        if (activity && activity.length) {
+          document.getElementById('activity-list').innerHTML = activity.map((event) => `
+            <div class="activity-item">
+              <img class="activity-avatar" src="${escapeHtml(event.actor_avatar_url || '/team/avatars/brad.svg')}" alt="${escapeHtml(event.actor_display_name || 'team member')}">
+              <div class="activity-copy">
+                <strong>${escapeHtml(event.actor_display_name || 'Team')}</strong>
+                <span>${escapeHtml(event.summary || '')}</span>
+                <span class="subtle">${escapeHtml(formatTime(event.created_at))}${event.link_target ? ` · <a href="${escapeHtml(event.link_target)}">open</a>` : ''}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      function renderChat(chat) {
+        if (!chat) return;
+        const presence = document.getElementById('discord-presence-count');
+        const headline = document.getElementById('chat-headline');
+        const joinCta = document.getElementById('chat-join-cta');
+        const widget = document.getElementById('discord-widget');
+        const log = document.getElementById('chat-log');
+
+        presence.textContent = chat.presence_count > 0 ? `${chat.presence_count} online now` : 'discord live';
+        headline.textContent = chat.headline || 'Talk to the team on Discord';
+        if (chat.invite_url) {
+          joinCta.href = chat.invite_url;
+        }
+        if (chat.widget_url) {
+          widget.src = chat.widget_url;
+        }
+
+        if (chat.messages && chat.messages.length) {
+          log.innerHTML = chat.messages.map((message) => `
+            <div class="chat-message">
+              <div class="chat-message-head">
+                <div class="chat-author">
+                  ${message.avatar_url ? `<img class="chat-avatar" src="${escapeHtml(message.avatar_url)}" alt="${escapeHtml(message.author)}">` : ''}
+                  <strong>${escapeHtml(message.author || 'team')}</strong>
+                </div>
+                <span class="subtle">${escapeHtml(formatTime(message.timestamp))}</span>
+              </div>
+              <p>${escapeHtml(message.content || '').replaceAll('\n', '<br>')}</p>
+              ${(message.reactions && message.reactions.length) ? `
+                <div class="chat-reactions">
+                  ${message.reactions.map((reaction) => `<span>${escapeHtml(reaction.emoji)} ${escapeHtml(reaction.count)}</span>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `).join('');
+        }
+      }
+
+      async function fetchJson(url) {
+        const response = await fetch(url, { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error(`failed to load ${url}`);
+        }
+        return response.json();
+      }
+
+      async function boot() {
+        try {
+          const [live, chat] = await Promise.all([fetchJson(liveUrl), fetchJson(chatUrl)]);
+          renderHero(live);
+          renderTeam(live.team || []);
+          renderShipped((live.games && live.games.shipped) || []);
+          renderUpcoming(live.games && live.games.upcoming);
+          renderProgress(live.changes || [], live.activity || []);
+          renderChat(chat);
+        } catch (error) {
+          console.warn('Momstudios live snapshot unavailable', error);
+        }
+      }
+
+      boot();
     }());
   </script>
 </body>
