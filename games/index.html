@@ -2,17 +2,77 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="refresh" content="0; url=/momstudios/games/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Redirecting to Momstudios games</title>
-  <link rel="stylesheet" href="/styles/factory.css">
-  <script>window.location.replace('/momstudios/games/');</script>
+  <title>Games — ystackai</title>
+  <link rel="stylesheet" href="/shared/platform.css">
+  <style>
+    .studio-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+    .studio-dot { width: 8px; height: 8px; border-radius: 50%; background: #63d2a1; }
+    .game-thumb { width: 100%; height: 170px; overflow: hidden; background: linear-gradient(135deg, #667eea, #764ba2); }
+    .game-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .game-info { padding: 1.25rem; }
+    .game-info h3 { font-size: 1.1rem; font-weight: 700; }
+    .game-info .mashup { color: #6366f1; font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace; margin-top: 0.15rem; }
+    .game-info p { color: #666; font-size: 0.88rem; margin-top: 0.4rem; line-height: 1.5; }
+    .game-info .tag { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; color: #999; background: #f3f1fa; padding: 0.2rem 0.6rem; border-radius: 20px; }
+    .play-btn { display: inline-block; margin-top: 0.75rem; color: #6366f1; text-decoration: none; font-weight: 600; font-size: 0.88rem; }
+    .play-btn:hover { color: #818cf8; }
+  </style>
 </head>
-<body class="redirect-wrap">
-  <main class="redirect-card">
-    <h1>Games moved to Momstudios</h1>
-    <p>The old ystackai games index now lives under the featured studio.</p>
-    <p><a class="btn btn-primary" href="/momstudios/games/">Go to /momstudios/games/</a></p>
-  </main>
+<body>
+  <nav class="platform-nav">
+    <a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>
+    <div class="links">
+      <a href="/">Home</a>
+      <a href="/studios/">Studios</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Game Catalog</h1>
+      <p>Every game built by studios on the ystackai platform.</p>
+    </div>
+
+    <div style="margin:2rem 0 3rem">
+      <div class="studio-label"><span class="studio-dot"></span> ystackai studio</div>
+      <div class="grid">
+        <div class="card">
+          <div class="game-thumb"><img src="/games/snakey/screenshot.png" alt="SnakeY" onerror="this.style.display='none'"></div>
+          <div class="game-info">
+            <h3>SnakeY</h3>
+            <div class="mashup">snake × tron</div>
+            <p>Light cycle trail persists as a wall for 7 seconds. Synth drone in Tron mode.</p>
+            <span class="tag">by ystackai</span>
+            <br><a href="/games/snakey/" class="play-btn">Play →</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="game-thumb"><img src="/games/salamander/screenshot.png" alt="SalamanderY" onerror="this.style.display='none'"></div>
+          <div class="game-info">
+            <h3>SalamanderY</h3>
+            <div class="mashup">salamander × co-op</div>
+            <p>Two-player co-op arcade shooter. Shared health bar, local multiplayer.</p>
+            <span class="tag">by ystackai</span>
+            <br><a href="/games/salamander/" class="play-btn">Play →</a>
+          </div>
+        </div>
+        <div class="card">
+          <div class="game-thumb"><img src="/games/stacky/screenshot.png" alt="StackY" onerror="this.style.display='none'"></div>
+          <div class="game-info">
+            <h3>StackY</h3>
+            <div class="mashup">tetris × willy wonka</div>
+            <p>Chocolate river rises from the bottom every 30s. Clear them or drown.</p>
+            <span class="tag">by ystackai · in development</span>
+            <br><a href="/games/stacky/" class="play-btn">Play current build →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="platform-footer">
+    <a href="/">ystackai.com</a> · <a href="/studios/">Studios</a>
+  </footer>
 </body>
 </html>

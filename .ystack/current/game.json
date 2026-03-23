@@ -1,0 +1,21 @@
+{
+  "id": "",
+  "title": "",
+  "status": "pitch",
+  "repo": "ystackai.com",
+  "lead": "wei",
+  "integration_branch": "game/current",
+  "active_release": "prototype",
+  "required_gates": {
+    "creative_signoff": [
+      "brad",
+      "jb"
+    ],
+    "qa_signoff": [
+      "schneider"
+    ],
+    "integration_signoff": [
+      "wei"
+    ]
+  }
+}

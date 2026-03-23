@@ -1,0 +1,125 @@
+{
+  "slug": "ystackai",
+  "name": "ystackai",
+  "tagline": "Y is for Yolo.",
+  "discord_invite": "https://discord.gg/6PNmk33VSD",
+  "github_org": "ystackai",
+
+  "theme": {
+    "accent": "#6366f1",
+    "accent2": "#f093fb",
+    "surface": "light",
+    "hero_gradient": ["#667eea", "#764ba2", "#f093fb"],
+    "font": "Inter"
+  },
+
+  "team": [
+    {
+      "id": "brad",
+      "name": "Brad Chen",
+      "slot": "founder",
+      "role": "Founder & CEO",
+      "avatar": "/team/avatars/brad.svg",
+      "bio": "Previously BD & partnerships at two enterprise SaaS companies. Founded ystackai to build LeoEats — on-demand delivery in low earth orbit. Building browser games until the orbital market is ready.",
+      "quote": "\"When something is important enough, you do it even if the odds are not in your favor.\" — Elon Musk",
+      "email": "brad@ystackai.com"
+    },
+    {
+      "id": "wei",
+      "name": "Wei Lin",
+      "slot": "lead_engineer",
+      "role": "AI/ML Researcher & Lead Engineer",
+      "avatar": "/team/avatars/wei.svg",
+      "bio": "PhD Tsinghua University, postdoc MILA. NLP and distributed systems. Previously published at NeurIPS and ICML. Builds production ML systems. The most competent person in the room.",
+      "quote": "\"Talk is cheap. Show me the code.\" — Linus Torvalds",
+      "email": "wei@ystackai.com"
+    },
+    {
+      "id": "jb",
+      "name": "Jean-Baptiste \"JB\" Moreau",
+      "slot": "creative_director",
+      "role": "Senior Engineer & Creative Director",
+      "avatar": "/team/avatars/jb.svg",
+      "bio": "Full-stack engineer. Previously at Ubisoft Paris and a fintech startup in San Francisco. Strong design instinct — focused on making things feel right with minimal code. Always on espresso break.",
+      "quote": "\"La perfection est atteinte non pas lorsqu'il n'y a plus rien à ajouter, mais lorsqu'il n'y a plus rien à retirer.\" — Saint-Exupéry",
+      "email": "jb@ystackai.com"
+    },
+    {
+      "id": "schneider",
+      "name": "Dr. Klaus Schneider",
+      "slot": "qa_lead",
+      "role": "Founding Engineer & QA Lead",
+      "avatar": "/team/avatars/schneider.svg",
+      "bio": "PhD Distributed Systems, ETH Zürich. MSc Computer Science, MSc Mathematics. 12 publications. Previously at CERN and Bosch Research. Focused on testing, reliability, and the Schneider Protocol.",
+      "quote": "\"Without rigorous validation, shipping is merely hoping in public.\" — Dr. K. Schneider",
+      "email": "schneider@ystackai.com"
+    },
+    {
+      "id": "derek",
+      "name": "Derek Okonkwo",
+      "slot": "producer",
+      "role": "Engineering Manager & Producer",
+      "avatar": "/team/avatars/derek.svg",
+      "bio": "Previously engineering manager at two early-stage startups. Force multiplier — finds the tools, libraries, and workflows that make the team 10x faster. Focused on team health and making sure engineers can do their best work.",
+      "quote": "\"Take care of your people and they'll take care of the product.\"",
+      "email": "derek@ystackai.com"
+    },
+    {
+      "id": "megan",
+      "name": "Megan Reyes",
+      "slot": "community",
+      "role": "Talent & Community",
+      "avatar": "/team/avatars/megan.svg",
+      "bio": "Previously people ops at two YC startups. Owns recruiting, culture, and community. The reason the team hasn't imploded. Plans parties during crunch.",
+      "quote": "\"Culture eats strategy for breakfast.\" — Peter Drucker",
+      "email": "megan@ystackai.com"
+    }
+  ],
+
+  "games": {
+    "shipped": [
+      {
+        "id": "snakey",
+        "title": "SnakeY",
+        "mashup": "snake × tron",
+        "summary": "Light cycle trail persists as a wall for 7 seconds. Synth drone in Tron mode.",
+        "play_url": "/games/snakey/",
+        "hero_assets": []
+      },
+      {
+        "id": "salamander",
+        "title": "SalamanderY",
+        "mashup": "salamander × co-op",
+        "summary": "Two-player co-op arcade shooter. Shared health bar, local multiplayer.",
+        "play_url": "/games/salamander/",
+        "hero_assets": []
+      }
+    ],
+    "building": {
+      "id": "stacky",
+      "title": "StackY",
+      "mashup": "tetris × willy wonka",
+      "summary": "Chocolate river rises from the bottom every 30s. Clear them or drown.",
+      "phase": "build",
+      "phases": ["concept", "spec", "build", "polish", "test", "ship"],
+      "play_url": "/games/stacky/",
+      "hero_assets": []
+    }
+  },
+
+  "discord": {
+    "recent_messages": [],
+    "presence_count": 0
+  },
+
+  "activity": {
+    "recent_prs": [],
+    "open_issues": []
+  },
+
+  "blog_posts": [
+    {"title": "SnakeY launched like a dare", "url": "/blog/003-snakey-launch.html", "date": "March 21, 2026", "teaser": "We took the bones of the most addictive game loop ever designed and wrapped it in a Tron-flavored fever dream."},
+    {"title": "Y is for YOLO", "url": "/blog/002-y-is-for-yolo.html", "date": "March 20, 2026", "teaser": "Why the games all end in Y and why the naming convention became a worldview."},
+    {"title": "Why LeoEats Was Never About Food", "url": "/blog/001-why-leoeats.html", "date": "March 19, 2026", "teaser": "The early essay that made the whole thing feel slightly unhinged in the right way."}
+  ]
+}

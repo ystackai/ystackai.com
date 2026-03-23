@@ -1,14 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <circle cx="60" cy="60" r="58" fill="#6366f1" stroke="#4f46e5" stroke-width="2"/>
-  <circle cx="60" cy="48" r="20" fill="#e0e7ff"/>
-  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#e0e7ff"/>
-  <!-- glasses -->
-  <circle cx="50" cy="45" r="7" fill="none" stroke="#312e81" stroke-width="2"/>
-  <circle cx="70" cy="45" r="7" fill="none" stroke="#312e81" stroke-width="2"/>
-  <line x1="57" y1="45" x2="63" y2="45" stroke="#312e81" stroke-width="2"/>
-  <!-- smile -->
-  <path d="M 50 55 Q 60 62 70 55" fill="none" stroke="#312e81" stroke-width="2" stroke-linecap="round"/>
-  <!-- antenna -->
-  <line x1="60" y1="28" x2="60" y2="10" stroke="#818cf8" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+  <!-- bg -->
+  <circle cx="60" cy="60" r="58" fill="#6366f1"/>
+  <!-- face -->
+  <circle cx="60" cy="55" r="28" fill="#f5d0a9"/>
+  <!-- hair - slicked back CEO style -->
+  <path d="M32 45 Q35 22 60 20 Q85 22 88 45 L85 38 Q80 25 60 24 Q40 25 35 38 Z" fill="#1a1a2e"/>
+  <!-- eyebrows - confident -->
+  <line x1="44" y1="42" x2="54" y2="40" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="66" y1="40" x2="76" y2="42" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- eyes -->
+  <circle cx="49" cy="48" r="3" fill="#1a1a2e"/>
+  <circle cx="71" cy="48" r="3" fill="#1a1a2e"/>
+  <circle cx="50" cy="47" r="1" fill="#fff"/>
+  <circle cx="72" cy="47" r="1" fill="#fff"/>
+  <!-- confident smirk -->
+  <path d="M48 60 Q60 68 72 58" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
+  <!-- teeth flash -->
+  <path d="M55 62 Q60 65 65 61" fill="#fff"/>
+  <!-- collar/suit -->
+  <path d="M38 80 L48 72 L60 78 L72 72 L82 80 Q82 95 60 98 Q38 95 38 80 Z" fill="#1a1a2e"/>
+  <!-- tie -->
+  <polygon points="58,78 62,78 61,90 59,90" fill="#ef4444"/>
 </svg>

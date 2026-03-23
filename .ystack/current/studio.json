@@ -1,0 +1,142 @@
+{
+  "slug": "ystackai",
+  "name": "ystackai",
+  "owner": "marcus",
+  "public_url": "/ystackai/",
+  "brand": {
+    "tagline": "Deranged arcade builders shipping in public.",
+    "accent": "#f97316"
+  },
+  "active_game_id": "stacky",
+  "visibility": "public",
+  "showcase": {
+    "hero_text": "Arcade browser games with a loud public build lane.",
+    "shipped_games": [
+      {
+        "id": "snakey",
+        "title": "SnakeY",
+        "status": "released",
+        "summary": "Neon snake arena with crisp movement, bright contrast, and a public proof that the studio can ship something people can play.",
+        "play_url": "/games/snakey/",
+        "studio_url": "/ystackai/games/snakey/",
+        "shots": [
+          {
+            "id": "snakey-game",
+            "label": "Live game",
+            "url": "https://ystackai.com/games/snakey/index.html"
+          },
+          {
+            "id": "snakey-dashboard",
+            "label": "Dashboard",
+            "url": "https://ystackai.com/games/snakey/dashboard.html"
+          }
+        ]
+      }
+    ],
+    "upcoming_game": {
+      "id": "stacky",
+      "title": "StackY",
+      "status": "implementation",
+      "summary": "Falling-block puzzle game with a gravity echo mechanic, readable recovery cues, and a tighter public build lane than the first attempt.",
+      "dev_state": "implementation rescue",
+      "owner": "Wei",
+      "next_milestone": "Readable recovery feedback and a clean mergeable change request.",
+      "play_url": "/games/stacky/",
+      "studio_url": "/ystackai/games/stacky/",
+      "shots": [
+        {
+          "id": "stacky-teaser",
+          "label": "Teaser",
+          "url": "https://ystackai.com/games/stacky/teaser.html"
+        },
+        {
+          "id": "stacky-game",
+          "label": "Current build",
+          "url": "https://ystackai.com/games/stacky/index.html"
+        }
+      ]
+    },
+    "chat": {
+      "channel": "#engineering",
+      "guild_id": "1483989123516596225",
+      "invite_url": "https://discord.gg/6PNmk33VSD",
+      "headline": "Talk to the team on Discord"
+    }
+  },
+  "layout": {
+    "template": "build-feed-first",
+    "theme": {
+      "palette": "factory-orange",
+      "surface": "nocturne",
+      "font_pair": "space-grotesk_ibm-plex-mono"
+    },
+    "section_order": [
+      "hero",
+      "studio_snapshot",
+      "activity_feed",
+      "open_surfaces"
+    ],
+    "featured": {
+      "game_id": "",
+      "change_id": "",
+      "staff_slots": [
+        "lead_engineer",
+        "creative_director",
+        "qa_lead"
+      ]
+    },
+    "custom_blocks": [
+      {
+        "id": "operating_principle",
+        "title": "Operating principle",
+        "format": "markdown",
+        "body": "Output first. Chat second. Keep build lanes narrow enough that the model budget turns into visible work."
+      }
+    ]
+  },
+  "roster": {
+    "founder": {
+      "slot_id": "founder",
+      "display_name": "Brad Chen",
+      "archetype": "visionary",
+      "tone": "bombastic",
+      "status": "active"
+    },
+    "producer": {
+      "slot_id": "producer",
+      "display_name": "Derek Okonkwo",
+      "archetype": "operator",
+      "tone": "steady",
+      "status": "active"
+    },
+    "lead_engineer": {
+      "slot_id": "lead_engineer",
+      "display_name": "Wei Lin",
+      "archetype": "systems",
+      "tone": "precise",
+      "status": "active"
+    },
+    "creative_director": {
+      "slot_id": "creative_director",
+      "display_name": "Jean-Baptiste Moreau",
+      "archetype": "taste",
+      "tone": "minimal",
+      "status": "active"
+    },
+    "qa_lead": {
+      "slot_id": "qa_lead",
+      "display_name": "Dr. Klaus Schneider",
+      "archetype": "validator",
+      "tone": "rigorous",
+      "status": "active"
+    },
+    "community": {
+      "slot_id": "community",
+      "display_name": "Megan Reyes",
+      "archetype": "community",
+      "tone": "warm",
+      "status": "active"
+    }
+  },
+  "alumni": []
+}

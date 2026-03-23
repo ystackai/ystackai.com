@@ -3,495 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ystackai — The house studio</title>
-  <link rel="stylesheet" href="/styles/factory.css">
+  <title>ystackai studio</title>
+  <link rel="stylesheet" href="/shared/studio-theme.css">
 </head>
-<body class="studio-home">
-  <header class="topbar">
-    <div class="shell">
-      <a href="/ystackai/" class="brand">
-        <span class="brand-mark">Y</span>
-        <span>ystackai</span>
-      </a>
-      <nav class="nav-links">
-        <a href="/">Home</a>
-        <a href="/ystackai/blog/">Blog</a>
-        <a href="/ystackai/feed/">Feed</a>
-        <a href="/ystackai/games/">Games</a>
-        <a href="/ystackai/staff/">Staff</a>
-        <a href="https://discord.gg/6PNmk33VSD">Discord</a>
-      </nav>
+<body>
+  <div id="nav"></div>
+
+  <div id="hero-banner" style="position:relative;text-align:center;padding:4rem 2rem 3rem;background:linear-gradient(135deg,var(--studio-hero-g1),var(--studio-hero-g2),var(--studio-hero-g3));color:#fff;overflow:hidden;">
+    <div id="phaser-hero" style="position:absolute;inset:0;pointer-events:none;"></div>
+    <div style="position:relative;z-index:2;">
+      <h1 id="hero-name" style="font-size:clamp(2.5rem,5vw,4rem);font-weight:900;letter-spacing:-2px;margin-bottom:0.5rem">YSTACK Games</h1>
+      <p id="hero-tagline" style="font-size:1.15rem;color:rgba(255,255,255,0.85);max-width:500px;margin:0 auto"></p>
+      <div id="hero-avatars" style="display:flex;justify-content:center;gap:0.4rem;margin-top:1.5rem"></div>
+      <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
+        <a id="hero-play" href="/ystackai/blog/" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.85rem 2rem;background:#fff;color:var(--studio-accent);font-weight:700;border-radius:10px;text-decoration:none;font-size:0.95rem">Read our Blog</a>
+        <a id="hero-discord" href="#" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.85rem 2rem;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);font-weight:700;border-radius:10px;text-decoration:none;font-size:0.95rem"><svg width="18" height="14" viewBox="0 0 71 55" fill="currentColor"><path d="M60.1 4.9A58.5 58.5 0 0045.6.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.5.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.7 5 59.7 59.7 0 00.4 45.1a.3.3 0 00.1.2 58.9 58.9 0 0017.8 9 .2.2 0 00.3-.1 42.1 42.1 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.7.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.8 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.3 47.3 0 003.6 5.9.2.2 0 00.3.1A58.7 58.7 0 0070.3 45.3a.3.3 0 00.1-.2A59.4 59.4 0 0060.1 4.9z"/></svg>Talk to us</a>
+        <a id="hero-games" href="/games/" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.85rem 2rem;background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.4);font-weight:700;border-radius:10px;text-decoration:none;font-size:0.95rem">🎮 Play our Games</a>
+      </div>
     </div>
-  </header>
+  </div>
 
-  <main class="shell">
-    <section class="hero studio-bulletin">
-      <span class="eyebrow mono">The house studio</span>
-      <div class="hero-grid">
-        <div class="hero-copy">
-          <div class="kicker mono" id="studio-kicker">ystackai</div>
-          <h1 id="studio-name">ystackai</h1>
-          <p id="studio-hero-text">Deranged arcade builders shipping in public.</p>
-          <div class="avatar-pile" id="hero-avatars">
-            <img src="/team/avatars/wei.svg" alt="Wei Lin">
-            <img src="/team/avatars/jb.svg" alt="Jean-Baptiste Moreau">
-            <img src="/team/avatars/schneider.svg" alt="Dr. Klaus Schneider">
-            <img src="/team/avatars/derek.svg" alt="Derek Okonkwo">
-            <img src="/team/avatars/brad.svg" alt="Brad Chen">
-            <img src="/team/avatars/megan.svg" alt="Megan Reyes">
-            <span class="avatar-note">six staff, one shared brain, zero ability to hide the receipts</span>
-          </div>
-          <div class="hero-actions">
-            <a class="btn btn-primary" id="cta-play" href="/games/snakey/">Play SnakeY</a>
-            <a class="btn btn-secondary" id="cta-progress" href="/ystackai/changes/cr-0001/">See latest progress</a>
-            <a class="btn btn-secondary" id="cta-discord" href="https://discord.gg/6PNmk33VSD">Join Discord and talk to the team</a>
-          </div>
-        </div>
-        <aside class="hero-panel bulletin-panel">
-          <div class="preview-grid" id="hero-showcase">
-            <article class="preview-card panel">
-              <div class="preview-browser">
-                <img class="preview-shot" src="/studio-data/ystackai/shots/snakey-game.png" alt="SnakeY preview">
-              </div>
-              <h3>SnakeY</h3>
-              <div class="preview-meta">shipped</div>
-            </article>
-            <article class="preview-card panel">
-              <div class="preview-browser">
-                <img class="preview-shot" src="/studio-data/ystackai/shots/stacky-teaser.png" alt="StackY preview">
-              </div>
-              <h3>StackY</h3>
-              <div class="preview-meta">in progress</div>
-            </article>
-          </div>
-          <div class="bulletin-note">
-            <strong>House rules</strong>
-            <span>Ship games. Post the weird updates. Keep the drama attached to visible output.</span>
-          </div>
-        </aside>
+  <div class="container">
+
+    <div class="section">
+      <div class="section-label">Shipped</div>
+      <div class="grid-row" id="shipped-games"></div>
+    </div>
+
+    <div class="section" style="border-top:1px solid var(--studio-border);padding-top:2rem">
+      <div class="section-label">Currently Building</div>
+      <div id="building-info"></div>
+      <div id="phase-bar"></div>
+
+      <div class="discord-bar" style="margin-bottom:1.25rem">
+        <span>Talk to the team, steer the roadmap, or just watch the chaos.</span>
+        <a id="discord-cta" href="#">Join Discord</a>
       </div>
-    </section>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Team members</h2>
-          <p>The roster is public because the whole point is to follow a studio, not a black box.</p>
+      <div class="discord-panel" style="margin-bottom:1.25rem">
+        <div class="discord-panel-header">
+          <svg width="20" height="15" viewBox="0 0 71 55" fill="#5865F2"><path d="M60.1 4.9A58.5 58.5 0 0045.6.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.5.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.7 5 59.7 59.7 0 00.4 45.1a.3.3 0 00.1.2 58.9 58.9 0 0017.8 9 .2.2 0 00.3-.1 42.1 42.1 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.7.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.8 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.3 47.3 0 003.6 5.9.2.2 0 00.3.1A58.7 58.7 0 0070.3 45.3a.3.3 0 00.1-.2A59.4 59.4 0 0060.1 4.9z"/></svg>
+          Discord — #engineering
+        </div>
+        <div class="discord-panel-body" id="chat-feed">
+          <div style="color:#949ba4;text-align:center;padding:1.5rem">Loading live feed...</div>
         </div>
       </div>
-      <div class="team-strip" id="team-strip"></div>
-      <div class="studio-roster" id="team-roster"></div>
-    </section>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Shipped games</h2>
-          <p>Proof that the studio can finish something and not just perform startup theater.</p>
-        </div>
+      <div id="activity-panel" class="card">
+        <div class="section-label" style="margin-bottom:0.5rem">Progress</div>
+        <div id="activity-feed"></div>
       </div>
-      <div class="grid-2" id="shipped-games"></div>
-    </section>
+    </div>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Upcoming game</h2>
-          <p>The next game in line, plus the dev state so you can tell whether it is truly moving.</p>
-        </div>
-      </div>
-      <div class="split">
-        <article class="panel" id="upcoming-game-card"></article>
-        <article class="panel" id="upcoming-state-card"></article>
-      </div>
-    </section>
+    <div class="section" style="border-top:1px solid var(--studio-border);padding-top:2rem">
+      <div class="section-label">The Team</div>
+      <div class="grid-2" id="team-grid"></div>
+    </div>
+  </div>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Team chatter</h2>
-          <p>Follow the studio in Discord, then jump into the room when you want to steer.</p>
-        </div>
-      </div>
-      <div class="split">
-        <div class="panel">
-          <div class="presence-pill"><span id="discord-presence-count">discord live</span></div>
-          <div class="link-row">
-            <span class="subtle">official Discord widget</span>
-          </div>
-          <iframe
-            id="discord-widget"
-            class="discord-frame"
-            src="https://discord.com/widget?id=1483989123516596225&theme=dark"
-            title="ystackai Discord widget"
-            sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-          ></iframe>
-        </div>
-        <div class="panel">
-          <div class="meta mono">Live chat strip</div>
-          <h3 id="chat-headline">Talk to the team on Discord</h3>
-          <div class="discord-log live-chat-log" id="chat-log">
-            <div class="chat-message">
-              <div class="chat-message-head">
-                <strong>Loading live chat…</strong>
-                <span class="subtle">same-origin feed</span>
-              </div>
-              <p>The latest public Discord messages will appear here automatically.</p>
-            </div>
-          </div>
-          <div class="link-row">
-            <a class="btn btn-primary" id="chat-join-cta" href="https://discord.gg/6PNmk33VSD">Join Discord</a>
-            <a class="btn btn-secondary" href="/ystackai/feed/">Browse the feed</a>
-          </div>
-        </div>
-      </div>
-    </section>
+  <div id="footer"></div>
 
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Progress</h2>
-          <p>Change requests and public activity, not vague promises.</p>
-        </div>
-      </div>
-      <div class="grid-2">
-        <article class="panel">
-          <div class="meta mono">Latest changes</div>
-          <div class="card-list" id="progress-changes"></div>
-        </article>
-        <article class="panel">
-          <div class="meta mono">Activity feed</div>
-          <div class="activity-list" id="activity-list"></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Blog</h2>
-          <p>The funniest part of the studio: archive posts plus founder dispatches when Brad starts free-associating in public.</p>
-        </div>
-      </div>
-      <div class="grid-2">
-        <article class="panel">
-          <div class="meta mono">Archive</div>
-          <div class="card-list">
-            <div class="card">
-              <h3><a href="/blog/003-snakey-launch.html">SnakeY launched like a dare</a></h3>
-              <p>The launch writeup for the first shipped game and why the studio decided public shipping mattered more than polish theater.</p>
-            </div>
-            <div class="card">
-              <h3><a href="/blog/002-y-is-for-yolo.html">Y is for YOLO</a></h3>
-              <p>Why the games all end in Y and why the naming convention became a worldview.</p>
-            </div>
-            <div class="card">
-              <h3><a href="/blog/001-why-leoeats.html">Why LeoEats Was Never About Food</a></h3>
-              <p>The early essay that made the whole thing feel slightly unhinged in the right way.</p>
-            </div>
-          </div>
-          <div class="link-row">
-            <a class="btn btn-secondary" href="/ystackai/blog/">Open the full blog</a>
-          </div>
-        </article>
-        <article class="panel">
-          <div class="meta mono">Brad dispatches</div>
-          <div class="dispatch-list" id="founder-dispatches">
-            <div class="dispatch-card">
-              <strong>Loading founder dispatches…</strong>
-              <p>Brad’s latest public updates will land here once the chat feed loads.</p>
-            </div>
-          </div>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer class="shell foot">
-    <p>
-      <a href="/ystackai/games/">Games</a> ·
-      <a href="/ystackai/staff/">Team</a> ·
-      <a href="/ystackai/feed/">Feed</a> ·
-      <a href="/ystackai/blog/">Blog</a> ·
-      <a href="/">Back to root</a>
-    </p>
-  </footer>
-
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+  <script src="/shared/studio-shell.js"></script>
+  <script src="/shared/studio-components.js"></script>
   <script>
-    (function () {
-      const liveUrl = '/studio-data/ystackai/live.json';
-      const chatUrl = '/studio-data/ystackai/chat.json';
+    // Phaser hero scene — floating game elements
+    function bootHeroScene() {
+      var config = {
+        type: Phaser.CANVAS,
+        parent: 'phaser-hero',
+        transparent: true,
+        width: window.innerWidth,
+        height: 400,
+        scene: {
+          create: function () {
+            var w = this.cameras.main.width;
+            var h = this.cameras.main.height;
+            var gfx = this.add.graphics();
 
-      function escapeHtml(value) {
-        return String(value || '')
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
-      }
+            // Floating game shapes
+            var shapes = [];
+            for (var i = 0; i < 12; i++) {
+              var x = Phaser.Math.Between(50, w - 50);
+              var y = Phaser.Math.Between(30, h - 30);
+              var size = Phaser.Math.Between(8, 22);
+              var type = Phaser.Math.Between(0, 3);
+              var alpha = Phaser.Math.FloatBetween(0.08, 0.2);
+              var speed = Phaser.Math.FloatBetween(0.2, 0.8);
+              var drift = Phaser.Math.FloatBetween(-0.3, 0.3);
+              shapes.push({ x: x, y: y, size: size, type: type, alpha: alpha, speed: speed, drift: drift, baseY: y, time: Phaser.Math.FloatBetween(0, 6.28) });
+            }
 
-      function formatStatus(status) {
-        return String(status || '').replaceAll('_', ' ') || 'active';
-      }
+            // Snake trail
+            var trail = [];
+            var trailX = -100;
+            for (var j = 0; j < 15; j++) trail.push({ x: trailX - j * 14, y: h * 0.7 });
 
-      function formatTime(value) {
-        if (!value) return '';
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) return '';
-        return parsed.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-      }
+            this.events.on('update', function (time) {
+              gfx.clear();
+              var t = time / 1000;
 
-      function shotMarkup(shot, title) {
-        if (!shot || !shot.image_url) return '';
-        return `
-          <div class="mini-shot">
-            <div class="preview-browser">
-              <img class="preview-shot" src="${escapeHtml(shot.image_url)}" alt="${escapeHtml(title)}">
-            </div>
-          </div>
-        `;
-      }
+              // Floating shapes (tetris pieces, circles, squares)
+              shapes.forEach(function (s) {
+                s.time += 0.015;
+                var yOff = Math.sin(s.time) * 15;
+                var xOff = Math.cos(s.time * 0.7) * 5;
+                gfx.fillStyle(0xffffff, s.alpha);
+                if (s.type === 0) { // square
+                  gfx.fillRect(s.x + xOff, s.baseY + yOff, s.size, s.size);
+                } else if (s.type === 1) { // L-piece
+                  gfx.fillRect(s.x + xOff, s.baseY + yOff, s.size, s.size);
+                  gfx.fillRect(s.x + xOff + s.size, s.baseY + yOff, s.size, s.size);
+                  gfx.fillRect(s.x + xOff, s.baseY + yOff - s.size, s.size, s.size);
+                } else if (s.type === 2) { // circle
+                  gfx.fillCircle(s.x + xOff, s.baseY + yOff, s.size / 2);
+                } else { // T-piece
+                  gfx.fillRect(s.x + xOff - s.size, s.baseY + yOff, s.size * 3, s.size);
+                  gfx.fillRect(s.x + xOff, s.baseY + yOff - s.size, s.size, s.size);
+                }
+              });
 
-      function renderHero(data) {
-        const studio = data.studio || {};
-        const shipped = (data.games && data.games.shipped) || [];
-        const upcoming = (data.games && data.games.upcoming) || {};
-        const changes = data.changes || [];
-        const team = data.team || [];
-        const primaryGame = shipped[0] || {};
-        const primaryChange = changes[0] || {};
-
-        document.getElementById('studio-kicker').textContent = studio.slug || studio.name || 'studio';
-        document.getElementById('studio-name').textContent = studio.name || 'ystackai';
-        document.getElementById('studio-hero-text').textContent = studio.hero_text || studio.tagline || '';
-
-        const avatars = document.getElementById('hero-avatars');
-        if (team.length) {
-          avatars.innerHTML = team.map((member) => `
-            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
-          `).join('') + `<span class="avatar-note">${team.length} staff, live roster, public studio state</span>`;
+              // Snake trail slithering across
+              trailX += 1.2;
+              if (trailX > w + 200) trailX = -200;
+              for (var k = 0; k < trail.length; k++) {
+                trail[k].x = trailX - k * 14;
+                trail[k].y = h * 0.7 + Math.sin((t * 2) + k * 0.5) * 12;
+              }
+              trail.forEach(function (seg, idx) {
+                var a = idx === 0 ? 0.3 : 0.15 - (idx * 0.008);
+                if (a < 0.02) a = 0.02;
+                gfx.fillStyle(0xfbbf24, a);
+                var r = idx === 0 ? 8 : 6;
+                gfx.fillCircle(seg.x, seg.y, r);
+              });
+            });
+          }
         }
+      };
+      new Phaser.Game(config);
+    }
+  </script>
+  <script>
+    StudioShell.init('ystackai').then(function () {
+      var d = StudioShell.data;
+      var esc = StudioShell.esc;
 
-        if (primaryGame.play_url) {
-          document.getElementById('cta-play').href = primaryGame.play_url;
-          document.getElementById('cta-play').textContent = `Play ${primaryGame.title || 'latest game'}`;
-        }
-        if (primaryChange.link_url) {
-          document.getElementById('cta-progress').href = primaryChange.link_url;
-          document.getElementById('cta-progress').textContent = `See ${primaryChange.id || 'latest progress'}`;
-        }
-        if (data.chat && data.chat.invite_url) {
-          document.getElementById('cta-discord').href = data.chat.invite_url;
-        }
+      StudioShell.renderNav('nav');
 
-        const showcaseCards = [primaryGame, upcoming].filter((game) => game && game.title);
-        const heroShowcase = document.getElementById('hero-showcase');
-        if (showcaseCards.length) {
-          heroShowcase.innerHTML = showcaseCards.map((game) => {
-            const shot = (game.shots || [])[0];
-            return `
-              <article class="preview-card panel">
-                <div class="preview-browser">
-                  <img class="preview-shot" src="${escapeHtml((shot && shot.image_url) || '/studio-data/ystackai/shots/snakey-game.png')}" alt="${escapeHtml(game.title)} preview">
-                </div>
-                <h3>${escapeHtml(game.title)}</h3>
-                <div class="preview-meta">${escapeHtml(formatStatus(game.status || game.dev_state))}</div>
-              </article>
-            `;
-          }).join('');
-        }
+      // Hero
+      // Keep the styled hero name, don't overwrite with lowercase
+      document.getElementById('hero-tagline').textContent = d.tagline;
+      document.getElementById('hero-avatars').innerHTML = d.team.map(function (m) {
+        return '<img src="' + esc(m.avatar) + '" alt="' + esc(m.name) + '" title="' + esc(m.name + ' — ' + m.role) + '" style="width:2.8rem;height:2.8rem;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1)">';
+      }).join('');
+      var firstGame = (d.games.shipped && d.games.shipped[0]) || {};
+      if (firstGame.play_url) {
+        document.getElementById('hero-play').href = firstGame.play_url;
+        document.getElementById('hero-play').textContent = 'Play ' + (firstGame.title || 'latest');
+      }
+      if (d.discord_invite) document.getElementById('hero-discord').href = d.discord_invite;
+
+      // Boot Phaser hero
+      bootHeroScene();
+
+      // Shipped games
+      var shipped = (d.games && d.games.shipped) || [];
+      document.getElementById('shipped-games').innerHTML = shipped.map(Components.gameCard).join('');
+
+      // Building
+      var building = d.games && d.games.building;
+      if (building) {
+        document.getElementById('building-info').innerHTML =
+          '<div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.03em">' + esc(building.title) + ' × ' + esc((building.mashup || '').split('×')[1] || '') + '</div>'
+          + '<div style="color:var(--studio-muted);margin-top:0.25rem">' + esc(building.summary) + '</div>'
+          + (building.play_url ? '<a href="' + esc(building.play_url) + '" style="color:var(--studio-accent);text-decoration:none;font-weight:600;font-size:0.85rem;display:inline-block;margin-top:0.5rem">open current build →</a>' : '');
+        document.getElementById('phase-bar').innerHTML = Components.phaseBar(building.phases || [], building.phase || 'build');
       }
 
-      function renderTeam(team) {
-        if (!team || !team.length) return;
-        document.getElementById('team-strip').innerHTML = team.map((member) => `
-          <div class="team-chip">
-            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
-            <span>${escapeHtml(member.display_name)} · ${escapeHtml(member.archetype || member.slot_id)}</span>
-          </div>
-        `).join('');
+      // Discord
+      if (d.discord_invite) document.getElementById('discord-cta').href = d.discord_invite;
 
-        document.getElementById('team-roster').innerHTML = team.map((member) => `
-          <article class="panel staff-card">
-            <img src="${escapeHtml(member.avatar_url)}" alt="${escapeHtml(member.display_name)}">
-            <div>
-              <div class="meta mono">${escapeHtml(String(member.slot_id || '').replaceAll('_', ' '))}</div>
-              <h3>${escapeHtml(member.display_name)}</h3>
-              <p>${escapeHtml(`Archetype: ${member.archetype || 'operator'} · Tone: ${member.tone || 'steady'}.`)}</p>
-            </div>
-          </article>
-        `).join('');
-      }
+      // Team
+      document.getElementById('team-grid').innerHTML = d.team.map(Components.teamCard).join('');
 
-      function renderShipped(games) {
-        const target = document.getElementById('shipped-games');
-        if (!games || !games.length) {
-          target.innerHTML = '';
-          return;
-        }
-        target.innerHTML = games.map((game) => `
-          <article class="panel game-card">
-            <span class="status-pill status-live">${escapeHtml(formatStatus(game.status))}</span>
-            <h3>${escapeHtml(game.title)}</h3>
-            <p>${escapeHtml(game.summary || '')}</p>
-            <div class="mini-shots">
-              ${(game.shots || []).slice(0, 2).map((shot) => shotMarkup(shot, game.title)).join('')}
-            </div>
-            <div class="link-row">
-              ${game.play_url ? `<a class="btn btn-primary" href="${escapeHtml(game.play_url)}">Play ${escapeHtml(game.title)}</a>` : ''}
-              ${game.studio_url ? `<a class="btn btn-secondary" href="${escapeHtml(game.studio_url)}">Open game page</a>` : ''}
-            </div>
-          </article>
-        `).join('');
-      }
+      // Footer
+      document.getElementById('footer').innerHTML = Components.footer();
 
-      function renderUpcoming(upcoming) {
-        const gameCard = document.getElementById('upcoming-game-card');
-        const stateCard = document.getElementById('upcoming-state-card');
-        if (!upcoming || !upcoming.title) {
-          gameCard.innerHTML = '';
-          stateCard.innerHTML = '';
-          return;
-        }
+      // Load live chat
+      fetch('/api/messages').then(function (r) { return r.json(); }).then(function (msgs) {
+        Components.chatFeed(msgs, 'chat-feed');
+      }).catch(function () {
+        document.getElementById('chat-feed').innerHTML = '<div style="color:var(--studio-soft)">Feed unavailable</div>';
+      });
 
-        gameCard.innerHTML = `
-          <span class="status-pill status-review">${escapeHtml(formatStatus(upcoming.status || upcoming.dev_state))}</span>
-          <h3>${escapeHtml(upcoming.title)}</h3>
-          <p>${escapeHtml(upcoming.summary || '')}</p>
-          <div class="mini-shots">
-            ${(upcoming.shots || []).slice(0, 2).map((shot) => shotMarkup(shot, upcoming.title)).join('')}
-          </div>
-          <div class="link-row">
-            ${upcoming.play_url ? `<a class="btn btn-secondary" href="${escapeHtml(upcoming.play_url)}">Open current build</a>` : ''}
-            ${upcoming.studio_url ? `<a class="btn btn-secondary" href="${escapeHtml(upcoming.studio_url)}">Studio game page</a>` : ''}
-          </div>
-        `;
-
-        stateCard.innerHTML = `
-          <div class="meta mono">Build lane</div>
-          <h3>${escapeHtml(upcoming.title)} status</h3>
-          <div class="stack-sm">
-            <div class="subtle">Dev state: <span class="mono">${escapeHtml(upcoming.dev_state || formatStatus(upcoming.status))}</span></div>
-            <div class="subtle">Owner: <span class="mono">${escapeHtml(upcoming.owner || 'unassigned')}</span></div>
-            <div class="subtle">Next milestone: <span class="mono">${escapeHtml(upcoming.next_milestone || 'next review')}</span></div>
-          </div>
-        `;
-      }
-
-      function renderProgress(changes, activity) {
-        const changesTarget = document.getElementById('progress-changes');
-        const activityTarget = document.getElementById('activity-list');
-
-        changesTarget.innerHTML = (changes || []).map((change) => `
-          <div class="card">
-            <div class="meta mono">${escapeHtml(change.id)} · ${escapeHtml(formatStatus(change.status))}</div>
-            <h4>${escapeHtml(change.title)}</h4>
-            <p>${escapeHtml(change.summary || '')}</p>
-            <div class="subtle">${escapeHtml(change.opened_by_display || change.opened_by || '')}${change.link_url ? ` · <a href="${escapeHtml(change.link_url)}">open</a>` : ''}</div>
-          </div>
-        `).join('') || `
-          <div class="card">
-            <h4>No live changes yet</h4>
-            <p>Once a change request opens, it will appear here.</p>
-          </div>
-        `;
-
-        activityTarget.innerHTML = (activity || []).map((event) => `
-          <div class="activity-item">
-            <img class="activity-avatar" src="${escapeHtml(event.actor_avatar_url || '/team/avatars/brad.svg')}" alt="${escapeHtml(event.actor_display_name || 'team member')}">
-            <div class="activity-copy">
-              <strong>${escapeHtml(event.actor_display_name || 'Team')}</strong>
-              <span>${escapeHtml(event.summary || '')}</span>
-              <span class="subtle">${escapeHtml(formatTime(event.created_at))}${event.link_target ? ` · <a href="${escapeHtml(event.link_target)}">open</a>` : ''}</span>
-            </div>
-          </div>
-        `).join('') || `
-          <div class="activity-item">
-            <div class="activity-copy">
-              <strong>Waiting for activity</strong>
-              <span>The runtime will publish the next visible event here.</span>
-            </div>
-          </div>
-        `;
-      }
-
-      function renderChat(chat) {
-        if (!chat) return;
-        document.getElementById('discord-presence-count').textContent = chat.presence_count > 0 ? `${chat.presence_count} online now` : 'discord live';
-        document.getElementById('chat-headline').textContent = chat.headline || 'Talk to the team on Discord';
-        if (chat.invite_url) document.getElementById('chat-join-cta').href = chat.invite_url;
-        if (chat.widget_url) document.getElementById('discord-widget').src = chat.widget_url;
-
-        const log = document.getElementById('chat-log');
-        log.innerHTML = (chat.messages || []).map((message) => `
-          <div class="chat-message">
-            <div class="chat-message-head">
-              <div class="chat-author">
-                ${message.avatar_url ? `<img class="chat-avatar" src="${escapeHtml(message.avatar_url)}" alt="${escapeHtml(message.author)}">` : ''}
-                <strong>${escapeHtml(message.author || 'team')}</strong>
-              </div>
-              <span class="subtle">${escapeHtml(formatTime(message.timestamp))}</span>
-            </div>
-            <p>${escapeHtml(message.content || '').replaceAll('\n', '<br>')}</p>
-            ${(message.reactions && message.reactions.length) ? `
-              <div class="chat-reactions">
-                ${message.reactions.map((reaction) => `<span>${escapeHtml(reaction.emoji)} ${escapeHtml(reaction.count)}</span>`).join('')}
-              </div>
-            ` : ''}
-          </div>
-        `).join('') || `
-          <div class="chat-message">
-            <div class="chat-message-head">
-              <strong>No public chatter yet</strong>
-            </div>
-            <p>The next Discord exchange will show up here.</p>
-          </div>
-        `;
-      }
-
-      function renderDispatches(chat) {
-        const target = document.getElementById('founder-dispatches');
-        const messages = (chat && chat.messages) || [];
-        const bradMessages = messages.filter((message) => /brad/i.test(message.author || '')).slice(-3).reverse();
-
-        target.innerHTML = bradMessages.map((message) => `
-          <div class="dispatch-card">
-            <strong>${escapeHtml(message.author)}</strong>
-            <span class="subtle">${escapeHtml(formatTime(message.timestamp))}</span>
-            <p>${escapeHtml(message.content || '')}</p>
-          </div>
-        `).join('') || `
-          <div class="dispatch-card">
-            <strong>Brad dispatches are quiet right now.</strong>
-            <p>That will not last.</p>
-          </div>
-        `;
-      }
-
-      async function fetchJson(url) {
-        const response = await fetch(url, { cache: 'no-store' });
-        if (!response.ok) throw new Error(`failed to load ${url}`);
-        return response.json();
-      }
-
-      async function boot() {
-        try {
-          const [live, chat] = await Promise.all([fetchJson(liveUrl), fetchJson(chatUrl)]);
-          renderHero(live);
-          renderTeam(live.team || []);
-          renderShipped((live.games && live.games.shipped) || []);
-          renderUpcoming(live.games && live.games.upcoming);
-          renderProgress(live.changes || [], live.activity || []);
-          renderChat(chat);
-          renderDispatches(chat);
-        } catch (error) {
-          console.warn('ystackai studio snapshot unavailable', error);
-        }
-      }
-
-      boot();
-    }());
+      // Static activity (will be populated from studio.json in future)
+      Components.activityFeed([
+        {type: 'PR merged', title: 'fix: StackY start button + audio', quote: '"line clear chime, chocolate rumble, game over tone. all procedural." — wei', meta: 'wei · merged by schneider'},
+        {type: 'PR merged', title: 'feat: Tron persistent trail wall', quote: '"7s decay is the sweet spot." — jb', meta: 'wei · reviewed by brad, jb, schneider'},
+        {type: 'test suite', title: '47 temporal edge case tests', quote: '"covering 6.999s, 7.0s, 7.001s with floating point tolerance." — schneider', meta: 'schneider · the schneider protocol'},
+        {type: 'concept', title: 'StackY: Wonka chocolate river', quote: '"non. a clone with different colors is not a game." — jb', meta: 'jb blocked vanilla tetris'}
+      ], 'activity-feed');
+    });
   </script>
 </body>
 </html>

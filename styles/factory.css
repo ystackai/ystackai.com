@@ -141,18 +141,18 @@ a {
 
 .hero-grid {
   display: grid;
-  grid-template-columns: 1.2fr 0.9fr;
-  gap: 2rem;
-  align-items: end;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
   margin-top: 1.5rem;
 }
 
 .hero-copy h1,
 .page-head h1 {
   margin: 0;
-  font-size: clamp(3rem, 7vw, 5.7rem);
-  line-height: 0.95;
-  letter-spacing: -0.07em;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
 }
 
 .hero-copy p,
@@ -308,6 +308,31 @@ a {
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+}
+
+.studio-preview {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.studio-preview .preview-card {
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.studio-preview .preview-browser {
+  height: 140px;
+  border-radius: var(--radius-sm);
+}
+
+.studio-preview .preview-card h3 {
+  margin-top: 0.8rem;
+  font-size: 1.1rem;
+}
+
+.studio-preview .preview-meta {
+  font-size: 0.82rem;
+  color: var(--accent-2);
 }
 
 .compact-section {
@@ -592,13 +617,13 @@ a {
 
 .preview-browser {
   position: relative;
-  height: 230px;
+  height: 200px;
   overflow: hidden;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.18)),
-    #08090d;
+    linear-gradient(135deg, rgba(255, 138, 61, 0.08), rgba(99, 210, 161, 0.06)),
+    #0d0f14;
 }
 
 .preview-browser::before {

@@ -1,13 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <circle cx="60" cy="60" r="58" fill="#0891b2" stroke="#0e7490" stroke-width="2"/>
-  <circle cx="60" cy="48" r="20" fill="#e0f2fe"/>
-  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#e0f2fe"/>
-  <!-- focused eyes -->
-  <circle cx="52" cy="45" r="3" fill="#164e63"/>
-  <circle cx="68" cy="45" r="3" fill="#164e63"/>
-  <!-- slight determined expression -->
-  <path d="M 52 55 Q 60 59 68 55" fill="none" stroke="#164e63" stroke-width="2" stroke-linecap="round"/>
-  <!-- antenna -->
-  <line x1="60" y1="28" x2="60" y2="10" stroke="#22d3ee" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+  <circle cx="60" cy="60" r="58" fill="#22d3ee"/>
+  <circle cx="60" cy="55" r="28" fill="#f5d0a9"/>
+  <path d="M30 52 Q30 18 60 16 Q90 18 90 52 L88 42 Q85 22 60 20 Q35 22 32 42 Z" fill="#0f172a"/>
+  <path d="M30 52 L28 70 Q30 65 34 55 Z" fill="#0f172a"/>
+  <path d="M90 52 L92 70 Q90 65 86 55 Z" fill="#0f172a"/>
+  <ellipse cx="48" cy="50" rx="3.5" ry="3" fill="#0f172a"/>
+  <ellipse cx="72" cy="50" rx="3.5" ry="3" fill="#0f172a"/>
+  <circle cx="49" cy="49" r="1.2" fill="#fff"/>
+  <circle cx="73" cy="49" r="1.2" fill="#fff"/>
+  <path d="M50 62 Q60 66 70 62" fill="none" stroke="#c4956a" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M35 78 Q35 95 60 98 Q85 95 85 78 L75 72 L60 76 L45 72 Z" fill="#334155"/>
+  <line x1="55" y1="76" x2="53" y2="86" stroke="#94a3b8" stroke-width="1.2"/>
+  <line x1="65" y1="76" x2="67" y2="86" stroke="#94a3b8" stroke-width="1.2"/>
 </svg>

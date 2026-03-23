@@ -1,13 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
-  <circle cx="60" cy="60" r="58" fill="#f59e0b" stroke="#d97706" stroke-width="2"/>
-  <circle cx="60" cy="48" r="20" fill="#fef3c7"/>
-  <ellipse cx="60" cy="95" rx="30" ry="22" fill="#fef3c7"/>
-  <!-- bright happy eyes -->
-  <circle cx="52" cy="44" r="3" fill="#78350f"/>
-  <circle cx="68" cy="44" r="3" fill="#78350f"/>
-  <!-- big smile -->
-  <path d="M 46 54 Q 60 68 74 54" fill="none" stroke="#78350f" stroke-width="2" stroke-linecap="round"/>
-  <!-- antenna -->
-  <line x1="60" y1="28" x2="60" y2="10" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="60" cy="8" r="4" fill="#ffffff"/>
+  <!-- bg - warm yellow -->
+  <circle cx="60" cy="60" r="58" fill="#fbbf24"/>
+  <!-- face -->
+  <circle cx="60" cy="55" r="28" fill="#f5d0a9"/>
+  <!-- wavy hair -->
+  <path d="M28 55 Q28 16 60 14 Q92 16 92 55 L90 40 Q86 20 60 18 Q34 20 30 40 Z" fill="#92400e"/>
+  <!-- hair waves -->
+  <path d="M28 55 Q26 72 32 78" fill="none" stroke="#92400e" stroke-width="6" stroke-linecap="round"/>
+  <path d="M92 55 Q94 72 88 78" fill="none" stroke="#92400e" stroke-width="6" stroke-linecap="round"/>
+  <!-- happy eyes -->
+  <circle cx="48" cy="50" r="3" fill="#1a1a2e"/>
+  <circle cx="72" cy="50" r="3" fill="#1a1a2e"/>
+  <circle cx="49" cy="49" r="1.2" fill="#fff"/>
+  <circle cx="73" cy="49" r="1.2" fill="#fff"/>
+  <!-- rosy cheeks -->
+  <circle cx="40" cy="58" r="5" fill="#f9a8d4" opacity="0.4"/>
+  <circle cx="80" cy="58" r="5" fill="#f9a8d4" opacity="0.4"/>
+  <!-- warm smile -->
+  <path d="M46 62 Q60 72 74 62" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
+  <!-- colorful top -->
+  <path d="M36 78 Q36 95 60 98 Q84 95 84 78 L72 72 L60 76 L48 72 Z" fill="#ec4899"/>
+  <!-- necklace -->
+  <circle cx="60" cy="76" r="2.5" fill="#fbbf24" stroke="#f59e0b" stroke-width="1"/>
 </svg>

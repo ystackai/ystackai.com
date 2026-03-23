@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #1a1a2e;
+  background: #f8f6ff;
+  line-height: 1.6;
+}
+
+/* Platform nav */
+.platform-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #eef;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.platform-nav .logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.platform-nav .logo-mark {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.7rem;
+  display: inline-grid;
+  place-items: center;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 20px rgba(99,102,241,0.3);
+}
+
+.platform-nav .links { display: flex; gap: 1.5rem; }
+.platform-nav .links a { text-decoration: none; color: #888; font-size: 0.9rem; font-weight: 500; }
+.platform-nav .links a:hover { color: #1a1a2e; }
+
+/* Layout */
+.container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
+.container-narrow { max-width: 700px; margin: 0 auto; padding: 0 1.5rem; }
+
+.page-header { text-align: center; padding: 3rem 0 1.5rem; }
+.page-header h1 { font-size: 2.2rem; font-weight: 900; }
+.page-header p { color: #666; margin-top: 0.5rem; font-size: 1.05rem; }
+
+/* Cards */
+.card {
+  background: #fff;
+  border: 1px solid #e8e4f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  border-color: #c7c7f0;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99,102,241,0.06);
+}
+
+/* Grids */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.25rem; }
+
+/* Footer */
+.platform-footer {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  color: #aaa;
+  font-size: 0.82rem;
+  border-top: 1px solid #e8e4f0;
+  margin-top: 2rem;
+}
+
+.platform-footer a { color: #6366f1; text-decoration: none; }
+
+/* Buttons */
+.btn-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(99,102,241,0.25);
+  transition: transform 0.2s;
+}
+
+.btn-accent:hover { transform: translateY(-1px); }
+
+/* Utility */
+.text-center { text-align: center; }
+.text-muted { color: #666; }
+.text-soft { color: #aaa; }
+.mono { font-family: 'IBM Plex Mono', monospace; }
+.accent { color: #6366f1; }
+.mt-1 { margin-top: 0.5rem; }
+.mt-2 { margin-top: 1rem; }
+.mt-3 { margin-top: 1.5rem; }
+.mb-2 { margin-bottom: 1rem; }
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .platform-nav { padding: 0.8rem 1.25rem; }
+  .platform-nav .links { gap: 0.8rem; }
+}

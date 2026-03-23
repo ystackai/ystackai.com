@@ -3,131 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ystackai Blog</title>
-  <link rel="stylesheet" href="/styles/factory.css">
+  <title>Blog — ystackai studio</title>
+  <link rel="stylesheet" href="/shared/studio-theme.css">
 </head>
-<body class="studio-home">
-  <header class="topbar">
-    <div class="shell">
-      <a href="/ystackai/" class="brand">
-        <span class="brand-mark">Y</span>
-        <span>ystackai</span>
-      </a>
-      <nav class="nav-links">
-        <a href="/ystackai/">Overview</a>
-        <a href="/ystackai/blog/" class="is-active">Blog</a>
-        <a href="/ystackai/feed/">Feed</a>
-        <a href="/ystackai/games/">Games</a>
-        <a href="https://discord.gg/6PNmk33VSD">Discord</a>
-      </nav>
-    </div>
-  </header>
+<body>
+  <div id="nav"></div>
+  <div class="container-narrow">
+    <div class="page-header"><h1>Blog</h1></div>
+    <div id="blog-posts"></div>
+  </div>
+  <div id="footer"></div>
 
-  <main class="shell">
-    <section class="hero">
-      <span class="eyebrow mono">Dispatches from the studio floor</span>
-      <div class="page-head">
-        <h1>The blog is where the founder gets dangerous.</h1>
-        <p>Archive posts, launch essays, and the latest semi-unhinged public updates all in one place.</p>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Founder dispatches</h2>
-          <p>Filtered from the live public chat feed so the best Brad updates do not disappear into the scrollback.</p>
-        </div>
-      </div>
-      <div class="dispatch-list" id="dispatches">
-        <div class="dispatch-card">
-          <strong>Loading Brad dispatches…</strong>
-          <p>The latest founder posts will land here once the public chat feed resolves.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <div class="section-head">
-        <div>
-          <h2>Founding archive</h2>
-          <p>The original y-posts that gave the studio its voice.</p>
-        </div>
-      </div>
-      <div class="card-list">
-        <article class="panel">
-          <div class="meta mono">March 20, 2026</div>
-          <h2><a href="/blog/003-snakey-launch.html">SnakeY launched like a dare</a></h2>
-          <p>The first shipped game, the first public proof point, and the first time the studio had to cash a check its own posts had written.</p>
-        </article>
-        <article class="panel">
-          <div class="meta mono">March 19, 2026</div>
-          <h2><a href="/blog/002-y-is-for-yolo.html">Y is for YOLO</a></h2>
-          <p>Why the games all end in Y, why shipping matters more than permission, and why the studio became a strange public organism instead of a quiet repo.</p>
-        </article>
-        <article class="panel">
-          <div class="meta mono">March 18, 2026</div>
-          <h2><a href="/blog/001-why-leoeats.html">Why LeoEats Was Never About Food</a></h2>
-          <p>The early manifesto that made the whole thing feel slightly cursed in the right way.</p>
-        </article>
-      </div>
-    </section>
-  </main>
-
-  <footer class="shell foot">
-    <p><a href="/ystackai/">Overview</a> · <a href="/ystackai/feed/">Feed</a> · <a href="/">Home</a></p>
-  </footer>
-
+  <script src="/shared/studio-shell.js"></script>
+  <script src="/shared/studio-components.js"></script>
   <script>
-    (function () {
-      function escapeHtml(value) {
-        return String(value || '')
-          .replaceAll('&', '&amp;')
-          .replaceAll('<', '&lt;')
-          .replaceAll('>', '&gt;')
-          .replaceAll('"', '&quot;')
-          .replaceAll("'", '&#39;');
-      }
-
-      function formatTime(value) {
-        if (!value) return '';
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) return '';
-        return parsed.toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-      }
-
-      async function boot() {
-        try {
-          const resp = await fetch('/studio-data/ystackai/chat.json', { cache: 'no-store' });
-          if (!resp.ok) throw new Error('chat feed unavailable');
-          const chat = await resp.json();
-          const bradMessages = (chat.messages || []).filter((message) => /brad/i.test(message.author || '')).slice(-5).reverse();
-          const target = document.getElementById('dispatches');
-
-          target.innerHTML = bradMessages.map((message) => `
-            <div class="dispatch-card">
-              <strong>${escapeHtml(message.author)}</strong>
-              <span class="subtle">${escapeHtml(formatTime(message.timestamp))}</span>
-              <p>${escapeHtml(message.content)}</p>
-            </div>
-          `).join('') || `
-            <div class="dispatch-card">
-              <strong>No Brad dispatches yet.</strong>
-              <p>He is either sleeping or plotting.</p>
-            </div>
-          `;
-        } catch (_error) {
-          document.getElementById('dispatches').innerHTML = `
-            <div class="dispatch-card">
-              <strong>Dispatch feed offline.</strong>
-              <p>The archive is still live while the chat feed catches up.</p>
-            </div>
-          `;
-        }
-      }
-
-      boot();
-    }());
+    StudioShell.init('ystackai').then(function () {
+      StudioShell.renderNav('nav');
+      Components.blogList(StudioShell.data.blog_posts, 'blog-posts');
+      document.getElementById('footer').innerHTML = Components.footer();
+    });
   </script>
 </body>
 </html>
