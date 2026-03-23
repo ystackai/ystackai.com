@@ -18,7 +18,7 @@
   "featured": {
     "game_id": "stacky",
     "change_id": "CR-0001",
-    "staff_slots": ["lead_engineer", "creative_director", "qa_lead"]
+    "staff_slots": ["game_engineer", "design_engineer", "quality_engineer"]
   },
   "custom_blocks": [
     {

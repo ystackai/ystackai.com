@@ -80,9 +80,9 @@
       "game_id": "",
       "change_id": "",
       "staff_slots": [
-        "lead_engineer",
-        "creative_director",
-        "qa_lead"
+        "game_engineer",
+        "design_engineer",
+        "quality_engineer"
       ]
     },
     "custom_blocks": [
@@ -95,8 +95,8 @@
     ]
   },
   "roster": {
-    "founder": {
-      "slot_id": "founder",
+    "studio_director": {
+      "slot_id": "studio_director",
       "display_name": "Brad Chen",
       "archetype": "visionary",
       "tone": "bombastic",
@@ -109,29 +109,29 @@
       "tone": "steady",
       "status": "active"
     },
-    "lead_engineer": {
-      "slot_id": "lead_engineer",
+    "game_engineer": {
+      "slot_id": "game_engineer",
       "display_name": "Wei Lin",
       "archetype": "systems",
       "tone": "precise",
       "status": "active"
     },
-    "creative_director": {
-      "slot_id": "creative_director",
+    "design_engineer": {
+      "slot_id": "design_engineer",
       "display_name": "Jean-Baptiste Moreau",
       "archetype": "taste",
       "tone": "minimal",
       "status": "active"
     },
-    "qa_lead": {
-      "slot_id": "qa_lead",
+    "quality_engineer": {
+      "slot_id": "quality_engineer",
       "display_name": "Dr. Klaus Schneider",
       "archetype": "validator",
       "tone": "rigorous",
       "status": "active"
     },
-    "community": {
-      "slot_id": "community",
+    "community_manager": {
+      "slot_id": "community_manager",
       "display_name": "Megan Reyes",
       "archetype": "community",
       "tone": "warm",
