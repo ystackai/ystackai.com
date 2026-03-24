@@ -653,3 +653,16 @@ footer a { color: var(--studio-accent); text-decoration: none; }
   background: #f0f0ff;
   border-color: #f0f0ff;
 }
+
+/* Nav CTA button */
+.platform-nav .nav-cta {
+  background: var(--studio-accent) !important;
+  color: #fff !important;
+  padding: 0.4rem 1rem !important;
+  border-radius: 8px !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
+}
+.platform-nav .nav-cta:hover {
+  background: #818cf8 !important;
+}
