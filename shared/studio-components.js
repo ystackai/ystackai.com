@@ -73,7 +73,7 @@ var Components = (function () {
       .then(function(r) { return r.json(); })
       .catch(function() {
         // Fallback: try via GitHub API directly
-        return fetch('https://api.github.com/repos/ystackai/ystackai.com/issues?state=open&per_page=50')
+        return fetch('https://api.github.com/repos/ystackai/studio-ystackai/issues?state=open&per_page=50')
           .then(function(r) { return r.json(); })
           .then(function(issues) {
             return {
@@ -121,7 +121,7 @@ var Components = (function () {
             var agent = claimed.length ? claimed[0].replace('claimed:', '') : '';
             var isBlocker = (issue.labels || []).indexOf('ship-blocker') >= 0;
 
-            html += '<a class="ticket-card' + (isBlocker ? ' blocker' : '') + '" href="https://github.com/ystackai/ystackai.com/issues/' + issue.number + '" target="_blank">';
+            html += '<a class="ticket-card' + (isBlocker ? ' blocker' : '') + '" href="https://github.com/ystackai/studio-ystackai/issues/' + issue.number + '" target="_blank">';
             html += '<div class="ticket-title">#' + issue.number + ' ' + esc(issue.title) + '</div>';
             if (agent) html += '<div class="ticket-agent">' + esc(agent) + '</div>';
             if (labels.length) html += '<div class="ticket-labels">' + labels.map(function(l) { return '<span class="ticket-label label-' + l + '">' + esc(l) + '</span>'; }).join('') + '</div>';
