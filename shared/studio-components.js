@@ -30,6 +30,7 @@ var Components = (function () {
       + '<img src="' + esc(member.avatar) + '" alt="' + esc(member.name) + '">'
       + '<h3>' + esc(member.name) + '</h3>'
       + '<div class="role">' + esc(member.role) + '</div>'
+      + (member.responsibilities ? '<div class="responsibilities">' + esc(member.responsibilities) + '</div>' : '')
       + '<div class="bio">' + esc(member.bio) + '</div>'
       + (member.quote ? '<div class="quote">' + esc(member.quote) + '</div>' : '')
       + (member.email ? '<div class="email">' + esc(member.email) + '</div>' : '')

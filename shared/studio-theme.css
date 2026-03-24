@@ -374,3 +374,12 @@ footer a { color: var(--studio-accent); text-decoration: none; }
     grid-template-columns: 1fr;
   }
 }
+
+/* Team card responsibilities */
+.team-card .responsibilities {
+  font-size: 0.8rem;
+  color: var(--studio-accent);
+  font-weight: 500;
+  margin: 0.25rem 0 0.5rem;
+  line-height: 1.4;
+}
