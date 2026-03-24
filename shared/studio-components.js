@@ -3,7 +3,7 @@
  * Depends on StudioShell for data and esc().
  */
 var Components = (function () {
-  var esc = StudioShell.esc;
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
   var AGENT_COLORS = {
     'Brad [CEO]': '#a78bfa', 'Derek [EM]': '#6ee7b7',
