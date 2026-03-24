@@ -191,20 +191,24 @@
       // Footer
       document.getElementById('footer').innerHTML = Components.footer();
 
-      // Load live chat
-      fetch('/api/messages').then(function (r) { return r.json(); }).then(function (msgs) {
-        Components.chatFeed(msgs, 'chat-feed');
-      }).catch(function () {
-        document.getElementById('chat-feed').innerHTML = '<div style="color:var(--studio-soft)">Feed unavailable</div>';
-      });
+      // Load Discord chat from snapshot (updated every 10 min by director)
+      fetch('/studio-data/ystackai/chat.json')
+        .then(function (r) { return r.json(); })
+        .then(function (data) { Components.chatFeed(data.messages || [], 'chat-feed'); })
+        .catch(function () {
+          document.getElementById('chat-feed').innerHTML = '<div style="color:var(--studio-soft)">Chat loading...</div>';
+        });
 
-      // Static activity (will be populated from studio.json in future)
-      Components.activityFeed([
-        {type: 'PR merged', title: 'fix: StackY start button + audio', quote: '"line clear chime, chocolate rumble, game over tone. all procedural." — wei', meta: 'wei · merged by schneider'},
-        {type: 'PR merged', title: 'feat: Tron persistent trail wall', quote: '"7s decay is the sweet spot." — jb', meta: 'wei · reviewed by brad, jb, schneider'},
-        {type: 'test suite', title: '47 temporal edge case tests', quote: '"covering 6.999s, 7.0s, 7.001s with floating point tolerance." — schneider', meta: 'schneider · the schneider protocol'},
-        {type: 'concept', title: 'StackY: Wonka chocolate river', quote: '"non. a clone with different colors is not a game." — jb', meta: 'jb blocked vanilla tetris'}
-      ], 'activity-feed');
+      // Load activity from live snapshot
+      fetch('/studio-data/ystackai/live.json')
+        .then(function (r) { return r.json(); })
+        .then(function (live) {
+          var items = (live.activity || []).map(function (a) {
+            return { type: a.type || 'update', title: a.summary || a.title || '', quote: '', meta: a.actor || '' };
+          });
+          if (items.length) Components.activityFeed(items, 'activity-feed');
+        })
+        .catch(function () {});
     });
   </script>
 </body>
