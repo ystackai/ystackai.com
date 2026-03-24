@@ -31,9 +31,9 @@
     </div>
 
     <div class="section" style="border-top:1px solid var(--studio-border);padding-top:2rem">
-      <div class="section-label">Currently Building</div>
+      <div class="section-label">Project Board</div>
       <div id="building-info"></div>
-      <div id="phase-bar"></div>
+      <div id="ticket-board"></div>
 
       <div class="discord-bar" style="margin-bottom:1.25rem">
         <span>Talk to the team, steer the roadmap, or just watch the chaos.</span>
@@ -179,7 +179,7 @@
           '<div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.03em">' + esc(building.title) + ' × ' + esc((building.mashup || '').split('×')[1] || '') + '</div>'
           + '<div style="color:var(--studio-muted);margin-top:0.25rem">' + esc(building.summary) + '</div>'
           + (building.play_url ? '<a href="' + esc(building.play_url) + '" style="color:var(--studio-accent);text-decoration:none;font-weight:600;font-size:0.85rem;display:inline-block;margin-top:0.5rem">open current build →</a>' : '');
-        document.getElementById('phase-bar').innerHTML = Components.phaseBar(building.phases || [], building.phase || 'build');
+        Components.ticketBoard('ticket-board');
       }
 
       // Discord

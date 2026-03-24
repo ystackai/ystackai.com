@@ -57,6 +57,80 @@ var Components = (function () {
       + '</div>';
   }
 
+  function ticketBoard(containerId, boardUrl) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = '<p style="color:#999">Loading board...</p>';
+
+    fetch(boardUrl || 'https://204.168.165.90:8080/public/board')
+      .then(function(r) { return r.json(); })
+      .catch(function() {
+        // Fallback: try via GitHub API directly
+        return fetch('https://api.github.com/repos/ystackai/ystackai.com/issues?state=open&per_page=50')
+          .then(function(r) { return r.json(); })
+          .then(function(issues) {
+            return {
+              all_open_issues: issues.filter(function(i) { return !i.pull_request; }).map(function(i) {
+                return {
+                  number: i.number,
+                  title: i.title,
+                  labels: i.labels.map(function(l) { return l.name; }),
+                  assignees: i.assignees.map(function(a) { return a.login; }),
+                  milestone: i.milestone ? i.milestone.title : ''
+                };
+              })
+            };
+          });
+      })
+      .then(function(data) {
+        var issues = data.all_open_issues || [];
+        var columns = {
+          backlog: { title: 'Backlog', items: [] },
+          'in-progress': { title: 'In Progress', items: [] },
+          'in-review': { title: 'In Review', items: [] },
+          done: { title: 'Done', items: [] }
+        };
+
+        issues.forEach(function(issue) {
+          var labels = issue.labels || [];
+          var col = 'backlog';
+          if (labels.indexOf('in-progress') >= 0) col = 'in-progress';
+          else if (labels.indexOf('in-review') >= 0) col = 'in-review';
+          else if (labels.indexOf('done') >= 0) col = 'done';
+          columns[col].items.push(issue);
+        });
+
+        var html = '<div class="ticket-board">';
+        ['backlog', 'in-progress', 'in-review', 'done'].forEach(function(key) {
+          var column = columns[key];
+          html += '<div class="ticket-column">';
+          html += '<div class="ticket-column-header">' + esc(column.title) + ' <span class="ticket-count">' + column.items.length + '</span></div>';
+          html += '<div class="ticket-cards">';
+          column.items.forEach(function(issue) {
+            var labels = (issue.labels || []).filter(function(l) {
+              return ['backlog','in-progress','in-review','done','ship-blocker'].indexOf(l) < 0;
+            });
+            var claimed = (issue.labels || []).filter(function(l) { return l.indexOf('claimed:') === 0; });
+            var agent = claimed.length ? claimed[0].replace('claimed:', '') : '';
+            var isBlocker = (issue.labels || []).indexOf('ship-blocker') >= 0;
+
+            html += '<a class="ticket-card' + (isBlocker ? ' blocker' : '') + '" href="https://github.com/ystackai/ystackai.com/issues/' + issue.number + '" target="_blank">';
+            html += '<div class="ticket-title">#' + issue.number + ' ' + esc(issue.title) + '</div>';
+            if (agent) html += '<div class="ticket-agent">' + esc(agent) + '</div>';
+            if (labels.length) html += '<div class="ticket-labels">' + labels.map(function(l) { return '<span class="ticket-label label-' + l + '">' + esc(l) + '</span>'; }).join('') + '</div>';
+            html += '</a>';
+          });
+          if (!column.items.length) html += '<div class="ticket-empty">No items</div>';
+          html += '</div></div>';
+        });
+        html += '</div>';
+        el.innerHTML = html;
+      })
+      .catch(function(err) {
+        el.innerHTML = '<p style="color:#999">Board unavailable</p>';
+      });
+  }
+
   function chatFeed(messages, containerId) {
     var el = document.getElementById(containerId);
     if (!el || !messages || !messages.length) return;
@@ -112,6 +186,7 @@ var Components = (function () {
     teamCard: teamCard,
     teamRow: teamRow,
     phaseBar: phaseBar,
+    ticketBoard: ticketBoard,
     chatFeed: chatFeed,
     activityFeed: activityFeed,
     blogList: blogList,
