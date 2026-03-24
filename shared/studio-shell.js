@@ -6,7 +6,7 @@ var StudioShell = (function () {
   var data = null;
 
   async function init(slug) {
-    var resp = await fetch('/studio-data/' + slug + '/studio.json', { cache: 'no-store' });
+    var resp = await fetch('/' + slug + '/studio.json', { cache: 'no-store' });
     data = await resp.json();
     applyTheme(data.theme || {});
     return data;
