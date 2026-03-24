@@ -116,13 +116,26 @@
       width: 100px;
     }
 
-    /* Fixed laptop — stays in place */
+    /* Portrait — bobs BEHIND the laptop */
+    .crew-member > img {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      object-fit: cover;
+      object-position: center top;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Fixed laptop — in FRONT of the person */
     .crew-member .desk {
       width: 72px;
       height: 54px;
       position: relative;
-      z-index: 1;
-      margin-top: -14px;
+      z-index: 2;
+      margin-top: -18px;
     }
 
     .crew-member .desk img {
@@ -133,19 +146,6 @@
       border: none;
       border-radius: 0;
       box-shadow: none;
-    }
-
-    /* Portrait — bobs behind the laptop */
-    .crew-member > img {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      border: 3px solid rgba(255,255,255,0.3);
-      object-fit: cover;
-      object-position: center top;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      position: relative;
-      z-index: 2;
     }
 
     .crew-member .role {
