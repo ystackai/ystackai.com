@@ -510,3 +510,41 @@ footer a { color: var(--studio-accent); text-decoration: none; }
   font-size: 0.8rem;
   line-height: 1.5;
 }
+
+/* Force equal height MTG cards */
+.grid-3, #team-grid {
+  align-items: stretch;
+}
+
+.team-slot {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mtg-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mtg-portrait {
+  flex-shrink: 0;
+}
+
+.mtg-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mtg-bio {
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  #team-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+@media (max-width: 480px) {
+  #team-grid { grid-template-columns: 1fr !important; }
+}
