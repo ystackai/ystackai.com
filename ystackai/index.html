@@ -5,9 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ystackai studio</title>
   <link rel="stylesheet" href="/shared/studio-theme.css">
+  <link rel="stylesheet" href="/shared/platform.css">
 </head>
 <body>
-  <div id="nav"></div>
+  <nav class="platform-nav">
+    <a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>
+    <div class="links">
+      <a href="/games/">Games</a>
+      <a href="/studios/">Studios</a>
+    </div>
+  </nav>
 
   <div id="hero-banner" style="position:relative;text-align:center;padding:4rem 2rem 2rem;background:linear-gradient(135deg,var(--studio-hero-g1),var(--studio-hero-g2),var(--studio-hero-g3));color:#fff;overflow:hidden;">
     <div id="phaser-hero" style="position:absolute;inset:0;pointer-events:none;"></div>
@@ -155,20 +162,17 @@
       var d = StudioShell.data;
       var esc = StudioShell.esc;
 
-      StudioShell.renderNav('nav');
-
       // Hero
       // Keep the styled hero name, don't overwrite with lowercase
       document.getElementById('hero-tagline').textContent = d.tagline;
       document.getElementById('hero-avatars').innerHTML = d.team.map(function (m) {
         return '<img src="' + esc(m.avatar) + '" alt="' + esc(m.name) + '" title="' + esc(m.name + ' — ' + m.role) + '" style="width:2.8rem;height:2.8rem;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1)">';
       }).join('');
-      var firstGame = (d.games.shipped && d.games.shipped[0]) || {};
-      if (firstGame.play_url) {
-        document.getElementById('hero-play').href = firstGame.play_url;
-        document.getElementById('hero-play').textContent = 'Play ' + (firstGame.title || 'latest');
+      // Set Discord link in tab nav
+      if (d.discord_invite) {
+        var discordTab = document.getElementById('hero-discord');
+        if (discordTab) discordTab.href = d.discord_invite;
       }
-      if (d.discord_invite) document.getElementById('hero-discord').href = d.discord_invite;
 
       // Boot Phaser hero
       bootHeroScene();
@@ -177,18 +181,19 @@
       var shipped = (d.games && d.games.shipped) || [];
       document.getElementById('shipped-games').innerHTML = shipped.map(Components.gameCard).join('');
 
-      // Building
+      // Building + Board
       var building = d.games && d.games.building;
       if (building) {
         document.getElementById('building-info').innerHTML =
           '<div style="font-size:1.3rem;font-weight:800;letter-spacing:-0.03em">' + esc(building.title) + ' × ' + esc((building.mashup || '').split('×')[1] || '') + '</div>'
           + '<div style="color:var(--studio-muted);margin-top:0.25rem">' + esc(building.summary) + '</div>'
           + (building.play_url ? '<a href="' + esc(building.play_url) + '" style="color:var(--studio-accent);text-decoration:none;font-weight:600;font-size:0.85rem;display:inline-block;margin-top:0.5rem">open current build →</a>' : '');
-        Components.ticketBoard('ticket-board');
       }
+      Components.ticketBoard('ticket-board');
 
       // Discord
-      if (d.discord_invite) document.getElementById('discord-cta').href = d.discord_invite;
+      var discordCta = document.getElementById('discord-cta');
+      if (d.discord_invite && discordCta) discordCta.href = d.discord_invite;
 
       // Team
       document.getElementById('team-grid').innerHTML = d.team.map(Components.teamCard).join('');
