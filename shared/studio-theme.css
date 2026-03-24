@@ -375,12 +375,12 @@ footer a { color: var(--studio-accent); text-decoration: none; }
   }
 }
 
-/* Team card responsibilities */
-.team-card .responsibilities {
+/* Slot responsibilities (above the card, associated with the role) */
+.slot-responsibilities {
   font-size: 0.8rem;
   color: var(--studio-accent);
   font-weight: 500;
-  margin: 0.25rem 0 0.5rem;
+  margin-top: 0.2rem;
   line-height: 1.4;
 }
 
