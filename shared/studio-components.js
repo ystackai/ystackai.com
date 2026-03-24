@@ -25,16 +25,16 @@ var Components = (function () {
   function teamCard(member) {
     var slotLabel = (member.slot || '').replace(/_/g, ' ');
     return '<div class="team-slot">'
-      + (slotLabel ? '<div class="slot-header">' + esc(slotLabel) + ' slot'
-        + (member.responsibilities ? '<div class="slot-responsibilities">' + esc(member.responsibilities) + '</div>' : '')
-        + '</div>' : '')
+      + (slotLabel ? '<div class="slot-header">' + esc(slotLabel) + ' slot</div>' : '')
       + '<a href="/ystackai/team/profile.html?id=' + esc(member.id) + '" class="card team-card" style="text-decoration:none;color:inherit;display:block">'
       + '<img src="' + esc(member.avatar) + '" alt="' + esc(member.name) + '">'
       + '<h3>' + esc(member.name) + '</h3>'
       + '<div class="role">' + esc(member.role) + '</div>'
       + '<div class="bio">' + esc(member.bio) + '</div>'
       + (member.quote ? '<div class="quote">' + esc(member.quote) + '</div>' : '')
-      + '</a></div>';
+      + '</a>'
+      + (member.responsibilities ? '<div class="slot-responsibilities">' + esc(member.responsibilities) + '</div>' : '')
+      + '</div>';
   }
 
   function teamRow(team) {
