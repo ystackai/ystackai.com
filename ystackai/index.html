@@ -21,7 +21,12 @@
     <div style="position:relative;z-index:2;">
       <h1 id="hero-name" style="font-size:clamp(2.5rem,5vw,4rem);font-weight:900;letter-spacing:-2px;margin-bottom:0.5rem">YSTACK Games</h1>
       <p id="hero-tagline" style="font-size:1.15rem;color:rgba(255,255,255,0.85);max-width:500px;margin:0 auto"></p>
-      <div id="hero-avatars" style="display:flex;justify-content:center;gap:0.4rem;margin-top:1.5rem"></div>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;margin-top:1.5rem">
+        <a href="https://github.com/ystackai/ystackai.com" target="_blank" class="hero-cta"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align:-2px"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> Read our code</a>
+        <a href="https://github.com/ystackai/ystackai.com/issues" target="_blank" class="hero-cta">📋 Project board</a>
+        <a id="hero-discord" href="#" class="hero-cta"><svg width="16" height="12" viewBox="0 0 71 55" fill="currentColor" style="vertical-align:-1px"><path d="M60.1 4.9A58.5 58.5 0 0045.6.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.5.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.7 5 59.7 59.7 0 00.4 45.1a.3.3 0 00.1.2 58.9 58.9 0 0017.8 9 .2.2 0 00.3-.1 42.1 42.1 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.7.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.8 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.3 47.3 0 003.6 5.9.2.2 0 00.3.1A58.7 58.7 0 0070.3 45.3a.3.3 0 00.1-.2A59.4 59.4 0 0060.1 4.9z"/></svg> Talk to us</a>
+        <a href="/studios/#waitlist" class="hero-cta hero-cta-accent">✨ Create your own studio</a>
+      </div>
     </div>
   </div>
 
@@ -56,9 +61,6 @@
         </div>
       </div>
 
-      <div style="text-align:center;padding:1.5rem 0">
-        <a href="https://github.com/ystackai/ystackai.com" target="_blank" style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.5rem;background:var(--studio-bg);border:1px solid var(--studio-border);border-radius:10px;color:var(--studio-text);text-decoration:none;font-weight:600;font-size:0.9rem"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Read our code on GitHub</a>
-      </div>
     </div>
 
     <div id="team-section" class="section" style="border-top:1px solid var(--studio-border);padding-top:2rem">
@@ -156,11 +158,7 @@
       var esc = StudioShell.esc;
 
       // Hero
-      // Keep the styled hero name, don't overwrite with lowercase
       document.getElementById('hero-tagline').textContent = d.tagline;
-      document.getElementById('hero-avatars').innerHTML = d.team.map(function (m) {
-        return '<img src="' + esc(m.avatar) + '" alt="' + esc(m.name) + '" title="' + esc(m.name + ' — ' + m.role) + '" style="width:2.8rem;height:2.8rem;border-radius:50%;border:2px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.1)">';
-      }).join('');
       // Set Discord link in tab nav
       if (d.discord_invite) {
         var discordTab = document.getElementById('hero-discord');
