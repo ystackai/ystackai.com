@@ -45,21 +45,38 @@
     .cc-badge-shipped { background: #6366f133; color: #a78bfa; }
     .cc-badge-game { background: #fbbf2433; color: #fbbf24; }
 
-    /* Full-width chat */
+    /* Full-width chat — Discord dark style */
     .chat-section {
-      max-width: 700px; margin: 0 auto; padding: 0 1rem;
-      border-top: 1px solid var(--studio-border);
+      background: #313338;
+      padding: 0 0 1px;
+      margin-top: 0.5rem;
     }
-    .chat-full { padding: 0.5rem 0; }
+    .chat-section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: #2b2d31; color: #b5bac1;
+      font-size: 0.85rem; font-weight: 600;
+      max-width: 700px; margin: 0 auto;
+    }
+    .chat-section-header a { color: #5865F2; text-decoration: none; font-size: 0.8rem; }
+    .chat-full {
+      max-width: 700px; margin: 0 auto;
+      padding: 0.25rem 0.5rem;
+    }
+    .chat-full .feed-item { border-bottom-color: #3f4147; }
+    .chat-full .feed-text { color: #dbdee1 !important; }
+    .chat-full .feed-time { color: #949ba4 !important; }
+    .chat-full .feed-item:hover { background: #2e3035; border-radius: 4px; }
 
     .chime-input {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 0.75rem 1rem; margin: 0.5rem 0 1rem;
-      background: #313338; border: 1px solid #1e1f22; border-radius: 10px;
+      padding: 0.75rem 1rem; margin: 0.5rem 1.5rem 1rem;
+      max-width: 670px; margin-left: auto; margin-right: auto;
+      background: #383a40; border: 1px solid #1e1f22; border-radius: 10px;
       text-decoration: none; cursor: text; transition: all 0.15s;
     }
-    .chime-input:hover { border-color: #5865F2; }
-    .chime-placeholder { color: #949ba4; font-size: 0.9rem; }
+    .chime-input:hover { border-color: #5865F2; background: #404249; }
+    .chime-placeholder { color: #6d6f78; font-size: 0.9rem; }
     .chime-icon { color: #5865F2; font-size: 1.1rem; font-weight: 700; }
 
     .feed-item {
@@ -141,8 +158,12 @@
       <div class="conveyor-track" id="conveyor"></div>
     </div>
 
-    <!-- Full-width chat -->
+    <!-- Full-width chat — Discord dark panel -->
     <div class="chat-section">
+      <div class="chat-section-header">
+        <span><svg width="16" height="12" viewBox="0 0 71 55" fill="#5865F2" style="vertical-align:-1px;margin-right:6px"><path d="M60.1 4.9A58.5 58.5 0 0045.6.2a.2.2 0 00-.2.1 40.8 40.8 0 00-1.8 3.7 54 54 0 00-16.2 0A37.4 37.4 0 0025.5.3a.2.2 0 00-.2-.1A58.4 58.4 0 0010.7 5 59.7 59.7 0 00.4 45.1a.3.3 0 00.1.2 58.9 58.9 0 0017.8 9 .2.2 0 00.3-.1 42.1 42.1 0 003.6-5.9.2.2 0 00-.1-.3 38.8 38.8 0 01-5.5-2.7.2.2 0 01 0-.4l1.1-.9a.2.2 0 01.2 0 42 42 0 0035.8 0 .2.2 0 01.2 0l1.1.9a.2.2 0 010 .4 36.4 36.4 0 01-5.5 2.6.2.2 0 00-.1.3 47.3 47.3 0 003.6 5.9.2.2 0 00.3.1A58.7 58.7 0 0070.3 45.3a.3.3 0 00.1-.2A59.4 59.4 0 0060.1 4.9z"/></svg>#engineering</span>
+        <a id="discord-link" href="#">Join the conversation →</a>
+      </div>
       <div id="chat-feed" class="chat-full"></div>
       <a id="chime-in" href="#" class="chime-input">
         <span class="chime-placeholder">Chime in...</span>
@@ -297,10 +318,12 @@
       // Footer
       document.getElementById('footer').innerHTML = Components.footer();
 
-      // Chime-in CTA links to Discord
+      // Discord links
       if (d.discord_invite) {
         var chime = document.getElementById('chime-in');
         if (chime) chime.href = d.discord_invite;
+        var dlink = document.getElementById('discord-link');
+        if (dlink) dlink.href = d.discord_invite;
       }
 
       // Chat feed (full width)
