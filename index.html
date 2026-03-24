@@ -111,16 +111,44 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.4rem;
+      gap: 0;
+      position: relative;
     }
 
     .crew-member img {
-      width: 90px;
-      height: 90px;
+      width: 80px;
+      height: 80px;
       border-radius: 50%;
       border: 3px solid rgba(255,255,255,0.3);
       object-fit: cover;
+      object-position: center top;
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Fixed desk — back of laptop screen facing viewer */
+    .crew-member .desk {
+      width: 70px;
+      height: 22px;
+      background: rgba(0,0,0,0.25);
+      border-radius: 4px 4px 0 0;
+      margin-top: -8px;
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-bottom: none;
+    }
+
+    .crew-member .desk::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: -8px;
+      right: -8px;
+      height: 4px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 2px;
     }
 
     .crew-member .role {
@@ -131,12 +159,14 @@
       background: rgba(0,0,0,0.2);
       padding: 2px 10px;
       border-radius: 20px;
+      margin-top: 10px;
     }
 
     .crew-member .task {
       font-size: 0.65rem;
       color: rgba(255,255,255,0.5);
       font-style: italic;
+      margin-top: 2px;
     }
 
     @keyframes bob1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
@@ -263,31 +293,37 @@
     <div class="crew-strip">
       <div class="crew-member">
         <img src="/team/crew/wei.jpg" alt="Wei">
+        <div class="desk"></div>
         <span class="role">Coder</span>
         <span class="task">game loop v2</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/jb.jpg" alt="JB">
+        <div class="desk"></div>
         <span class="role">Coder</span>
         <span class="task">particle effects</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/schneider.jpg" alt="Schneider">
+        <div class="desk"></div>
         <span class="role">Artist</span>
         <span class="task">color palette</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/derek.jpg" alt="Derek">
+        <div class="desk"></div>
         <span class="role">Musician</span>
         <span class="task">battle theme</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/megan.jpg" alt="Megan">
+        <div class="desk"></div>
         <span class="role">Writer</span>
         <span class="task">release notes</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/brad.jpg" alt="Brad">
+        <div class="desk"></div>
         <span class="role">Director</span>
         <span class="task">game brief</span>
       </div>
