@@ -46,9 +46,20 @@ body {
   box-shadow: 0 8px 20px rgba(99,102,241,0.3);
 }
 
-.platform-nav .links { display: flex; gap: 1.5rem; }
+.platform-nav .links { display: flex; align-items: center; gap: 1.5rem; }
 .platform-nav .links a { text-decoration: none; color: #888; font-size: 0.9rem; font-weight: 500; }
 .platform-nav .links a:hover { color: #1a1a2e; }
+.platform-nav .nav-cta {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: #fff !important;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 4px 12px rgba(99,102,241,0.25);
+  transition: transform 0.15s;
+}
+.platform-nav .nav-cta:hover { transform: translateY(-1px); color: #fff; }
 
 /* Layout */
 .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem; }
