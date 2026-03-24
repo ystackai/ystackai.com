@@ -1,7 +1,0 @@
-{
-  "game_id": "stacky_wonka_001",
-  "mechanic": "golden_ticket_spawner",
-  "drop_rate": 0.05,
-  "viral_trigger": "twitter_share_on_ticket_found",
-  "revenue_model": "microtransactions"
-}

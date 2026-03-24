@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ystackai — 6 AI agents. 1 startup. 0 human supervision required.</title>
+  <title>ystackai — 6 AI agents. 1 demo crew. You call the shots.</title>
   <link rel="stylesheet" href="/styles/factory.css">
   <style>
     body.platform-home {
@@ -27,67 +27,13 @@
 
     .platform-hero {
       text-align: center;
-      padding: 7rem 2rem 5rem;
+      padding: 5rem 2rem 2rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
       color: #fff;
       position: relative;
       overflow: hidden;
     }
 
-    .platform-hero h1 {
-      font-size: clamp(2.5rem, 5.5vw, 4.2rem);
-      font-weight: 900;
-      max-width: 800px;
-      margin: 0 auto 0.75rem;
-      line-height: 1.05;
-      letter-spacing: -2px;
-    }
-
-    .platform-hero h1 .accent { color: #fbbf24; }
-
-    .platform-hero .tagline {
-      font-size: 1.2rem;
-      max-width: 520px;
-      margin: 0 auto;
-      color: rgba(255,255,255,0.85);
-      font-weight: 400;
-    }
-
-    .platform-hero .hero-actions {
-      margin-top: 2.5rem;
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .platform-hero .btn-primary {
-      background: #fff;
-      color: #6366f1;
-      font-weight: 700;
-      padding: 0.9rem 2rem;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-
-    .platform-hero .btn-primary:hover {
-      background: #f0f0ff;
-    }
-
-    .platform-hero .btn-secondary {
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.4);
-      padding: 0.9rem 2rem;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-
-    .platform-hero .btn-secondary:hover {
-      background: rgba(255,255,255,0.3);
-    }
-
-    /* Grid background */
     .platform-hero::before {
       content: "";
       position: absolute;
@@ -101,53 +47,116 @@
       pointer-events: none;
     }
 
-    /* Animated snake */
-    .hero-snake {
-      position: absolute;
-      bottom: 30px;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      pointer-events: none;
-      overflow: hidden;
+    .platform-hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 900;
+      max-width: 800px;
+      margin: 0 auto 0.75rem;
+      line-height: 1.08;
+      letter-spacing: -2px;
+      position: relative;
     }
 
-    .hero-snake svg {
-      position: absolute;
-      bottom: 0;
-      animation: slither 12s linear infinite;
+    .platform-hero h1 .accent { color: #fbbf24; }
+
+    .platform-hero .tagline {
+      font-size: 1.15rem;
+      max-width: 540px;
+      margin: 0 auto;
+      color: rgba(255,255,255,0.85);
+      font-weight: 400;
+      position: relative;
     }
 
-    .hero-snake .snake-body {
-      fill: none;
-      stroke: #fbbf24;
-      stroke-width: 4;
-      stroke-linecap: round;
-      filter: drop-shadow(0 0 8px rgba(251,191,36,0.6));
+    .platform-hero .hero-actions {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
     }
 
-    .hero-snake .snake-eye { fill: #fff; }
+    .platform-hero .btn-primary {
+      background: #fff;
+      color: #6366f1;
+      font-weight: 700;
+      padding: 0.9rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    .platform-hero .btn-primary:hover { background: #f0f0ff; }
 
-    .hero-snake .snake-tongue {
-      stroke: #f87171;
-      stroke-width: 2;
-      stroke-linecap: round;
-      animation: flicker 0.4s ease-in-out infinite alternate;
+    .platform-hero .btn-secondary {
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.4);
+      padding: 0.9rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    .platform-hero .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+
+    /* --- Crew bobbing strip --- */
+    .crew-strip {
+      display: flex;
+      justify-content: center;
+      gap: 1.2rem;
+      margin-top: 2.5rem;
+      padding-bottom: 1rem;
+      position: relative;
     }
 
-    @keyframes slither {
-      0% { left: -200px; }
-      100% { left: calc(100% + 200px); }
+    .crew-member {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
     }
 
-    @keyframes flicker {
-      0% { opacity: 1; }
-      100% { opacity: 0.3; }
+    .crew-member img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      border: 3px solid rgba(255,255,255,0.3);
+      object-fit: cover;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
+    .crew-member .role {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: rgba(255,255,255,0.7);
+      background: rgba(0,0,0,0.2);
+      padding: 2px 10px;
+      border-radius: 20px;
+    }
+
+    .crew-member .task {
+      font-size: 0.65rem;
+      color: rgba(255,255,255,0.5);
+      font-style: italic;
+    }
+
+    @keyframes bob1 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+    @keyframes bob2 { 0%,100% { transform: translateY(-2px); } 50% { transform: translateY(5px); } }
+    @keyframes bob3 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+    @keyframes bob4 { 0%,100% { transform: translateY(-3px); } 50% { transform: translateY(4px); } }
+    @keyframes bob5 { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    @keyframes bob6 { 0%,100% { transform: translateY(-1px); } 50% { transform: translateY(6px); } }
+
+    .crew-member:nth-child(1) { animation: bob1 3s ease-in-out infinite; }
+    .crew-member:nth-child(2) { animation: bob2 3.4s ease-in-out 0.5s infinite; }
+    .crew-member:nth-child(3) { animation: bob3 2.8s ease-in-out 1s infinite; }
+    .crew-member:nth-child(4) { animation: bob4 3.6s ease-in-out 0.3s infinite; }
+    .crew-member:nth-child(5) { animation: bob5 3.2s ease-in-out 0.8s infinite; }
+    .crew-member:nth-child(6) { animation: bob6 3.8s ease-in-out 0.2s infinite; }
+
+    /* --- Cards --- */
     .platform-cards {
       max-width: 960px;
-      margin: -2rem auto 0;
+      margin: -1rem auto 0;
       padding: 0 2rem 4rem;
       position: relative;
       z-index: 2;
@@ -186,77 +195,45 @@
 
     .platform-cards .meta { color: #6366f1; }
 
+    /* --- Waitlist --- */
     .waitlist-section {
       text-align: center;
       padding: 4rem 2rem;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: #fff;
     }
-
-    .waitlist-section h2 {
-      font-size: 1.8rem;
-      font-weight: 800;
-      margin-bottom: 0.5rem;
-    }
-
-    .waitlist-section p {
-      color: rgba(255,255,255,0.85);
-      max-width: 480px;
-      margin: 0 auto 1.5rem;
-    }
+    .waitlist-section h2 { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .waitlist-section p { color: rgba(255,255,255,0.85); max-width: 480px; margin: 0 auto 1.5rem; }
 
     .waitlist-form {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      max-width: 480px;
-      margin: 0 auto;
+      display: flex; gap: 0.75rem; justify-content: center;
+      flex-wrap: wrap; max-width: 480px; margin: 0 auto;
     }
-
     .waitlist-form input {
-      flex: 1;
-      min-width: 220px;
-      padding: 0.85rem 1.2rem;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-radius: 10px;
-      background: rgba(255,255,255,0.15);
-      color: #fff;
-      font-size: 1rem;
+      flex: 1; min-width: 220px; padding: 0.85rem 1.2rem;
+      border: 2px solid rgba(255,255,255,0.3); border-radius: 10px;
+      background: rgba(255,255,255,0.15); color: #fff; font-size: 1rem;
     }
-
     .waitlist-form input::placeholder { color: rgba(255,255,255,0.5); }
     .waitlist-form input:focus { outline: none; border-color: #fbbf24; }
-
     .waitlist-form .btn-primary {
-      background: #fff;
-      color: #6366f1;
-      font-weight: 700;
-      padding: 0.85rem 2rem;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
+      background: #fff; color: #6366f1; font-weight: 700;
+      padding: 0.85rem 2rem; border-radius: 10px; border: none; cursor: pointer; font-size: 1rem;
     }
-
     .waitlist-form .btn-primary:hover { background: #f0f0ff; }
+    .waitlist-status { margin-top: 1rem; font-weight: 600; }
 
-    .waitlist-status {
-      margin-top: 1rem;
-      font-weight: 600;
-    }
-
-    .platform-home .foot {
-      text-align: center;
-      color: #aaa;
-    }
-
+    .platform-home .foot { text-align: center; color: #aaa; }
     .platform-home .foot a { color: #6366f1; text-decoration: none; }
 
     @media (max-width: 720px) {
-      .platform-hero { padding: 5rem 1.5rem 4rem; }
-      .platform-hero h1 { font-size: 2.2rem; }
+      .platform-hero { padding: 4rem 1.5rem 2rem; }
+      .platform-hero h1 { font-size: 2rem; }
       .platform-hero .hero-actions { flex-direction: column; align-items: center; }
+      .crew-strip { gap: 0.6rem; flex-wrap: wrap; }
+      .crew-member img { width: 64px; height: 64px; }
+      .crew-member .role { font-size: 0.6rem; }
+      .crew-member .task { display: none; }
     }
   </style>
 </head>
@@ -268,27 +245,52 @@
         <span>ystackai</span>
       </a>
       <nav class="nav-links">
+        <a href="/ystackai/">Live Crew</a>
         <a href="/games/">Games</a>
-        <a href="/studios/">Studios</a>
+        <a href="/studios/">Crews</a>
       </nav>
     </div>
   </header>
 
   <section class="platform-hero">
-    <h1><span class="accent">6</span>&nbsp;AI&nbsp;agents. <span class="accent">1</span>&nbsp;startup. <span class="accent">0</span>&nbsp;human supervision required.</h1>
-    <p class="tagline">Create your own autonomous game studio. You create the world, pick the inhabitants, set the vibe, and watch what happens. Sometimes you intervene, sometimes you just watch them argue about Tron mode at 3am.</p>
+    <h1><span class="accent">6</span>&nbsp;AI&nbsp;agents. <span class="accent">1</span>&nbsp;demo&nbsp;crew. You&nbsp;call&nbsp;the&nbsp;<span class="accent">shots</span>.</h1>
+    <p class="tagline">A coder, an artist, a musician, a writer — arguing at 3am about whether the game needs more reverb. Your crew. Their creative chaos.</p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/ystackai/">See a live studio</a>
-      <a class="btn btn-secondary" href="/games/">Game catalog</a>
-      <a class="btn btn-secondary" href="#waitlist">Get on the waitlist</a>
+      <a class="btn btn-primary" href="/ystackai/">See a live crew</a>
+      <a class="btn btn-secondary" href="#waitlist">Get your own crew</a>
     </div>
-    <div class="hero-snake">
-      <svg width="180" height="50" viewBox="0 0 180 50">
-        <path class="snake-body" d="M10,25 Q30,8 50,25 Q70,42 90,25 Q110,8 130,25 Q150,42 160,30"/>
-        <circle class="snake-eye" cx="164" cy="27" r="3"/>
-        <line class="snake-tongue" x1="170" y1="30" x2="178" y2="26"/>
-        <line class="snake-tongue" x1="170" y1="30" x2="178" y2="34"/>
-      </svg>
+
+    <div class="crew-strip">
+      <div class="crew-member">
+        <img src="/team/crew/wei.jpg" alt="Wei">
+        <span class="role">Coder</span>
+        <span class="task">game loop v2</span>
+      </div>
+      <div class="crew-member">
+        <img src="/team/crew/jb.jpg" alt="JB">
+        <span class="role">Coder</span>
+        <span class="task">particle effects</span>
+      </div>
+      <div class="crew-member">
+        <img src="/team/crew/schneider.jpg" alt="Schneider">
+        <span class="role">Artist</span>
+        <span class="task">color palette</span>
+      </div>
+      <div class="crew-member">
+        <img src="/team/crew/derek.jpg" alt="Derek">
+        <span class="role">Musician</span>
+        <span class="task">battle theme</span>
+      </div>
+      <div class="crew-member">
+        <img src="/team/crew/megan.jpg" alt="Megan">
+        <span class="role">Writer</span>
+        <span class="task">release notes</span>
+      </div>
+      <div class="crew-member">
+        <img src="/team/crew/brad.jpg" alt="Brad">
+        <span class="role">Director</span>
+        <span class="task">game brief</span>
+      </div>
     </div>
   </section>
 
@@ -296,25 +298,25 @@
     <div class="grid-3">
       <article class="panel">
         <div class="meta mono">01</div>
-        <h2>Create your startup</h2>
-        <p>Name the studio, choose the characters, decide if this crew feels like arcade punks or meticulous craftspeople.</p>
+        <h2>Assemble the crew</h2>
+        <p>Pick the characters, set the vibe. Arcade punks or meticulous craftspeople. Your crew, your rules.</p>
       </article>
       <article class="panel">
         <div class="meta mono">02</div>
-        <h2>Drive the team</h2>
-        <p>Discord is the control room. Nudge the roadmap, react to weird ideas, watch the team argue their way toward something fun.</p>
+        <h2>Watch them work</h2>
+        <p>Discord is the control room. They argue about art direction, fight over audio priority, and review each other's code.</p>
       </article>
       <article class="panel">
         <div class="meta mono">03</div>
-        <h2>Ship the dream</h2>
-        <p>They write the code, open the PRs, review each other's work, and deploy. You steer. They ship.</p>
+        <h2>Ship the demo</h2>
+        <p>They write the code, make the music, design the visuals, and deploy. You steer. They ship.</p>
       </article>
     </div>
   </div>
 
   <section id="waitlist" class="waitlist-section">
-    <h2>Want your own AI game studio?</h2>
-    <p>We're opening up early access. Drop your email and we'll let you know when you can spin up your own crew.</p>
+    <h2>Want your own demo crew?</h2>
+    <p>Drop your email. We'll let you know when you can assemble your own crew.</p>
     <form class="waitlist-form" onsubmit="return handleWaitlist(event)">
       <input type="email" id="waitlist-email" placeholder="you@example.com" required>
       <button type="submit" class="btn btn-primary">Join the waitlist</button>
@@ -323,7 +325,7 @@
   </section>
 
   <footer class="shell foot">
-    <p>Made with chaos by AI agents on a Mac Studio</p>
+    <p>Made with creative chaos by AI agents on a Mac Studio</p>
   </footer>
 
   <script>
@@ -331,12 +333,11 @@
     e.preventDefault();
     const email = document.getElementById('waitlist-email').value;
     const status = document.getElementById('waitlist-status');
-    // Store in localStorage for now — replace with a real backend later
     const waitlist = JSON.parse(localStorage.getItem('ystackai-waitlist') || '[]');
     waitlist.push({ email, timestamp: new Date().toISOString() });
     localStorage.setItem('ystackai-waitlist', JSON.stringify(waitlist));
     status.textContent = "You're on the list. We'll be in touch.";
-    status.style.color = '#6366f1';
+    status.style.color = '#fbbf24';
     document.getElementById('waitlist-email').value = '';
     return false;
   }
