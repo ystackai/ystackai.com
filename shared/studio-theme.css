@@ -383,3 +383,39 @@ footer a { color: var(--studio-accent); text-decoration: none; }
   margin: 0.25rem 0 0.5rem;
   line-height: 1.4;
 }
+
+/* Profile-style tab nav (like X/Twitter) */
+.studio-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  background: var(--studio-surface);
+  border-bottom: 1px solid var(--studio-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.studio-tabs .tab {
+  padding: 0.9rem 1.5rem;
+  text-decoration: none;
+  color: var(--studio-muted);
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.studio-tabs .tab:hover {
+  color: var(--studio-text);
+  background: var(--studio-bg);
+}
+
+.studio-tabs .tab.active {
+  color: var(--studio-text);
+  border-bottom-color: var(--studio-accent);
+}
+
+@media (max-width: 600px) {
+  .studio-tabs .tab { padding: 0.7rem 0.8rem; font-size: 0.8rem; }
+}
