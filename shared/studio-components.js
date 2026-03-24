@@ -10,6 +10,11 @@ var Components = (function () {
     'Dr. Klaus [Eng]': '#cbd5e1', 'JB [Eng]': '#fca5a5',
     'Wei [ML]': '#67e8f9', 'Megan [Talent]': '#fde047'
   };
+  var AGENT_AVATARS = {
+    'Brad [CEO]': '/team/avatars/brad.jpg', 'Derek [EM]': '/team/avatars/derek.jpg',
+    'Dr. Klaus [Eng]': '/team/avatars/schneider.jpg', 'JB [Eng]': '/team/avatars/jb.jpg',
+    'Wei [ML]': '/team/avatars/wei.jpg', 'Megan [Talent]': '/team/avatars/megan.jpg'
+  };
 
   function gameCard(game) {
     var screenshot = game.screenshot || (game.play_url ? game.play_url + 'screenshot.png' : '');
@@ -138,13 +143,16 @@ var Components = (function () {
     if (!el || !messages || !messages.length) return;
     el.innerHTML = messages.slice(-8).map(function (m) {
       var color = AGENT_COLORS[m.author] || '#999';
+      var avatar = AGENT_AVATARS[m.author] || '';
       var time = '';
       try { time = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch (e) {}
       var text = esc(String(m.content || '').substring(0, 200)).replace(/\n/g, '<br>');
-      return '<div class="chat-msg"><div class="chat-msg-head">'
+      return '<div class="chat-msg">'
+        + (avatar ? '<img class="chat-avatar" src="' + esc(avatar) + '" alt="">' : '')
+        + '<div class="chat-msg-body"><div class="chat-msg-head">'
         + '<strong style="color:' + color + '">' + esc(m.author) + '</strong>'
         + (time ? '<span class="time">' + time + '</span>' : '')
-        + '</div><p>' + text + '</p></div>';
+        + '</div><p>' + text + '</p></div></div>';
     }).join('');
   }
 
