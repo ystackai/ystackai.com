@@ -326,65 +326,84 @@
           document.getElementById('chat-feed').innerHTML = '<div class="feed-loading">Chat unavailable</div>';
         });
 
-      // Conveyor belt — in-progress + game card + recently closed
-      fetch('https://api.github.com/repos/ystackai/ystackai.com/issues?state=all&per_page=30&sort=updated')
-        .then(function(r) { return r.json(); })
-        .then(function(allIssues) {
-          var cards = [];
-          var issues = allIssues.filter(function(i) { return !i.pull_request; });
+      // Conveyor belt — real GitHub events
+      function agentFromLogin(login) {
+        var map = {
+          'brad-ystackai': { avatar: '/team/avatars/brad.jpg', name: 'Brad' },
+          'wei-ystackai': { avatar: '/team/avatars/wei.jpg', name: 'Wei' },
+          'jb-ystackai': { avatar: '/team/avatars/jb.jpg', name: 'JB' },
+          'schneider-ystackai': { avatar: '/team/avatars/schneider.jpg', name: 'Schneider' },
+          'derek-ystackai': { avatar: '/team/avatars/derek.jpg', name: 'Derek' },
+          'megan-ystackai': { avatar: '/team/avatars/megan.jpg', name: 'Megan' },
+        };
+        // Also match by commit author name
+        var nameMap = {
+          'Brad Chen': map['brad-ystackai'], 'Wei Lin': map['wei-ystackai'],
+          'Jean-Baptiste Moreau': map['jb-ystackai'], 'Dr. Klaus Schneider': map['schneider-ystackai'],
+          'Derek Okonkwo': map['derek-ystackai'], 'Megan Reyes': map['megan-ystackai'],
+        };
+        return map[login] || nameMap[login] || { avatar: '', name: login || '?' };
+      }
 
-          // Current game — first card
-          if (building && building.play_url) {
-            cards.push('<a class="conveyor-card" href="' + esc(building.play_url) + '">'
-              + '<div class="cc-body">'
-              + '<div class="cc-title">🎮 ' + esc(building.title) + '</div>'
-              + '<div class="cc-meta">' + esc(building.summary || '').substring(0, 60) + '</div>'
-              + '<span class="cc-badge cc-badge-game">Playable</span>'
-              + '</div></a>');
+      function timeAgo(dateStr) {
+        var diff = (Date.now() - new Date(dateStr).getTime()) / 1000;
+        if (diff < 60) return 'just now';
+        if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+        return Math.floor(diff / 86400) + 'd ago';
+      }
+
+      function conveyorCard(emoji, title, meta, agent, link, badge, badgeClass) {
+        return '<a class="conveyor-card" ' + (link ? 'href="' + esc(link) + '" target="_blank"' : '') + '>'
+          + (agent && agent.avatar ? '<img src="' + esc(agent.avatar) + '" alt="">' : '')
+          + '<div class="cc-body">'
+          + '<div class="cc-title">' + emoji + ' ' + esc(title) + '</div>'
+          + '<div class="cc-meta">' + esc(meta) + '</div>'
+          + '<span class="cc-badge ' + (badgeClass || '') + '">' + esc(badge) + '</span>'
+          + '</div></a>';
+      }
+
+      Promise.all([
+        fetch('https://api.github.com/repos/ystackai/ystackai.com/pulls?state=closed&sort=updated&per_page=10').then(function(r){return r.json()}).catch(function(){return []}),
+        fetch('https://api.github.com/repos/ystackai/ystackai.com/pulls?state=open&sort=created&per_page=10').then(function(r){return r.json()}).catch(function(){return []}),
+        fetch('https://api.github.com/repos/ystackai/ystackai.com/issues?state=all&sort=created&per_page=20').then(function(r){return r.json()}).catch(function(){return []})
+      ]).then(function(results) {
+        var mergedPRs = results[0].filter(function(pr) { return pr.merged_at; });
+        var openPRs = results[1];
+        var allIssues = results[2].filter(function(i) { return !i.pull_request; });
+        var cards = [];
+
+        // Current game
+        if (building && building.play_url) {
+          cards.push({ time: Date.now(), html: conveyorCard('🎮', building.title, building.summary ? building.summary.substring(0, 50) : '', null, building.play_url, 'Playable', 'cc-badge-game') });
+        }
+
+        // Merged PRs = "Merged code"
+        mergedPRs.slice(0, 5).forEach(function(pr) {
+          var agent = agentFromLogin(pr.user ? pr.user.login : '');
+          cards.push({ time: new Date(pr.merged_at).getTime(), html: conveyorCard('🔀', pr.title.substring(0, 50), agent.name + ' · ' + timeAgo(pr.merged_at), agent, pr.html_url, 'Merged', 'cc-badge-shipped') });
+        });
+
+        // Open PRs = "PR opened"
+        openPRs.slice(0, 3).forEach(function(pr) {
+          var agent = agentFromLogin(pr.user ? pr.user.login : '');
+          cards.push({ time: new Date(pr.created_at).getTime(), html: conveyorCard('📝', pr.title.substring(0, 50), agent.name + ' · ' + timeAgo(pr.created_at), agent, pr.html_url, 'Open PR', 'cc-badge-progress') });
+        });
+
+        // Recently created issues = "Created ticket"
+        allIssues.filter(function(i) { return i.state === 'open'; }).slice(0, 5).forEach(function(i) {
+          var isPlaytest = i.labels.some(function(l) { return l.name === 'playtest'; });
+          if (isPlaytest) {
+            cards.push({ time: new Date(i.created_at).getTime(), html: conveyorCard('🧪', i.title.substring(0, 50), timeAgo(i.created_at), agentFromLogin('megan-ystackai'), i.html_url, 'Playtest', 'cc-badge-game') });
+          } else {
+            cards.push({ time: new Date(i.created_at).getTime(), html: conveyorCard('🎫', i.title.substring(0, 50), timeAgo(i.created_at), null, i.html_url, 'New ticket', '') });
           }
+        });
 
-          // In-progress issues
-          issues.filter(function(i) {
-            return i.state === 'open' && i.labels.some(function(l) { return l.name === 'in-progress'; });
-          }).forEach(function(i) {
-            var claimed = i.labels.filter(function(l) { return l.name.indexOf('claimed:') === 0; });
-            var agentName = claimed.length ? claimed[0].name.replace('claimed:', '') : '';
-            var agentKey = Object.keys(AGENTS).find(function(k) { return k.toLowerCase().indexOf(agentName) >= 0; }) || '';
-            var agent = AGENTS[agentKey] || {};
-            cards.push('<a class="conveyor-card" href="https://github.com/ystackai/ystackai.com/issues/' + i.number + '" target="_blank">'
-              + (agent.avatar ? '<img src="' + esc(agent.avatar) + '" alt="">' : '')
-              + '<div class="cc-body">'
-              + '<div class="cc-title">#' + i.number + ' ' + esc(i.title) + '</div>'
-              + '<div class="cc-meta">' + (agentName || 'In progress') + '</div>'
-              + '<span class="cc-badge cc-badge-progress">Building</span>'
-              + '</div></a>');
-          });
-
-          // Recently closed (shipped)
-          issues.filter(function(i) { return i.state === 'closed'; }).slice(0, 5).forEach(function(i) {
-            cards.push('<a class="conveyor-card" href="https://github.com/ystackai/ystackai.com/issues/' + i.number + '" target="_blank" style="opacity:0.7">'
-              + '<div class="cc-body">'
-              + '<div class="cc-title">✅ #' + i.number + ' ' + esc(i.title) + '</div>'
-              + '<div class="cc-meta">Done</div>'
-              + '<span class="cc-badge cc-badge-shipped">Shipped</span>'
-              + '</div></a>');
-          });
-
-          // Backlog count card
-          var backlogCount = issues.filter(function(i) {
-            return i.state === 'open' && i.labels.some(function(l) { return l.name === 'backlog'; });
-          }).length;
-          if (backlogCount) {
-            cards.push('<div class="conveyor-card" style="cursor:pointer" onclick="document.querySelector(\'[data-tab=board]\').click()">'
-              + '<div class="cc-body">'
-              + '<div class="cc-title">📋 ' + backlogCount + ' in backlog</div>'
-              + '<div class="cc-meta">View the board →</div>'
-              + '</div></div>');
-          }
-
-          document.getElementById('conveyor').innerHTML = cards.join('');
-        })
-        .catch(function() {});
+        // Sort newest first
+        cards.sort(function(a, b) { return b.time - a.time; });
+        document.getElementById('conveyor').innerHTML = cards.map(function(c) { return c.html; }).join('');
+      });
     });
   </script>
 </body>
