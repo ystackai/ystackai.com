@@ -131,28 +131,21 @@
 
     /* Fixed laptop — in FRONT of the person */
     .crew-member .desk {
-      width: 68px;
-      height: 44px;
-      background: rgba(0,0,0,0.35);
-      border: 1.5px solid rgba(255,255,255,0.15);
-      border-radius: 4px 4px 0 0;
+      width: 80px;
+      height: 56px;
       position: relative;
       z-index: 2;
-      margin-top: -16px;
+      margin-top: -20px;
     }
 
-    /* Laptop base/keyboard edge */
-    .crew-member .desk::after {
-      content: "";
-      position: absolute;
-      bottom: -5px;
-      left: -6px;
-      right: -6px;
-      height: 5px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 0 0 3px 3px;
-      border: 1.5px solid rgba(255,255,255,0.1);
-      border-top: none;
+    .crew-member .desk img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      animation: none !important;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     .crew-member .role {
@@ -297,32 +290,32 @@
     <div class="crew-strip">
       <div class="crew-member">
         <img src="/team/crew/schneider.jpg" alt="Schneider">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Artist</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/wei.jpg" alt="Wei">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Coder</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/jb.jpg" alt="JB">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Coder</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/brad.jpg" alt="Brad">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Director</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/derek.jpg" alt="Derek">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Musician</span>
       </div>
       <div class="crew-member">
         <img src="/team/crew/megan.jpg" alt="Megan">
-        <div class="desk"></div>
+        <div class="desk"><img src="/team/crew/laptop.png" alt=""></div>
         <span class="role">Writer</span>
       </div>
     </div>
