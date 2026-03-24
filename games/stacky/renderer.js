@@ -42,28 +42,45 @@
 
   var GHOST_ALPHA = 0.2;
 
-  // --- line clear animation state ---
-  var clearingRows = [];
-  var clearFlash = 0;
-  var FLASH_FRAMES = 20;
+// --- line clear animation state ---
+   var clearingRows = [];
+   var clearFlash = 0;
+   var FLASH_FRAMES = 20;
 
-  // --- particles ---
-  var particles = [];
+   // --- screen shake ---
+   var shakeIntensity = 0;
+   var shakeDecay = 0.92;
 
-  function spawnParticles(rows) {
-    for (var ri = 0; ri < rows.length; ri++) {
-      var r = rows[ri];
-      for (var c = 0; c < COLS; c++) {
-        if (state.grid[r][c] === 0) continue;
-        var colorIdx = state.grid[r][c];
-        for (var i = 0; i < 3; i++) {
-          particles.push({
-            x: (c + 0.5) * CELL, y: (r + 0.5) * CELL,
-            vx: (Math.random() - 0.5) * 6, vy: -Math.random() * 4 - 2,
-            life: 1, decay: 0.02 + Math.random() * 0.02,
-            color: PIECE_COLORS[colorIdx], size: 2 + Math.random() * 3
-          });
-        }
+   // --- piece spin/land animation state ---
+   var pieceSpinAngle = 0;
+   var pieceLandTargetY = null;
+   var pieceLandAnimation = false;
+
+   // --- particles ---
+   var particles = [];
+
+   function spawnParticles(rows) {
+     for (var ri = 0; ri < rows.length; ri++) {
+       var r = rows[ri];
+       for (var c = 0; c < COLS; c++) {
+         if (state.grid[r][c] === 0) continue;
+         var colorIdx = state.grid[r][c];
+         var particleCount = 4 + Math.random() * 3;
+         for (var i = 0; i < particleCount; i++) {
+           particles.push({
+             x: (c + 0.5) * CELL, y: (r + 0.5) * CELL,
+             vx: (Math.random() - 0.5) * 12, vy: -Math.random() * 8 - 4,
+             life: 1, decay: 0.015 + Math.random() * 0.02,
+             color: PIECE_COLORS[colorIdx], size: 3 + Math.random() * 4
+           });
+         }
+       }
+     }
+   }
+
+   function triggerScreenShake(intensity) {
+     shakeIntensity = intensity;
+   }
       }
     }
   }

@@ -306,12 +306,12 @@ var StackyGame = (function () {
       }
     }
     state.activePiece = null;
-    if (window.StackyAudio) window.StackyAudio.playPieceLock();
+    if (window.StackyAudio) window.StackyAudio.playPlace();
     var cleared = clearLines(state);
     if (cleared > 0) {
       updateScore(state, cleared);
       state.comboCounter++;
-      if (window.StackyAudio) window.StackyAudio.playLineClear();
+      if (window.StackyAudio) window.StackyAudio.playClear();
     } else {
       state.comboCounter = 0;
     }
