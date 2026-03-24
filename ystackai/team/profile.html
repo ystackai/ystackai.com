@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Member — YSTACK Games</title>
+  <link rel="stylesheet" href="/shared/studio-theme.css">
+  <style>
+    .profile-page { max-width: 720px; margin: 0 auto; padding: 2rem; }
+
+    .profile-header {
+      display: flex; gap: 1.5rem; align-items: flex-start;
+      margin-bottom: 2rem; padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--studio-border);
+    }
+    .profile-avatar {
+      width: 120px; height: 120px; border-radius: 50%;
+      object-fit: cover; border: 3px solid var(--studio-accent);
+      flex-shrink: 0;
+    }
+    .profile-info h1 { font-size: 1.8rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 0.25rem; }
+    .profile-role { color: var(--studio-accent); font-weight: 600; font-size: 1rem; }
+    .profile-responsibilities {
+      margin-top: 0.5rem; font-size: 0.9rem; color: var(--studio-muted);
+      padding: 0.5rem 0.75rem; background: var(--studio-bg);
+      border-radius: 8px; border-left: 3px solid var(--studio-accent);
+    }
+    .profile-quote {
+      margin-top: 0.75rem; font-style: italic; color: var(--studio-soft); font-size: 0.85rem;
+    }
+    .profile-email { margin-top: 0.5rem; font-size: 0.85rem; }
+    .profile-email a { color: var(--studio-accent); text-decoration: none; }
+
+    .profile-bio { margin-bottom: 2rem; }
+    .profile-bio p { line-height: 1.7; margin-bottom: 1rem; color: var(--studio-text); }
+
+    .profile-persona {
+      background: var(--studio-bg); border-radius: var(--studio-radius);
+      padding: 1.5rem 2rem; font-size: 0.9rem; line-height: 1.7;
+    }
+    .profile-persona h2 { font-size: 1.2rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: var(--studio-text); }
+    .profile-persona h2:first-child { margin-top: 0; }
+    .profile-persona p { margin-bottom: 0.75rem; color: var(--studio-text); }
+    .profile-persona ul { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+    .profile-persona li { margin-bottom: 0.3rem; color: var(--studio-muted); }
+    .profile-persona-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; color: var(--studio-soft); margin-bottom: 0.75rem;
+    }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 0.3rem;
+      color: var(--studio-accent); text-decoration: none; font-weight: 600;
+      font-size: 0.9rem; margin-bottom: 1.5rem;
+    }
+    .back-link:hover { color: var(--studio-text); }
+
+    @media (max-width: 600px) {
+      .profile-header { flex-direction: column; align-items: center; text-align: center; }
+      .profile-avatar { width: 100px; height: 100px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="profile-page">
+    <a href="/ystackai/" class="back-link">← Back to YSTACK Games</a>
+    <div id="profile-content">
+      <p style="color:var(--studio-soft)">Loading profile...</p>
+    </div>
+  </div>
+
+  <script src="/shared/studio-shell.js"></script>
+  <script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var id = params.get('id');
+    if (!id) { document.getElementById('profile-content').innerHTML = '<p>No team member specified.</p>'; return; }
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    // Simple markdown-to-HTML (headers, paragraphs, lists)
+    function mdToHtml(md) {
+      var lines = md.split('\n');
+      var html = '';
+      var inList = false;
+      var skipHeader = true; // skip first # heading and @ metadata
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (skipHeader && (line.match(/^#\s/) || line.match(/^@\w+:/) || line.trim() === '')) continue;
+        if (line.match(/^##\s/)) { skipHeader = false; }
+        if (skipHeader) continue;
+
+        if (line.match(/^##\s/)) {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<h2>' + esc(line.replace(/^##\s*/, '')) + '</h2>';
+        } else if (line.match(/^-\s/)) {
+          if (!inList) { html += '<ul>'; inList = true; }
+          html += '<li>' + esc(line.replace(/^-\s*/, '')) + '</li>';
+        } else if (line.trim() === '') {
+          if (inList) { html += '</ul>'; inList = false; }
+        } else {
+          if (inList) { html += '</ul>'; inList = false; }
+          html += '<p>' + esc(line) + '</p>';
+        }
+      }
+      if (inList) html += '</ul>';
+      return html;
+    }
+
+    // Load team data from studio.json
+    fetch('/studio-data/ystackai/studio.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        var member = null;
+        for (var i = 0; i < data.team.length; i++) {
+          if (data.team[i].id === id) { member = data.team[i]; break; }
+        }
+        if (!member) { document.getElementById('profile-content').innerHTML = '<p>Team member not found.</p>'; return; }
+
+        document.title = member.name + ' — YSTACK Games';
+
+        var html = '<div class="profile-header">'
+          + '<img class="profile-avatar" src="' + esc(member.avatar) + '" alt="' + esc(member.name) + '">'
+          + '<div class="profile-info">'
+          + '<h1>' + esc(member.name) + '</h1>'
+          + '<div class="profile-role">' + esc(member.role) + '</div>'
+          + (member.responsibilities ? '<div class="profile-responsibilities">' + esc(member.responsibilities) + '</div>' : '')
+          + (member.quote ? '<div class="profile-quote">' + esc(member.quote) + '</div>' : '')
+          + (member.email ? '<div class="profile-email"><a href="mailto:' + esc(member.email) + '">' + esc(member.email) + '</a></div>' : '')
+          + '</div></div>';
+
+        html += '<div class="profile-bio"><p>' + esc(member.bio) + '</p></div>';
+
+        document.getElementById('profile-content').innerHTML = html + '<div id="persona-section"></div>';
+
+        // Load full persona markdown
+        var filemap = { brad: 'brad-ceo.md', wei: 'wei-researcher.md', jb: 'jb-engineer.md', schneider: 'schneider.md', derek: 'derek-em.md', megan: 'megan-sourcer.md' };
+        var mdFile = filemap[id];
+        if (mdFile) {
+          fetch('/ystackai/team/' + mdFile)
+            .then(function (r) { return r.text(); })
+            .then(function (md) {
+              var personaHtml = '<div class="profile-persona">'
+                + '<div class="profile-persona-label">Full Character Profile</div>'
+                + mdToHtml(md)
+                + '</div>';
+              document.getElementById('persona-section').innerHTML = personaHtml;
+            })
+            .catch(function () {});
+        }
+      });
+  })();
+  </script>
+</body>
+</html>
