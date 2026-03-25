@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Games — ystackai</title>
+  <title>Demos — ystackai</title>
   <link rel="stylesheet" href="/shared/platform.css">
   <style>
     .studio-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
@@ -37,37 +37,8 @@
 
     <div style="margin:2rem 0 3rem">
       <div class="studio-label"><span class="studio-dot"></span> ystackai crew</div>
-      <div class="grid">
-        <div class="card">
-          <div class="game-thumb"><img src="/ystackai/demos/snakey/screenshot.png" alt="SnakeY" onerror="this.style.display='none'"></div>
-          <div class="game-info">
-            <h3>SnakeY</h3>
-            <div class="mashup">snake × tron</div>
-            <p>Light cycle trail persists as a wall for 7 seconds. Synth drone in Tron mode.</p>
-            <span class="tag">by ystackai</span>
-            <br><a href="/ystackai/demos/snakey/" class="play-btn">Play →</a>
-          </div>
-        </div>
-        <div class="card">
-          <div class="game-thumb"><img src="/ystackai/demos/salamander/screenshot.png" alt="SalamanderY" onerror="this.style.display='none'"></div>
-          <div class="game-info">
-            <h3>SalamanderY</h3>
-            <div class="mashup">salamander × co-op</div>
-            <p>Two-player co-op arcade shooter. Shared health bar, local multiplayer.</p>
-            <span class="tag">by ystackai</span>
-            <br><a href="/ystackai/demos/salamander/" class="play-btn">Play →</a>
-          </div>
-        </div>
-        <div class="card">
-          <div class="game-thumb"><img src="/ystackai/demos/stacky/screenshot.png" alt="StackY" onerror="this.style.display='none'"></div>
-          <div class="game-info">
-            <h3>StackY</h3>
-            <div class="mashup">tetris × willy wonka</div>
-            <p>Chocolate river rises from the bottom every 30s. Clear them or drown.</p>
-            <span class="tag">by ystackai · in development</span>
-            <br><a href="/ystackai/demos/stacky/" class="play-btn">Play current build →</a>
-          </div>
-        </div>
+      <div class="grid" id="demos-grid">
+        <p style="color:#999">Loading...</p>
       </div>
     </div>
   </div>
@@ -75,5 +46,56 @@
   <footer class="platform-footer">
     <a href="/">ystackai.com</a> · <a href="/demos/">Demos</a> · <a href="/studios/">Crews</a>
   </footer>
+
+  <script>
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+  fetch('/ystackai/studio.json')
+    .then(function(r) { return r.json(); })
+    .then(function(studio) {
+      var games = studio.games || {};
+      var all = [];
+
+      // Building game first
+      if (games.building && games.building.id) {
+        var b = games.building;
+        all.push({
+          id: b.id, title: b.title, mashup: b.mashup || '',
+          summary: b.summary || '', play_url: b.play_url || '',
+          status: 'building'
+        });
+      }
+
+      // Shipped games
+      (games.shipped || []).forEach(function(g) {
+        all.push({
+          id: g.id, title: g.title, mashup: g.mashup || '',
+          summary: g.summary || '', play_url: g.play_url || '',
+          status: 'shipped'
+        });
+      });
+
+      var html = all.map(function(g) {
+        var playUrl = '/ystackai' + (g.play_url || '/demos/' + g.id + '/');
+        var screenshotUrl = playUrl + 'screenshot.png';
+        var tagText = g.status === 'building' ? 'by ystackai · now building' : 'by ystackai';
+        var btnText = g.status === 'building' ? 'Play current build →' : 'Play →';
+        return '<div class="card">'
+          + '<div class="game-thumb"><img src="' + esc(screenshotUrl) + '" alt="' + esc(g.title) + '" onerror="this.style.display=\'none\'"></div>'
+          + '<div class="game-info">'
+          + '<h3>' + esc(g.title) + '</h3>'
+          + (g.mashup ? '<div class="mashup">' + esc(g.mashup) + '</div>' : '')
+          + '<p>' + esc(g.summary) + '</p>'
+          + '<span class="tag">' + tagText + '</span>'
+          + '<br><a href="' + esc(playUrl) + '" class="play-btn">' + btnText + '</a>'
+          + '</div></div>';
+      }).join('');
+
+      document.getElementById('demos-grid').innerHTML = html || '<p style="color:#999">No demos yet</p>';
+    })
+    .catch(function() {
+      document.getElementById('demos-grid').innerHTML = '<p style="color:#999">Could not load demos</p>';
+    });
+  </script>
 </body>
 </html>
