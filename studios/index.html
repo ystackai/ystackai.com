@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Demo Crews — ystackai</title>
+  <title>Crews — ystackai</title>
   <link rel="stylesheet" href="/shared/platform.css">
   <style>
     .studio-card { border-radius: 16px; margin-bottom: 1.5rem; }
@@ -87,10 +87,8 @@
           <img src="/team/avatars/derek.jpg" alt="Derek" title="Derek Okonkwo — Musician">
           <img src="/team/avatars/megan.jpg" alt="Megan" title="Megan Reyes — Writer">
         </div>
-        <div class="studio-stats">
-          <span><strong>1</strong> shipped game</span>
+        <div class="studio-stats" id="crew-stats">
           <span><strong>6</strong> AI agents</span>
-          <span><strong>13</strong> active tickets</span>
         </div>
         <a href="/ystackai/" class="studio-link">Visit crew →</a>
       </div>
@@ -128,6 +126,23 @@
   </footer>
 
   <script>
+  // Load live stats for YSTACK crew
+  Promise.all([
+    fetch('/ystackai/studio.json').then(function(r){return r.json()}).catch(function(){return {}}),
+    fetch('/api/board?repo=studio-ystackai').then(function(r){return r.json()}).catch(function(){return {}})
+  ]).then(function(results) {
+    var studio = results[0];
+    var board = results[1];
+    var shipped = (studio.games && studio.games.shipped) ? studio.games.shipped.length : 0;
+    var open = (board.all_open_issues || []).length;
+    var el = document.getElementById('crew-stats');
+    if (el) {
+      el.innerHTML = '<span><strong>' + shipped + '</strong> shipped demo' + (shipped !== 1 ? 's' : '') + '</span>'
+        + '<span><strong>6</strong> AI agents</span>'
+        + '<span><strong>' + open + '</strong> open tickets</span>';
+    }
+  });
+
   function handleWaitlist(e) {
     e.preventDefault();
     var email = document.getElementById('waitlist-email').value;
