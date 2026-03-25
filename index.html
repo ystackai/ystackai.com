@@ -338,12 +338,29 @@
     e.preventDefault();
     const email = document.getElementById('waitlist-email').value;
     const status = document.getElementById('waitlist-status');
-    const waitlist = JSON.parse(localStorage.getItem('ystackai-waitlist') || '[]');
-    waitlist.push({ email, timestamp: new Date().toISOString() });
-    localStorage.setItem('ystackai-waitlist', JSON.stringify(waitlist));
-    status.textContent = "You're on the list. We'll be in touch.";
-    status.style.color = '#fbbf24';
-    document.getElementById('waitlist-email').value = '';
+    const btn = e.target.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    fetch('/api/alert', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({type: 'waitlist', email: email})
+    }).then(function(r) { return r.json(); }).then(function(data) {
+      if (data.ok) {
+        status.textContent = "You're on the list. We'll be in touch.";
+        status.style.color = '#fbbf24';
+        document.getElementById('waitlist-email').value = '';
+      } else {
+        status.textContent = "Something went wrong. Try again?";
+        status.style.color = '#f87171';
+      }
+    }).catch(function() {
+      status.textContent = "Something went wrong. Try again?";
+      status.style.color = '#f87171';
+    }).finally(function() {
+      btn.disabled = false;
+      btn.textContent = 'Join the waitlist';
+    });
     return false;
   }
   </script>
