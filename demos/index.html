@@ -36,7 +36,7 @@
     </div>
 
     <div style="margin:2rem 0 3rem">
-      <div class="studio-label"><span class="studio-dot"></span> ystackai crew</div>
+      <div class="studio-label"><span class="studio-dot"></span> live crews</div>
       <div class="grid" id="demos-grid">
         <p style="color:#999">Loading...</p>
       </div>
@@ -49,43 +49,52 @@
 
   <script>
   function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function fetchJson(url) {
+    return fetch(url, { cache: 'no-store' }).then(function(r) {
+      if (!r.ok) throw new Error('failed to load ' + url);
+      return r.json();
+    });
+  }
   function resolvePlayUrl(game) {
     var raw = (game && game.play_url) || '';
-    if (!raw) return '/ystackai/games/' + (game && game.id ? game.id : '') + '/';
+    if (!raw) return game && game.id ? '/games/' + game.id + '/' : '';
     if (/^https?:\/\//.test(raw) || raw.charAt(0) === '/') return raw;
     return '/ystackai/' + raw.replace(/^\/+/, '');
   }
+  function resolveScreenshot(game) {
+    var shot = ((game && game.shots) || [])[0];
+    if (shot && shot.image_url) return shot.image_url;
+    var playUrl = resolvePlayUrl(game);
+    if (!playUrl) return '';
+    if (playUrl.slice(-1) !== '/') playUrl += '/';
+    return playUrl + 'screenshot.png';
+  }
 
-  fetch('/ystackai/studio.json')
-    .then(function(r) { return r.json(); })
-    .then(function(studio) {
-      var games = studio.games || {};
+  fetchJson('/studio-data/index.json')
+    .then(function(payload) {
       var all = [];
-
-      // Building game first
-      if (games.building && games.building.id) {
-        var b = games.building;
-        all.push({
-          id: b.id, title: b.title, mashup: b.mashup || '',
-          summary: b.summary || '', play_url: b.play_url || '',
-          status: 'building'
-        });
-      }
-
-      // Shipped games
-      (games.shipped || []).forEach(function(g) {
-        all.push({
-          id: g.id, title: g.title, mashup: g.mashup || '',
-          summary: g.summary || '', play_url: g.play_url || '',
-          status: 'shipped'
+      ((payload && payload.studios) || []).forEach(function(live) {
+        var studio = live.studio || {};
+        var games = live.games || {};
+        if (games.building && games.building.id) {
+          all.push(Object.assign({}, games.building, {
+            crew_name: studio.name || studio.slug || 'crew',
+            status: 'building'
+          }));
+        }
+        (games.shipped || []).forEach(function(g) {
+          all.push(Object.assign({}, g, {
+            crew_name: studio.name || studio.slug || 'crew',
+            status: 'shipped'
+          }));
         });
       });
 
       var html = all.map(function(g) {
         var playUrl = resolvePlayUrl(g);
         if (playUrl.slice(-1) !== '/') playUrl += '/';
-        var screenshotUrl = playUrl + 'screenshot.png';
-        var tagText = g.status === 'building' ? 'by ystackai · now building' : 'by ystackai';
+        var screenshotUrl = resolveScreenshot(g);
+        var tagText = g.status === 'building' ? 'by ' + g.crew_name + ' · now building' : 'by ' + g.crew_name;
         var btnText = g.status === 'building' ? 'Play current build →' : 'Play →';
         return '<div class="card">'
           + '<div class="game-thumb"><img src="' + esc(screenshotUrl) + '" alt="' + esc(g.title) + '" onerror="this.style.display=\'none\'"></div>'

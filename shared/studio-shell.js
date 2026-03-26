@@ -5,9 +5,57 @@
 var StudioShell = (function () {
   var data = null;
 
+  function detectSlug(fallback) {
+    var meta = document.querySelector('meta[name="studio-slug"]');
+    if (meta && meta.content) return meta.content.trim();
+    var bodySlug = document.body && document.body.getAttribute('data-studio-slug');
+    if (bodySlug) return bodySlug.trim();
+    var parts = window.location.pathname.split('/').filter(Boolean);
+    if (parts.length) return parts[0];
+    return fallback || 'ystackai';
+  }
+
+  function publicUrl(path) {
+    if (!path) return path;
+    if (/^(https?:)?\/\//.test(path)) return path;
+    return path.charAt(0) === '/' ? path : '/' + path;
+  }
+
+  function normalize(payload, slug) {
+    var snapshot = payload || {};
+    var studio = snapshot.studio || {};
+    var links = snapshot.links || {};
+    var normalized = Object.assign({}, snapshot, {
+      studio: studio,
+      links: links,
+      slug: studio.slug || slug,
+      name: studio.name || slug,
+      public_url: studio.public_url || '/' + (studio.slug || slug) + '/',
+      repo: studio.repo || '',
+      hero_text: studio.hero_text || '',
+      tagline: studio.tagline || '',
+      release: studio.release || {},
+      cast: snapshot.cast || snapshot.team || [],
+      team: snapshot.team || snapshot.cast || [],
+      games: snapshot.games || {},
+      blog_posts: snapshot.blog_posts || [],
+      chat: snapshot.chat || {},
+      theme: snapshot.theme || studio.theme || {},
+      discord_invite: links.discord_invite || '',
+      blog_url: links.blog_url || '/' + (studio.slug || slug) + '/blog/',
+      demos_url: links.demos_url || '/' + (studio.slug || slug) + '/games/',
+      team_url: links.team_url || '/' + (studio.slug || slug) + '/#team',
+      board_url: links.board_url || '',
+      issues_url: links.issues_url || '',
+      github_repo_url: links.github_repo_url || ''
+    });
+    return normalized;
+  }
+
   async function init(slug) {
-    var resp = await fetch('/' + slug + '/studio.json', { cache: 'no-store' });
-    data = await resp.json();
+    var studioSlug = slug || detectSlug('ystackai');
+    var resp = await fetch('/studio-data/' + studioSlug + '/live.json', { cache: 'no-store' });
+    data = normalize(await resp.json(), studioSlug);
     applyTheme(data.theme || {});
     return data;
   }
@@ -35,14 +83,11 @@ var StudioShell = (function () {
     if (!data) return;
     var el = document.getElementById(containerId);
     if (!el) return;
-    el.innerHTML = '<nav class="studio-nav"><a href="/' + esc(data.slug) + '/" class="studio-id">'
-      + '<div class="studio-dot"></div><div><div class="studio-name">' + esc(data.name) + '</div>'
-      + '<div class="studio-label">crew</div></div></a>'
+    el.innerHTML = '<nav class="platform-nav"><a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>'
       + '<div class="links">'
-      + '<a href="/">← ystackai.com</a>'
-      + '<a href="/' + esc(data.slug) + '/">Crew</a>'
-      + '<a href="/' + esc(data.slug) + '/blog/">Blog</a>'
-      + (data.discord_invite ? '<a href="' + esc(data.discord_invite) + '">Discord</a>' : '')
+      + '<a href="/demos/">Demos</a>'
+      + '<a href="/crews/">Crews</a>'
+      + '<a href="/crews/#waitlist" class="nav-cta">Create Your Own</a>'
       + '</div></nav>';
   }
 
@@ -50,5 +95,13 @@ var StudioShell = (function () {
     return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  return { init: init, renderNav: renderNav, applyTheme: applyTheme, get data() { return data; }, esc: esc };
+  return {
+    init: init,
+    renderNav: renderNav,
+    applyTheme: applyTheme,
+    detectSlug: detectSlug,
+    publicUrl: publicUrl,
+    get data() { return data; },
+    esc: esc
+  };
 })();

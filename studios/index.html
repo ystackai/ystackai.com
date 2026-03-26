@@ -74,7 +74,6 @@
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
   (function () {
-    var STUDIO_SLUGS = ['ystackai', 'tactical-vector'];
 
     function esc(value) {
       var node = document.createElement('div');
@@ -118,9 +117,8 @@
       );
     }
 
-    Promise.all(STUDIO_SLUGS.map(function (slug) {
-      return fetchJson('/studio-data/' + slug + '/live.json').catch(function () { return null; });
-    })).then(function (studios) {
+    fetchJson('/studio-data/index.json').then(function (payload) {
+      var studios = (payload && payload.studios) || [];
       var cards = studios.filter(Boolean).map(studioCard);
       document.getElementById('studio-grid').innerHTML = cards.join('') || '<div class="empty-state">No crews published yet.</div>';
     }).catch(function () {

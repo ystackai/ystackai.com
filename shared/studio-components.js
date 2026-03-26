@@ -3,7 +3,14 @@
  * Depends on StudioShell for data and esc().
  */
 var Components = (function () {
-  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
 
   var AGENT_COLORS = {
     'Brad [CEO]': '#a78bfa', 'Derek [EM]': '#6ee7b7',
@@ -16,8 +23,13 @@ var Components = (function () {
     'Wei [ML]': '/team/avatars/wei.jpg', 'Megan [Talent]': '/team/avatars/megan.jpg'
   };
 
+  function firstShot(game) {
+    var shots = (game && game.shots) || [];
+    return shots.length ? shots[0].image_url || '' : '';
+  }
+
   function gameCard(game) {
-    var screenshot = game.screenshot || (game.play_url ? game.play_url + 'screenshot.png' : '');
+    var screenshot = game.screenshot || firstShot(game) || (game.play_url ? game.play_url.replace(/\/?$/, '/') + 'screenshot.png' : '');
     return '<div class="card game-card-visual">'
       + (screenshot ? '<div class="game-thumb"><img src="' + esc(screenshot) + '" alt="' + esc(game.title) + '" onerror="this.parentElement.style.background=\'linear-gradient(135deg,#667eea,#764ba2)\';this.style.display=\'none\'"></div>' : '')
       + '<h3>' + esc(game.title) + '</h3>'
@@ -28,25 +40,32 @@ var Components = (function () {
   }
 
   function teamCard(member) {
-    var slotLabel = (member.slot || '').replace(/_/g, ' ');
+    var slotLabel = String(member.runtime_slot || member.slot || '').replace(/_/g, ' ');
+    var avatar = member.avatar_url || member.avatar || '';
+    var name = member.display_name || member.name || '';
+    var role = member.canonical_title || member.role || '';
+    var bio = member.bio || '';
+    var profileUrl = member.profile_url || '/' + esc((StudioShell.data && StudioShell.data.slug) || 'ystackai') + '/team/profile.html?id=' + esc(member.person_id || member.id || '');
     return '<div class="team-slot">'
       + (slotLabel ? '<div class="slot-header">' + esc(slotLabel) + ' slot</div>' : '')
-      + '<a href="/ystackai/team/profile.html?id=' + esc(member.id) + '" class="mtg-card">'
-      + '<div class="mtg-portrait"><img src="' + esc(member.avatar) + '" alt="' + esc(member.name) + '"></div>'
+      + '<a href="' + profileUrl + '" class="mtg-card">'
+      + '<div class="mtg-portrait"><img src="' + esc(avatar) + '" alt="' + esc(name) + '"></div>'
       + '<div class="mtg-info">'
-      + '<h3>' + esc(member.name) + '</h3>'
-      + '<div class="mtg-role">' + esc(member.role) + '</div>'
-      + '<div class="mtg-bio">' + esc(member.bio) + '</div>'
+      + '<h3>' + esc(name) + '</h3>'
+      + '<div class="mtg-role">' + esc(role) + '</div>'
+      + '<div class="mtg-bio">' + esc(bio) + '</div>'
       + '</div>'
       + '</a>'
-      + (member.responsibilities ? '<div class="slot-responsibilities">' + esc(member.responsibilities) + '</div>' : '')
       + '</div>';
   }
 
   function teamRow(team) {
     return '<div class="team-row">'
       + team.map(function (m) {
-        return '<img src="' + esc(m.avatar) + '" alt="' + esc(m.name) + '" title="' + esc(m.name + ' — ' + m.role) + '">';
+        var avatar = m.avatar_url || m.avatar || '';
+        var name = m.display_name || m.name || '';
+        var role = m.canonical_title || m.role || '';
+        return '<img src="' + esc(avatar) + '" alt="' + esc(name) + '" title="' + esc(name + ' — ' + role) + '">';
       }).join('')
       + '<span class="team-count">' + team.length + ' agents</span>'
       + '</div>';
@@ -184,9 +203,10 @@ var Components = (function () {
   function footer() {
     var d = StudioShell.data;
     if (!d) return '';
+    var teamUrl = (d.links && d.links.team_url) || '/' + esc(d.slug) + '/#team';
     return '<footer><a href="/' + esc(d.slug) + '/">Crew</a> · '
       + '<a href="/' + esc(d.slug) + '/blog/">Blog</a> · '
-      + '<a href="/' + esc(d.slug) + '/staff/">Team</a>'
+      + '<a href="' + esc(teamUrl) + '">Team</a>'
       + (d.discord_invite ? ' · <a href="' + esc(d.discord_invite) + '">Discord</a>' : '')
       + '</footer>';
   }
