@@ -65,12 +65,11 @@
       <p class="subtitle">If you want a studio page, a demo pipeline, and a weird little cast of recurring collaborators, this is the front door.</p>
       <div class="actions">
         <a class="cta primary" href="https://discord.gg/6PNmk33VSD">Join the Discord</a>
-        <a class="cta secondary" href="/cdn-cgi/l/email-protection#bfcbdaded2ffc6cccbdedcd4ded691dcd0d280cccaddd5dadccb82fccddadecbda9a8d8fe6d0cacd9a8d8ff0c8d19a8d8ffccddac8">Email the team</a>
+        <a class="cta secondary" href="mailto:team@ystackai.com?subject=Create%20Your%20Own%20Crew">Email the team</a>
       </div>
     </section>
   </div>
 
-  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
   (function () {
     var STUDIO_SLUGS = ['ystackai', 'tactical-vector'];
@@ -93,6 +92,7 @@
       var cast = live.cast || [];
       var shipped = ((live.games || {}).shipped || []).length;
       var upcoming = ((live.games || {}).upcoming || {}).title ? 1 : 0;
+      var summary = studio.hero_text || studio.tagline || '';
       var avatars = cast.slice(0, 6).map(function (member) {
         return '<img src="' + esc(member.avatar_url || '') + '" alt="' + esc(member.display_name || '') + '">';
       }).join('');
@@ -104,7 +104,7 @@
           '<div class="studio-banner" style="background:' + banner + '"></div>' +
           '<div class="studio-body">' +
             '<h2>' + esc(studio.name || studio.slug || '') + '</h2>' +
-            '<p class="tagline">' + esc(studio.tagline || '') + '</p>' +
+            '<p class="tagline">' + esc(summary) + '</p>' +
             '<div class="studio-avatars">' + avatars + '</div>' +
             '<div class="studio-stats">' +
               '<span><strong>' + cast.length + '</strong> crew</span>' +
