@@ -49,6 +49,12 @@
 
   <script>
   function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function resolvePlayUrl(game) {
+    var raw = (game && game.play_url) || '';
+    if (!raw) return '/ystackai/games/' + (game && game.id ? game.id : '') + '/';
+    if (/^https?:\/\//.test(raw) || raw.charAt(0) === '/') return raw;
+    return '/ystackai/' + raw.replace(/^\/+/, '');
+  }
 
   fetch('/ystackai/studio.json')
     .then(function(r) { return r.json(); })
@@ -76,7 +82,8 @@
       });
 
       var html = all.map(function(g) {
-        var playUrl = '/ystackai' + (g.play_url || '/demos/' + g.id + '/');
+        var playUrl = resolvePlayUrl(g);
+        if (playUrl.slice(-1) !== '/') playUrl += '/';
         var screenshotUrl = playUrl + 'screenshot.png';
         var tagText = g.status === 'building' ? 'by ystackai · now building' : 'by ystackai';
         var btnText = g.status === 'building' ? 'Play current build →' : 'Play →';
