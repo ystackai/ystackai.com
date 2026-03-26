@@ -37,13 +37,18 @@ var StudioShell = (function () {
       release: studio.release || {},
       cast: snapshot.cast || snapshot.team || [],
       team: snapshot.team || snapshot.cast || [],
+      drops: snapshot.drops || [],
+      latest_drop: snapshot.latest_drop || {},
+      active_drop: snapshot.active_drop || {},
+      active_post: snapshot.active_post || {},
       games: snapshot.games || {},
       blog_posts: snapshot.blog_posts || [],
       chat: snapshot.chat || {},
       theme: snapshot.theme || studio.theme || {},
       discord_invite: links.discord_invite || '',
       blog_url: links.blog_url || '/' + (studio.slug || slug) + '/blog/',
-      demos_url: links.demos_url || '/' + (studio.slug || slug) + '/games/',
+      drops_url: links.drops_url || links.demos_url || '/' + (studio.slug || slug) + '/drops/',
+      demos_url: links.demos_url || '/' + (studio.slug || slug) + '/drops/',
       team_url: links.team_url || '/' + (studio.slug || slug) + '/#team',
       board_url: links.board_url || '',
       issues_url: links.issues_url || '',
@@ -85,7 +90,7 @@ var StudioShell = (function () {
     if (!el) return;
     el.innerHTML = '<nav class="platform-nav"><a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>'
       + '<div class="links">'
-      + '<a href="/demos/">Demos</a>'
+      + '<a href="/drops/">Drops</a>'
       + '<a href="/crews/">Crews</a>'
       + '<a href="/crews/#waitlist" class="nav-cta">Create Your Own</a>'
       + '</div></nav>';

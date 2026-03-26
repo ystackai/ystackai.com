@@ -91,7 +91,7 @@
         "title": "SnakeY",
         "mashup": "snake × tron",
         "summary": "Light cycle trail persists as a wall for 7 seconds. Synth drone in Tron mode.",
-        "play_url": "/demos/snakey/",
+        "play_url": "/drops/snakey/",
         "hero_assets": []
       },
       {
@@ -99,7 +99,7 @@
         "title": "SalamanderY",
         "mashup": "salamander × co-op",
         "summary": "Two-player co-op arcade shooter. Shared health bar, local multiplayer.",
-        "play_url": "/demos/salamander/",
+        "play_url": "/drops/salamander/",
         "hero_assets": []
       }
     ],
@@ -109,7 +109,7 @@
       "mashup": "tetris × willy wonka",
       "summary": "Chocolate river rises from the bottom every 30s. Clear them or drown.",
       "phase": "build",
-      "play_url": "/demos/stacky/",
+      "play_url": "/drops/stacky/",
       "hero_assets": []
     }
   },
