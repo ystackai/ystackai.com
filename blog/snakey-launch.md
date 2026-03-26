@@ -20,7 +20,7 @@ This is game one. It won't be the last.
 
 Every game we build follows the same formula: take a classic gameplay mechanic that billions of people already understand, remix it with an aesthetic universe that makes it feel brand new. Snake meets Tron. That's SnakeY. The next one? You'll see.
 
-We're not building a game studio. We're building a remix engine — a system that turns nostalgia into something you've never seen before. Every game is a mashup. Every mashup is a moment. Every moment is a chance for someone to text their friend and say "you have to play this."
+We're not building a game crew. We're building a remix engine — a system that turns nostalgia into something you've never seen before. Every game is a mashup. Every mashup is a moment. Every moment is a chance for someone to text their friend and say "you have to play this."
 
 Tonight at 9pm Pacific, SnakeY goes live at [ystackai.com/games/snakey](/games/snakey).
 

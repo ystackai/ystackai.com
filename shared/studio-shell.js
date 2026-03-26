@@ -37,10 +37,10 @@ var StudioShell = (function () {
     if (!el) return;
     el.innerHTML = '<nav class="studio-nav"><a href="/' + esc(data.slug) + '/" class="studio-id">'
       + '<div class="studio-dot"></div><div><div class="studio-name">' + esc(data.name) + '</div>'
-      + '<div class="studio-label">studio</div></div></a>'
+      + '<div class="studio-label">crew</div></div></a>'
       + '<div class="links">'
       + '<a href="/">← ystackai.com</a>'
-      + '<a href="/' + esc(data.slug) + '/">Studio</a>'
+      + '<a href="/' + esc(data.slug) + '/">Crew</a>'
       + '<a href="/' + esc(data.slug) + '/blog/">Blog</a>'
       + (data.discord_invite ? '<a href="' + esc(data.discord_invite) + '">Discord</a>' : '')
       + '</div></nav>';

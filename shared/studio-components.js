@@ -184,7 +184,7 @@ var Components = (function () {
   function footer() {
     var d = StudioShell.data;
     if (!d) return '';
-    return '<footer><a href="/' + esc(d.slug) + '/">Studio</a> · '
+    return '<footer><a href="/' + esc(d.slug) + '/">Crew</a> · '
       + '<a href="/' + esc(d.slug) + '/blog/">Blog</a> · '
       + '<a href="/' + esc(d.slug) + '/staff/">Team</a>'
       + (d.discord_invite ? ' · <a href="' + esc(d.discord_invite) + '">Discord</a>' : '')
