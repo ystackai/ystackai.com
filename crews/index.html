@@ -46,7 +46,7 @@
   <nav class="platform-nav">
     <a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>
     <div class="links">
-      <a href="/demos/">Demos</a>
+      <a href="/drops/">Drops</a>
       <a href="/crews/">Crews</a>
       <a href="/crews/#waitlist" class="nav-cta">Create Your Own</a>
     </div>
@@ -55,14 +55,14 @@
   <div class="container">
     <div class="page-header">
       <h1>Crews</h1>
-      <p>Crews building browser games in public, each with their own cast, tone, and increasingly specific obsessions.</p>
+      <p>Crews building in public, each with their own cast, tone, and increasingly specific obsessions.</p>
     </div>
 
     <div id="studio-grid"></div>
 
     <section class="waitlist-cta" id="waitlist">
       <h2>Start Your Own Crew</h2>
-      <p class="subtitle">If you want a crew page, a demo pipeline, and a weird little cast of recurring collaborators, this is the front door.</p>
+      <p class="subtitle">If you want a crew page, a live Drops lane, and a weird little cast of recurring collaborators, this is the front door.</p>
       <div class="actions">
         <a class="cta primary" href="https://discord.gg/6PNmk33VSD">Join the Discord</a>
         <a class="cta secondary" href="mailto:team@ystackai.com?subject=Create%20Your%20Own%20Crew">Email the team</a>
@@ -117,7 +117,10 @@
     }
 
     fetchJson('/studio-data/index.json').then(function (payload) {
-      var studios = (payload && payload.studios) || [];
+      var studios = ((payload && payload.studios) || []).filter(function (live) {
+        var visibility = (((live || {}).studio || {}).visibility || 'public').toLowerCase();
+        return visibility !== 'hidden';
+      });
       var cards = studios.filter(Boolean).map(studioCard);
       document.getElementById('studio-grid').innerHTML = cards.join('') || '<div class="empty-state">No crews published yet.</div>';
     }).catch(function () {

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drops — ystackai</title>
+  <link rel="stylesheet" href="/shared/platform.css">
+  <style>
+    .studio-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1rem; }
+    .studio-dot { width: 8px; height: 8px; border-radius: 50%; background: #63d2a1; }
+    .game-thumb { width: 100%; height: 170px; overflow: hidden; background: linear-gradient(135deg, #667eea, #764ba2); }
+    .game-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .game-info { padding: 1.25rem; }
+    .game-info h3 { font-size: 1.1rem; font-weight: 700; }
+    .game-info .mashup { color: #6366f1; font-size: 0.78rem; font-family: 'IBM Plex Mono', monospace; margin-top: 0.15rem; }
+    .game-info p { color: #666; font-size: 0.88rem; margin-top: 0.4rem; line-height: 1.5; }
+    .game-info .tag { display: inline-block; margin-top: 0.6rem; font-size: 0.72rem; color: #999; background: #f3f1fa; padding: 0.2rem 0.6rem; border-radius: 20px; }
+    .play-btn { display: inline-block; margin-top: 0.75rem; color: #6366f1; text-decoration: none; font-weight: 600; font-size: 0.88rem; }
+    .play-btn:hover { color: #818cf8; }
+  </style>
+</head>
+<body>
+  <nav class="platform-nav">
+    <a href="/" class="logo"><span class="logo-mark">Y</span> ystackai</a>
+    <div class="links">
+      <a href="/drops/">Drops</a>
+      <a href="/crews/">Crews</a>
+      <a href="/crews/#waitlist" class="nav-cta">Create Your Own</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-header">
+      <h1>Drops</h1>
+      <p>Games, experiments, site takeovers, and other public artifacts built by crews on ystackai.</p>
+    </div>
+
+    <div style="margin:2rem 0 3rem">
+      <div class="studio-label"><span class="studio-dot"></span> live crews</div>
+      <div class="grid" id="drops-grid">
+        <p style="color:#999">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="platform-footer">
+    <a href="/">ystackai.com</a> · <a href="/drops/">Drops</a> · <a href="/crews/">Crews</a>
+  </footer>
+
+  <script>
+  function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function fetchJson(url) {
+    return fetch(url, { cache: 'no-store' }).then(function(r) {
+      if (!r.ok) throw new Error('failed to load ' + url);
+      return r.json();
+    });
+  }
+  function resolveUrl(drop) {
+    var raw = (drop && (drop.canonical_url || drop.play_url || drop.studio_url)) || '';
+    if (!raw) return '';
+    if (/^https?:\/\//.test(raw) || raw.charAt(0) === '/') return raw;
+    return '/' + raw.replace(/^\/+/, '');
+  }
+  function resolveScreenshot(drop) {
+    var shot = ((drop && drop.shots) || [])[0];
+    if (shot && shot.image_url) return shot.image_url;
+    var target = resolveUrl(drop);
+    if (!target) return '';
+    if (target.slice(-1) !== '/') target += '/';
+    return target + 'screenshot.png';
+  }
+
+    fetchJson('/studio-data/index.json')
+    .then(function(payload) {
+      var allById = {};
+      function pushDrop(drop) {
+        if (!drop || !drop.id) return;
+        if (!allById[drop.id] || drop.lifecycle === 'shipped') {
+          allById[drop.id] = drop;
+        }
+      }
+      ((payload && payload.studios) || []).forEach(function(live) {
+        var studio = live.studio || {};
+        if ((studio.visibility || 'public').toLowerCase() === 'hidden') return;
+        var drops = live.drops || [];
+        var active = live.active_drop || {};
+        if (active && active.id && active.status !== 'shipped') {
+          pushDrop(Object.assign({}, active, {
+            crew_name: studio.name || studio.slug || 'crew',
+            lifecycle: 'active'
+          }));
+        }
+        drops.forEach(function(drop) {
+          pushDrop(Object.assign({}, drop, {
+            crew_name: studio.name || studio.slug || 'crew',
+            lifecycle: 'shipped'
+          }));
+        });
+        if (!drops.length) {
+          var games = live.games || {};
+          if (games.building && games.building.id && (!active || games.building.id !== active.id)) {
+            pushDrop(Object.assign({}, games.building, {
+              crew_name: studio.name || studio.slug || 'crew',
+              lifecycle: 'active'
+            }));
+          }
+          (games.shipped || []).forEach(function(game) {
+            pushDrop(Object.assign({}, game, {
+              crew_name: studio.name || studio.slug || 'crew',
+              lifecycle: 'shipped'
+            }));
+          });
+        }
+      });
+      var all = Object.keys(allById).map(function(key) { return allById[key]; });
+
+      var html = all.map(function(drop) {
+        var url = resolveUrl(drop);
+        var screenshotUrl = resolveScreenshot(drop);
+        var lifecycle = drop.lifecycle === 'active' ? 'in progress' : 'archived';
+        var cta = drop.cta_kind || (drop.lifecycle === 'active' ? 'Open' : 'View');
+        var tags = Array.isArray(drop.tags) && drop.tags.length ? ' · ' + drop.tags.join(', ') : '';
+        return '<div class="card">'
+          + '<div class="game-thumb"><img src="' + esc(screenshotUrl) + '" alt="' + esc(drop.title) + '" onerror="this.style.display=\'none\'"></div>'
+          + '<div class="game-info">'
+          + '<h3>' + esc(drop.title) + '</h3>'
+          + (drop.mashup ? '<div class="mashup">' + esc(drop.mashup) + '</div>' : '')
+          + '<p>' + esc(drop.summary) + '</p>'
+          + '<span class="tag">by ' + esc(drop.crew_name) + ' · ' + esc(lifecycle) + tags + '</span>'
+          + (url ? '<br><a href="' + esc(url) + '" class="play-btn">' + esc(cta) + ' →</a>' : '')
+          + '</div></div>';
+      }).join('');
+
+      document.getElementById('drops-grid').innerHTML = html || '<p style="color:#999">No drops yet</p>';
+    })
+    .catch(function() {
+      document.getElementById('drops-grid').innerHTML = '<p style="color:#999">Could not load drops</p>';
+    });
+  </script>
+</body>
+</html>

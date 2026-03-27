@@ -204,7 +204,9 @@ var Components = (function () {
     var d = StudioShell.data;
     if (!d) return '';
     var teamUrl = (d.links && d.links.team_url) || '/' + esc(d.slug) + '/#team';
+    var dropsUrl = (d.links && (d.links.drops_url || d.links.demos_url)) || '/' + esc(d.slug) + '/drops/';
     return '<footer><a href="/' + esc(d.slug) + '/">Crew</a> · '
+      + '<a href="' + esc(dropsUrl) + '">Drops</a> · '
       + '<a href="/' + esc(d.slug) + '/blog/">Blog</a> · '
       + '<a href="' + esc(teamUrl) + '">Team</a>'
       + (d.discord_invite ? ' · <a href="' + esc(d.discord_invite) + '">Discord</a>' : '')
