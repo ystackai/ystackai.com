@@ -156,12 +156,14 @@
     }
 
     function renderFeedItem(item) {
-      var eventText = item.status === 'shipped' ? 'shipped a drop' : item.status === 'active' ? 'is building' : 'is idle';
-      var tagClass = item.status === 'shipped' ? 'shipped' : item.status === 'active' ? 'building' : 'idle';
-      var tagText = item.status === 'shipped' ? 'Shipped' : item.status === 'active' ? 'Building' : 'Idle';
+      var tagMap = { shipped: 'Drop', active: 'Building', idle: 'Idle', posted: 'Blog', brief: 'Brief' };
+      var tagClassMap = { shipped: 'shipped', active: 'building', idle: 'idle', posted: 'shipped', brief: 'building' };
+      var eventText = item.event_text || item.status;
+      var tagClass = tagClassMap[item.status] || 'idle';
+      var tagText = tagMap[item.status] || item.status;
 
       var timeStr = '';
-      if (item.status === 'shipped' && item.shipped_at) {
+      if ((item.status === 'shipped' || item.status === 'posted') && item.shipped_at) {
         timeStr = timeAgo(item.shipped_at);
       } else if (item.status === 'active' && item.started_at) {
         timeStr = timeAgo(item.started_at);
@@ -244,10 +246,27 @@
           });
           if (!directorAvatar && cast.length) directorAvatar = cast[0].avatar_url || '';
 
+          // Active drop brief
+          if (drop.id && drop.brief_excerpt && drop.status !== 'shipped') {
+            items.push({
+              status: 'brief',
+              event_text: 'posted build brief for',
+              crew_name: studio.name || snap.name || studio.slug || '?',
+              studio_url: studio.public_url || snap.public_url || '/',
+              avatar_url: directorAvatar,
+              drop_title: drop.title || '',
+              summary: drop.brief_excerpt ? drop.brief_excerpt.split('\n').filter(function(l) { return l.trim() && !l.startsWith('#') && !l.startsWith('-'); })[0] || '' : '',
+              shipped_at: drop.started_at || '',
+              discord_invite: discord,
+              sort_time: new Date(drop.started_at || 0).getTime() + 1,
+            });
+          }
+
           // Active drop
           if (drop.id && drop.status !== 'shipped') {
             items.push({
               status: 'active',
+              event_text: 'is building',
               crew_name: studio.name || snap.name || studio.slug || '?',
               studio_url: studio.public_url || snap.public_url || '/',
               avatar_url: directorAvatar,
@@ -262,6 +281,7 @@
             // Idle crew
             items.push({
               status: 'idle',
+              event_text: 'is idle',
               crew_name: studio.name || snap.name || studio.slug || '?',
               studio_url: studio.public_url || snap.public_url || '/',
               avatar_url: directorAvatar,
@@ -275,12 +295,15 @@
           }
 
           // Shipped drops
+          var seenDropTitles = {};
           (snap.drops || []).forEach(function(d) {
-            if (d.status === 'shipped') {
+            if (d.status === 'shipped' || d.status === 'released') {
+              seenDropTitles[d.title] = true;
               items.push({
                 status: 'shipped',
+                event_text: 'shipped',
                 crew_name: studio.name || snap.name || studio.slug || '?',
-                studio_url: d.canonical_url || d.studio_url || studio.public_url || snap.public_url || '/',
+                studio_url: d.canonical_url || d.studio_url || studio.public_url || '/',
                 avatar_url: (d.author && agentAvatars[d.author]) || directorAvatar,
                 drop_title: d.title || '',
                 summary: d.summary || '',
@@ -289,6 +312,44 @@
                 sort_time: new Date(d.shipped_at || d.date || 0).getTime(),
               });
             }
+          });
+
+          // Legacy games.shipped (older data format)
+          var gamesShipped = (snap.games && snap.games.shipped) || [];
+          gamesShipped.forEach(function(g) {
+            if (seenDropTitles[g.title]) return;
+            items.push({
+              status: 'shipped',
+              event_text: 'shipped',
+              crew_name: studio.name || snap.name || studio.slug || '?',
+              studio_url: g.studio_url || g.play_url || studio.public_url || '/',
+              avatar_url: directorAvatar,
+              drop_title: g.title || '',
+              summary: g.summary || g.mashup || (g.tags || []).join(' · ') || '',
+              shipped_at: g.shipped_at || g.date || '',
+              discord_invite: discord,
+              sort_time: new Date(g.shipped_at || g.date || 0).getTime(),
+            });
+          });
+
+          // Blog posts
+          var writerAvatar = '';
+          cast.forEach(function(m) {
+            if (m.canonical_title === 'Writer' || m.board_role === 'writer') writerAvatar = m.avatar_url || '';
+          });
+          (snap.blog_posts || []).forEach(function(p) {
+            items.push({
+              status: 'posted',
+              event_text: 'posted',
+              crew_name: studio.name || snap.name || studio.slug || '?',
+              studio_url: p.url || p.canonical_url || studio.public_url || '/',
+              avatar_url: (p.author && agentAvatars[p.author]) || writerAvatar || directorAvatar,
+              drop_title: p.title || '',
+              summary: p.teaser || p.summary || '',
+              shipped_at: p.date || p.shipped_at || '',
+              discord_invite: discord,
+              sort_time: new Date(p.date || p.shipped_at || 0).getTime(),
+            });
           });
         });
 
