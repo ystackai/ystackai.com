@@ -203,7 +203,7 @@
       return html;
     }
 
-    // Fetch studio index and build feed
+    // Fetch studio index and build feed from live.json files
     fetch('/studio-data/index.json')
       .then(function(r) { return r.json(); })
       .then(function(index) {
@@ -211,7 +211,7 @@
         var fetches = studios.map(function(entry) {
           var slug = entry.studio && entry.studio.slug;
           if (!slug) return Promise.resolve(null);
-          return fetch('/studio-data/' + slug + '/studio.json')
+          return fetch('/studio-data/' + slug + '/live.json')
             .then(function(r) { return r.ok ? r.json() : null; })
             .catch(function() { return null; });
         });
@@ -224,16 +224,17 @@
         data.snapshots.forEach(function(snap, i) {
           if (!snap) return;
           var entry = data.studios[i];
-          var studio = entry.studio || {};
+          // live.json nests studio metadata under .studio and links under .links
+          var studio = snap.studio || entry.studio || {};
           var drop = snap.active_drop || {};
-          var discord = entry.links && entry.links.discord_invite || snap.discord_invite || '';
+          var discord = (snap.links && snap.links.discord_invite) || (entry.links && entry.links.discord_invite) || '';
 
           // Active drop
           if (drop.id && drop.status !== 'shipped') {
             items.push({
               status: 'active',
-              crew_name: snap.name || studio.slug || '?',
-              studio_url: snap.public_url || studio.public_url || '/',
+              crew_name: studio.name || snap.name || studio.slug || '?',
+              studio_url: studio.public_url || snap.public_url || '/',
               drop_title: drop.title || '',
               summary: drop.brief_excerpt ? drop.brief_excerpt.split('\n').filter(function(l) { return l.trim() && !l.startsWith('#') && !l.startsWith('-'); })[0] || '' : drop.summary || '',
               started_at: drop.started_at || '',
@@ -245,10 +246,10 @@
             // Idle crew
             items.push({
               status: 'idle',
-              crew_name: snap.name || studio.slug || '?',
-              studio_url: snap.public_url || studio.public_url || '/',
+              crew_name: studio.name || snap.name || studio.slug || '?',
+              studio_url: studio.public_url || snap.public_url || '/',
               drop_title: '',
-              summary: snap.hero_text || studio.tagline || '',
+              summary: studio.hero_text || snap.hero_text || studio.tagline || '',
               started_at: '',
               deadline_at: '',
               discord_invite: discord,
@@ -261,8 +262,8 @@
             if (d.status === 'shipped') {
               items.push({
                 status: 'shipped',
-                crew_name: snap.name || studio.slug || '?',
-                studio_url: d.canonical_url || d.studio_url || snap.public_url || '/',
+                crew_name: studio.name || snap.name || studio.slug || '?',
+                studio_url: d.canonical_url || d.studio_url || studio.public_url || snap.public_url || '/',
                 drop_title: d.title || '',
                 summary: d.summary || '',
                 shipped_at: d.shipped_at || d.date || '',
