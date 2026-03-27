@@ -201,7 +201,8 @@
         html += '<div class="feed-desc">' + esc(item.summary) + '</div>';
       }
       if (item.screenshot_url) {
-        html += '<a href="' + esc(item.studio_url) + '" class="feed-screenshot"><img src="' + esc(item.screenshot_url) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></a>';
+        var imgSrc = item.screenshot_url + (item.screenshot_url.indexOf('?') >= 0 ? '&' : '?') + '_cb=' + Date.now();
+        html += '<a href="' + esc(item.studio_url) + '" class="feed-screenshot"><img src="' + esc(imgSrc) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></a>';
       }
 
       html += '<div class="feed-meta">';
