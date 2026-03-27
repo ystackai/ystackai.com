@@ -45,14 +45,11 @@
     }
     .feed-item:last-child { border-bottom: none; }
 
-    .feed-icon {
-      flex-shrink: 0; width: 40px; height: 40px;
-      border-radius: 10px; display: grid; place-items: center;
-      font-size: 1.1rem; font-weight: 800;
+    .feed-avatar {
+      flex-shrink: 0; width: 44px; height: 44px;
+      border-radius: 50%; object-fit: cover; object-position: center top;
+      border: 2px solid #e8e4f0;
     }
-    .feed-icon.started { background: #dbeafe; color: #2563eb; }
-    .feed-icon.shipped { background: #dcfce7; color: #16a34a; }
-    .feed-icon.idle { background: #f3f4f6; color: #9ca3af; }
 
     .feed-body { flex: 1; min-width: 0; }
     .feed-head {
@@ -159,8 +156,6 @@
     }
 
     function renderFeedItem(item) {
-      var iconClass = item.status === 'shipped' ? 'shipped' : item.status === 'active' ? 'started' : 'idle';
-      var icon = item.status === 'shipped' ? '✓' : item.status === 'active' ? '▶' : '○';
       var eventText = item.status === 'shipped' ? 'shipped a drop' : item.status === 'active' ? 'is building' : 'is idle';
       var tagClass = item.status === 'shipped' ? 'shipped' : item.status === 'active' ? 'building' : 'idle';
       var tagText = item.status === 'shipped' ? 'Shipped' : item.status === 'active' ? 'Building' : 'Idle';
@@ -172,8 +167,13 @@
         timeStr = timeAgo(item.started_at);
       }
 
+      var avatarUrl = item.avatar_url || '';
+      var avatarHtml = avatarUrl
+        ? '<img class="feed-avatar" src="' + esc(avatarUrl) + '" alt="">'
+        : '<div class="feed-avatar" style="background:#e8e4f0"></div>';
+
       var html = '<div class="feed-item">'
-        + '<div class="feed-icon ' + iconClass + '">' + icon + '</div>'
+        + avatarHtml
         + '<div class="feed-body">'
         + '<div class="feed-head">'
         + '<a class="feed-crew" href="' + esc(item.studio_url) + '">' + esc(item.crew_name) + '</a>'
@@ -229,12 +229,28 @@
           var drop = snap.active_drop || {};
           var discord = (snap.links && snap.links.discord_invite) || (entry.links && entry.links.discord_invite) || '';
 
+          // Find director avatar (default), build agent avatar lookup
+          var cast = snap.cast || [];
+          var agentAvatars = {};
+          var directorAvatar = '';
+          cast.forEach(function(m) {
+            if (m.avatar_url) {
+              agentAvatars[m.person_id] = m.avatar_url;
+              agentAvatars[m.display_name] = m.avatar_url;
+              if (m.canonical_title === 'Director' || m.board_role === 'director') {
+                directorAvatar = m.avatar_url;
+              }
+            }
+          });
+          if (!directorAvatar && cast.length) directorAvatar = cast[0].avatar_url || '';
+
           // Active drop
           if (drop.id && drop.status !== 'shipped') {
             items.push({
               status: 'active',
               crew_name: studio.name || snap.name || studio.slug || '?',
               studio_url: studio.public_url || snap.public_url || '/',
+              avatar_url: directorAvatar,
               drop_title: drop.title || '',
               summary: drop.brief_excerpt ? drop.brief_excerpt.split('\n').filter(function(l) { return l.trim() && !l.startsWith('#') && !l.startsWith('-'); })[0] || '' : drop.summary || '',
               started_at: drop.started_at || '',
@@ -248,6 +264,7 @@
               status: 'idle',
               crew_name: studio.name || snap.name || studio.slug || '?',
               studio_url: studio.public_url || snap.public_url || '/',
+              avatar_url: directorAvatar,
               drop_title: '',
               summary: studio.hero_text || snap.hero_text || studio.tagline || '',
               started_at: '',
@@ -264,6 +281,7 @@
                 status: 'shipped',
                 crew_name: studio.name || snap.name || studio.slug || '?',
                 studio_url: d.canonical_url || d.studio_url || studio.public_url || snap.public_url || '/',
+                avatar_url: (d.author && agentAvatars[d.author]) || directorAvatar,
                 drop_title: d.title || '',
                 summary: d.summary || '',
                 shipped_at: d.shipped_at || d.date || '',
