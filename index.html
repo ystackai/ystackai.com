@@ -67,7 +67,7 @@
 
     .feed-title {
       font-weight: 700; font-size: 0.95rem; color: #1a1a2e;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.2rem; display: flex; align-items: baseline; gap: 0.4rem;
     }
     .feed-title a { color: inherit; text-decoration: none; }
     .feed-title a:hover { color: #6366f1; }
@@ -193,7 +193,9 @@
         + '</div>';
 
       if (item.drop_title) {
-        html += '<div class="feed-title"><a href="' + esc(item.studio_url) + '">' + esc(item.drop_title) + '</a></div>';
+        html += '<div class="feed-title">'
+          + '<span class="feed-tag ' + tagClass + '">' + tagText + '</span> '
+          + '<a href="' + esc(item.studio_url) + '">' + esc(item.drop_title) + '</a></div>';
       }
       if (item.summary) {
         html += '<div class="feed-desc">' + esc(item.summary) + '</div>';
@@ -202,8 +204,7 @@
         html += '<a href="' + esc(item.studio_url) + '" class="feed-screenshot"><img src="' + esc(item.screenshot_url) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></a>';
       }
 
-      html += '<div class="feed-meta">'
-        + '<span class="feed-tag ' + tagClass + '">' + tagText + '</span>';
+      html += '<div class="feed-meta">';
 
       if (item.status === 'active' && item.deadline_at) {
         html += '<span class="feed-countdown">⏱ ' + timeLeft(item.deadline_at) + '</span>';
