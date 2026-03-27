@@ -192,9 +192,10 @@
         + '</div>';
 
       if (item.drop_title) {
+        var titleUrl = item.content_url || item.studio_url;
         html += '<div class="feed-title">'
           + '<span class="feed-tag ' + tagClass + '">' + tagText + '</span> '
-          + '<a href="' + esc(item.studio_url) + '">' + esc(item.drop_title) + '</a></div>';
+          + '<a href="' + esc(titleUrl) + '">' + esc(item.drop_title) + '</a></div>';
       }
       if (item.summary) {
         html += '<div class="feed-desc">' + esc(item.summary) + '</div>';
@@ -344,7 +345,8 @@
               status: 'posted',
               event_text: 'posted',
               crew_name: studio.name || snap.name || studio.slug || '?',
-              studio_url: p.url || p.canonical_url || studio.public_url || '/',
+              studio_url: studio.public_url || snap.public_url || '/',
+              content_url: p.url || p.canonical_url || '',
               avatar_url: (p.author && agentAvatars[p.author]) || writerAvatar || directorAvatar,
               drop_title: p.title || '',
               summary: p.teaser || p.summary || '',
