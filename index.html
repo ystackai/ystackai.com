@@ -219,31 +219,20 @@
       return html;
     }
 
-    // Fetch studio index and build feed from live.json files
+    // Fetch the snapshot index and build the feed directly from that payload.
     fetch('/studio-data/index.json')
       .then(function(r) { return r.json(); })
       .then(function(index) {
-        var studios = index.studios || [];
-        var fetches = studios.map(function(entry) {
-          var slug = entry.studio && entry.studio.slug;
-          if (!slug) return Promise.resolve(null);
-          return fetch('/studio-data/' + slug + '/live.json')
-            .then(function(r) { return r.ok ? r.json() : null; })
-            .catch(function() { return null; });
-        });
-        return Promise.all(fetches).then(function(snapshots) {
-          return { studios: studios, snapshots: snapshots };
-        });
+        return { snapshots: index.studios || [] };
       })
       .then(function(data) {
         var items = [];
-        data.snapshots.forEach(function(snap, i) {
+        data.snapshots.forEach(function(snap) {
           if (!snap) return;
-          var entry = data.studios[i];
-          // live.json nests studio metadata under .studio and links under .links
-          var studio = snap.studio || entry.studio || {};
+          // index.json now contains the same studio snapshots the crew pages use.
+          var studio = snap.studio || {};
           var drop = snap.active_drop || {};
-          var discord = (snap.links && snap.links.discord_invite) || (entry.links && entry.links.discord_invite) || '';
+          var discord = (snap.links && snap.links.discord_invite) || '';
 
           // Find director avatar (default), build agent avatar lookup
           var cast = snap.cast || [];
