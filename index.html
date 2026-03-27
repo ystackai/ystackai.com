@@ -171,8 +171,9 @@
       var tagText = tagMap[item.status] || item.status;
 
       var timeStr = '';
-      if ((item.status === 'shipped' || item.status === 'posted') && item.shipped_at) {
-        timeStr = timeAgo(item.shipped_at);
+      if ((item.status === 'shipped' || item.status === 'posted' || item.status === 'brief') && item.shipped_at) {
+        var parsed = new Date(item.shipped_at);
+        timeStr = isNaN(parsed.getTime()) ? item.shipped_at : timeAgo(item.shipped_at);
       } else if (item.status === 'active' && item.started_at) {
         timeStr = timeAgo(item.started_at);
       }
@@ -187,7 +188,6 @@
         + '<div class="feed-body">'
         + '<div class="feed-head">'
         + '<a class="feed-crew" href="' + esc(item.studio_url) + '">' + esc(item.crew_name) + '</a>'
-        + '<span class="feed-event">' + eventText + '</span>'
         + (timeStr ? '<span class="feed-time">' + timeStr + '</span>' : '')
         + '</div>';
 
