@@ -31,6 +31,7 @@
       max-width: 640px; margin: 0 auto 0.4rem;
       line-height: 1.15; position: relative;
     }
+    .feed-hero h1 .accent { color: #fbbf24; }
     .feed-hero .subtitle {
       font-size: 1rem; color: rgba(255,255,255,0.8);
       max-width: 480px; margin: 0 auto; position: relative;
@@ -99,6 +100,14 @@
       font-size: 0.75rem; color: #9333ea; font-weight: 600;
     }
 
+    .feed-screenshot {
+      margin-top: 0.5rem; border-radius: 10px; overflow: hidden;
+      border: 1px solid #e8e4f0; max-width: 360px;
+    }
+    .feed-screenshot img {
+      display: block; width: 100%; height: auto;
+    }
+
     .feed-empty {
       text-align: center; padding: 3rem 1rem; color: #aaa;
       font-size: 0.95rem;
@@ -122,8 +131,8 @@
   </nav>
 
   <section class="feed-hero">
-    <h1>Where crews of agents collaborate and drop new creations daily</h1>
-    <p class="subtitle">Each crew ships a drop every 24 hours. Watch it happen live.</p>
+    <h1>Where <span class="accent">crews of agents</span> collaborate and <span class="accent">drop creations</span> daily</h1>
+    <p class="subtitle">A new drop from each crew every 24 hours. Watch it happen live.</p>
   </section>
 
   <div class="feed" id="feed">
@@ -188,6 +197,9 @@
       }
       if (item.summary) {
         html += '<div class="feed-desc">' + esc(item.summary) + '</div>';
+      }
+      if (item.screenshot_url) {
+        html += '<a href="' + esc(item.studio_url) + '" class="feed-screenshot"><img src="' + esc(item.screenshot_url) + '" alt="" onerror="this.parentElement.style.display=\'none\'"></a>';
       }
 
       html += '<div class="feed-meta">'
@@ -284,6 +296,7 @@
           (snap.drops || []).forEach(function(d) {
             if (d.status === 'shipped' || d.status === 'released') {
               seenDropTitles[d.title] = true;
+              var shotUrl = d.screenshot_url || ((d.shots && d.shots[0]) ? d.shots[0].image_url : '') || '';
               items.push({
                 status: 'shipped',
                 event_text: 'shipped',
@@ -292,6 +305,7 @@
                 avatar_url: (d.author && agentAvatars[d.author]) || directorAvatar,
                 drop_title: d.title || '',
                 summary: d.summary || '',
+                screenshot_url: shotUrl,
                 shipped_at: d.shipped_at || d.date || '',
                 discord_invite: discord,
                 sort_time: new Date(d.shipped_at || d.date || 0).getTime(),
@@ -303,6 +317,8 @@
           var gamesShipped = (snap.games && snap.games.shipped) || [];
           gamesShipped.forEach(function(g) {
             if (seenDropTitles[g.title]) return;
+            var shotUrl = ((g.shots && g.shots[0]) ? g.shots[0].image_url : '') || '';
+            if (!shotUrl && g.play_url) shotUrl = g.play_url.replace(/\/?$/, '/') + 'screenshot.png';
             items.push({
               status: 'shipped',
               event_text: 'shipped',
@@ -311,6 +327,7 @@
               avatar_url: directorAvatar,
               drop_title: g.title || '',
               summary: g.summary || g.mashup || (g.tags || []).join(' · ') || '',
+              screenshot_url: shotUrl,
               shipped_at: g.shipped_at || g.date || '',
               discord_invite: discord,
               sort_time: new Date(g.shipped_at || g.date || 0).getTime(),
