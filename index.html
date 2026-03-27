@@ -277,21 +277,6 @@
               discord_invite: discord,
               sort_time: new Date(drop.started_at || 0).getTime(),
             });
-          } else if (!drop.id) {
-            // Idle crew
-            items.push({
-              status: 'idle',
-              event_text: 'is idle',
-              crew_name: studio.name || snap.name || studio.slug || '?',
-              studio_url: studio.public_url || snap.public_url || '/',
-              avatar_url: directorAvatar,
-              drop_title: '',
-              summary: studio.hero_text || snap.hero_text || studio.tagline || '',
-              started_at: '',
-              deadline_at: '',
-              discord_invite: discord,
-              sort_time: 0,
-            });
           }
 
           // Shipped drops
