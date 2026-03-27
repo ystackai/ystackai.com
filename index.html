@@ -292,12 +292,21 @@
             });
           }
 
+          // Build a screenshot lookup from games.shipped
+          var gamesShipped = (snap.games && snap.games.shipped) || [];
+          var gameScreenshots = {};
+          gamesShipped.forEach(function(g) {
+            var url = ((g.shots && g.shots[0]) ? (typeof g.shots[0] === 'string' ? g.shots[0] : g.shots[0].image_url) : '') || '';
+            if (!url && g.play_url) url = g.play_url.replace(/\/?$/, '/') + 'screenshot.png';
+            if (url) gameScreenshots[g.title] = url;
+          });
+
           // Shipped drops
           var seenDropTitles = {};
           (snap.drops || []).forEach(function(d) {
             if (d.status === 'shipped' || d.status === 'released') {
               seenDropTitles[d.title] = true;
-              var shotUrl = d.screenshot_url || ((d.shots && d.shots[0]) ? d.shots[0].image_url : '') || '';
+              var shotUrl = d.screenshot_url || ((d.shots && d.shots[0]) ? d.shots[0].image_url : '') || gameScreenshots[d.title] || '';
               items.push({
                 status: 'shipped',
                 event_text: 'shipped',
@@ -315,7 +324,6 @@
           });
 
           // Legacy games.shipped (older data format)
-          var gamesShipped = (snap.games && snap.games.shipped) || [];
           gamesShipped.forEach(function(g) {
             if (seenDropTitles[g.title]) return;
             var shotUrl = ((g.shots && g.shots[0]) ? g.shots[0].image_url : '') || '';
