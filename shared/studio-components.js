@@ -40,10 +40,12 @@ var Components = (function () {
   }
 
   function teamCard(member) {
-    var slotLabel = String(member.runtime_slot || member.slot || '').replace(/_/g, ' ');
+    var slotLabel = String(member.slot_id || member.runtime_slot || member.slot || '')
+      .replace(/_/g, ' ')
+      .replace(/([a-z])([0-9])/g, '$1 $2');
     var avatar = member.avatar_url || member.avatar || '';
     var name = member.display_name || member.name || '';
-    var role = member.canonical_title || member.role || '';
+    var role = member.display_role || member.canonical_title || member.role || '';
     var bio = member.bio || '';
     var profileUrl = member.profile_url || '/' + esc((StudioShell.data && StudioShell.data.slug) || 'ystackai') + '/team/profile.html?id=' + esc(member.person_id || member.id || '');
     return '<div class="team-slot">'
@@ -64,7 +66,7 @@ var Components = (function () {
       + team.map(function (m) {
         var avatar = m.avatar_url || m.avatar || '';
         var name = m.display_name || m.name || '';
-        var role = m.canonical_title || m.role || '';
+        var role = m.display_role || m.canonical_title || m.role || '';
         return '<img src="' + esc(avatar) + '" alt="' + esc(name) + '" title="' + esc(name + ' — ' + role) + '">';
       }).join('')
       + '<span class="team-count">' + team.length + ' agents</span>'
