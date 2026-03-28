@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jibberi Ops</title>
+  <style>
+    :root {
+      --bg: #0f1224;
+      --panel: rgba(18, 23, 48, 0.9);
+      --panel-2: rgba(26, 33, 68, 0.9);
+      --border: rgba(255, 255, 255, 0.12);
+      --text: #eef2ff;
+      --muted: #a9b4d0;
+      --good: #44d492;
+      --warn: #ffcc66;
+      --bad: #ff6b7a;
+      --accent: #8ea7ff;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(110, 132, 255, 0.35), transparent 36%),
+        radial-gradient(circle at top right, rgba(255, 107, 122, 0.22), transparent 30%),
+        linear-gradient(180deg, #121730 0%, #090b17 100%);
+    }
+
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      letter-spacing: -0.05em;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      max-width: 68ch;
+      line-height: 1.5;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 0.95rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--muted);
+      box-shadow: 0 0 12px currentColor;
+    }
+
+    .dot.good { color: var(--good); background: var(--good); }
+    .dot.warn { color: var(--warn); background: var(--warn); }
+    .dot.bad { color: var(--bad); background: var(--bad); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .panel {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      border-radius: 20px;
+      padding: 18px;
+      backdrop-filter: blur(12px);
+    }
+
+    .panel h2, .panel h3 {
+      margin: 0 0 12px;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 10px 0;
+      line-height: 1.45;
+    }
+
+    .metric strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .studio-list, .profile-list, .alerts {
+      display: grid;
+      gap: 14px;
+    }
+
+    .studio-card, .profile-card, .alert {
+      background: var(--panel-2);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .studio-header, .profile-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .muted { color: var(--muted); }
+
+    code {
+      font-family: inherit;
+      font-size: 0.92rem;
+      color: var(--accent);
+      word-break: break-word;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 12px 0;
+    }
+
+    .error {
+      color: var(--bad);
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <h1>Jibberi Ops</h1>
+        <p class="sub">Read-only production view from <code>/studio-data/ops.json</code>. This is the quick answer to “is shit broken?”, not a control panel.</p>
+      </div>
+      <div id="status-badge" class="badge"><span class="dot"></span><span>Loading…</span></div>
+    </section>
+
+    <section class="grid">
+      <div class="panel" id="overview"></div>
+      <div class="panel" id="runtime"></div>
+      <div class="panel" id="publish"></div>
+    </section>
+
+    <section class="panel" style="margin-bottom:16px;">
+      <h2>Studios</h2>
+      <div id="studios" class="studio-list"></div>
+    </section>
+
+    <section class="panel" style="margin-bottom:16px;">
+      <h2>Build Profiles</h2>
+      <div id="profiles" class="profile-list"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Current Alerts</h2>
+      <div id="alerts" class="alerts"></div>
+    </section>
+  </main>
+
+  <script>
+    function fmtBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      let value = bytes;
+      let i = 0;
+      while (value >= 1024 && i < units.length - 1) {
+        value /= 1024;
+        i += 1;
+      }
+      return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+    }
+
+    function statusClass(ok, warn) {
+      if (ok) return "good";
+      return warn ? "warn" : "bad";
+    }
+
+    function setStatusBadge(ok, label, warn = false) {
+      const root = document.getElementById("status-badge");
+      root.innerHTML = `<span class="dot ${statusClass(ok, warn)}"></span><span>${label}</span>`;
+    }
+
+    function metric(label, value) {
+      return `<div class="metric"><span class="muted">${label}</span><strong>${value}</strong></div>`;
+    }
+
+    function renderOverview(data) {
+      const readiness = data.readiness || {};
+      const studios = Array.isArray(data.studio_sources) ? data.studio_sources.length : 0;
+      const blockers = readiness.blocker_count ?? 0;
+      const warnings = readiness.warning_count ?? 0;
+      document.getElementById("overview").innerHTML = `
+        <h2>Overview</h2>
+        ${metric("Timestamp", data.timestamp || "unknown")}
+        ${metric("Director rev", `<code>${data.director_rev || "unknown"}</code>`)}
+        ${metric("Studios", studios)}
+        ${metric("Readiness", `${readiness.ok_count ?? 0}/${readiness.studio_count ?? studios || 0} healthy`)}
+        ${metric("Blockers", blockers)}
+        ${metric("Warnings", warnings)}
+      `;
+      setStatusBadge(Boolean(data.ok), data.ok ? "Healthy" : blockers ? "Blocked" : "Needs attention", warnings > 0 && !blockers);
+    }
+
+    function renderRuntime(data) {
+      const runtime = data.runtime_db || {};
+      const fs = data.filesystem || {};
+      document.getElementById("runtime").innerHTML = `
+        <h2>Runtime</h2>
+        ${metric("DB exists", runtime.exists ? "yes" : "no")}
+        ${metric("DB size", fmtBytes(runtime.size_bytes || 0))}
+        ${metric("DB updated", runtime.modified_at || "unknown")}
+        ${metric("Disk free", fmtBytes(fs.free_bytes || 0))}
+        ${metric("Disk used", fmtBytes(fs.used_bytes || 0))}
+      `;
+    }
+
+    function renderPublish(data) {
+      const last = data.last_successful_publish || {};
+      document.getElementById("publish").innerHTML = `
+        <h2>Publish</h2>
+        ${metric("Current run", data.publish_run_id ?? "unknown")}
+        ${metric("Restarted services", data.restarted_services ? "yes" : "no")}
+        ${metric("Last successful run", last.id ?? "unknown")}
+        ${metric("Last successful at", last.completed_at || "unknown")}
+      `;
+    }
+
+    function renderStudios(data) {
+      const readiness = data.readiness || {};
+      const studios = Array.isArray(readiness.studios) ? readiness.studios : [];
+      const sources = new Map((Array.isArray(data.studio_sources) ? data.studio_sources : []).map((item) => [item.slug || item.repo, item]));
+      const html = studios.map((studio) => {
+        const blockers = Array.isArray(studio.blockers) ? studio.blockers : [];
+        const warnings = Array.isArray(studio.warnings) ? studio.warnings : [];
+        const source = sources.get(studio.slug) || sources.get(studio.repo) || {};
+        const mirror = source.github_issue_mirror || {};
+        return `
+          <article class="studio-card">
+            <div class="studio-header">
+              <div>
+                <div class="title">${studio.slug || studio.repo || "studio"}</div>
+                <div class="muted">${studio.active_drop_slug || "no active drop"}${studio.active_drop_status ? ` • drop ${studio.active_drop_status}` : ""}</div>
+              </div>
+              <div class="badge"><span class="dot ${statusClass(Boolean(studio.ok), warnings.length > 0)}"></span><span>${studio.ok ? "ok" : "attention"}</span></div>
+            </div>
+            ${metric("Live URL", studio.live_url ? `<code>${studio.live_url}</code>` : "unknown")}
+            ${metric("Current post", studio.current_post_id || "none")}
+            ${metric("Chat messages", studio.chat_message_count ?? 0)}
+            ${metric("Delivery mode", source.build_delivery_mode || "pull_request")}
+            ${metric("Issue mirror", mirror.ok ? `${mirror.issue_count ?? 0} mirrored` : (mirror.error ? `error: ${mirror.error}` : "unknown"))}
+            ${metric("Source rev", source.source_rev ? `<code>${source.source_rev.slice(0, 12)}</code>` : "unknown")}
+            ${blockers.length ? `<div class="alert"><strong>Blockers</strong><div class="muted">${blockers.join("<br>")}</div></div>` : ""}
+            ${warnings.length ? `<div class="alert"><strong>Warnings</strong><div class="muted">${warnings.join("<br>")}</div></div>` : ""}
+          </article>
+        `;
+      }).join("");
+      document.getElementById("studios").innerHTML = html || `<div class="empty">No studio readiness data.</div>`;
+    }
+
+    function renderProfiles(data) {
+      const profiles = Array.isArray(data.build_profiles?.profiles) ? data.build_profiles.profiles : [];
+      const html = profiles.map((profile) => `
+        <article class="profile-card">
+          <div class="profile-header">
+            <div>
+              <div class="title">${profile.repo || "repo"} / ${profile.profile_id || "default"}</div>
+              <div class="muted">${profile.harness || "?"} • ${profile.provider || "?"}</div>
+            </div>
+            <div class="badge"><span class="dot ${statusClass(profile.ok === true, profile.smoke_status && profile.smoke_status !== "ok")}"></span><span>${profile.smoke_status || "unknown"}</span></div>
+          </div>
+          ${metric("Model", `<code>${profile.model || "unknown"}</code>`)}
+          ${metric("Timeout", `${profile.timeout_seconds || 0}s`)}
+          ${metric("Checked", profile.last_checked_at || "never")}
+          ${metric("Last success", profile.last_success_at || "never")}
+          ${metric("Last code run", profile.last_code_run_at || "never")}
+          ${profile.failure_reason ? `<div class="alert"><strong>Failure</strong><div class="error">${profile.failure_reason}</div></div>` : ""}
+        </article>
+      `).join("");
+      document.getElementById("profiles").innerHTML = html || `<div class="empty">No build profile data.</div>`;
+    }
+
+    function renderAlerts(data) {
+      const alerts = [];
+      const readiness = data.readiness || {};
+      if (Array.isArray(readiness.studios)) {
+        readiness.studios.forEach((studio) => {
+          (studio.blockers || []).forEach((item) => alerts.push(`${studio.slug}: ${item}`));
+          (studio.warnings || []).forEach((item) => alerts.push(`${studio.slug}: ${item}`));
+        });
+      }
+      if (Array.isArray(data.build_profiles?.profiles)) {
+        data.build_profiles.profiles.forEach((profile) => {
+          if (profile.failure_reason) {
+            alerts.push(`${profile.repo}/${profile.profile_id}: ${profile.failure_reason}`);
+          }
+        });
+      }
+      document.getElementById("alerts").innerHTML = alerts.length
+        ? alerts.map((item) => `<div class="alert">${item}</div>`).join("")
+        : `<div class="empty">No current blockers or warnings.</div>`;
+    }
+
+    async function boot() {
+      try {
+        const response = await fetch("/studio-data/ops.json", { cache: "no-store" });
+        if (!response.ok) throw new Error(`ops.json returned ${response.status}`);
+        const data = await response.json();
+        renderOverview(data);
+        renderRuntime(data);
+        renderPublish(data);
+        renderStudios(data);
+        renderProfiles(data);
+        renderAlerts(data);
+      } catch (error) {
+        setStatusBadge(false, "ops unavailable");
+        document.getElementById("alerts").innerHTML = `<div class="alert error">${String(error)}</div>`;
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>
