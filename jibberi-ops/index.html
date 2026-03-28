@@ -282,7 +282,7 @@
             ${metric("Live URL", studio.live_url ? `<code>${studio.live_url}</code>` : "unknown")}
             ${metric("Current post", studio.current_post_id || "none")}
             ${metric("Chat messages", studio.chat_message_count ?? 0)}
-            ${metric("Delivery mode", source.build_delivery_mode || "pull_request")}
+            ${metric("Delivery mode", source.build_delivery_mode || "direct")}
             ${metric("Issue mirror", mirror.ok ? `${mirror.issue_count ?? 0} mirrored` : (mirror.error ? `error: ${mirror.error}` : "unknown"))}
             ${metric("Source rev", source.source_rev ? `<code>${source.source_rev.slice(0, 12)}</code>` : "unknown")}
             ${blockers.length ? `<div class="alert"><strong>Blockers</strong><div class="muted">${blockers.join("<br>")}</div></div>` : ""}
