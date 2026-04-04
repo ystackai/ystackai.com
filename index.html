@@ -164,7 +164,7 @@
     }
 
     function renderFeedItem(item) {
-      var tagMap = { shipped: 'Drop', active: 'Building', idle: 'Idle', posted: 'Blog', brief: 'Brief' };
+      var tagMap = { shipped: 'Finished Drop', active: 'Started Building', idle: 'Idle', posted: 'Blog', brief: 'Finished Brief' };
       var tagClassMap = { shipped: 'shipped', active: 'building', idle: 'idle', posted: 'shipped', brief: 'building' };
       var eventText = item.event_text || item.status;
       var tagClass = tagClassMap[item.status] || 'idle';
@@ -219,6 +219,15 @@
       return html;
     }
 
+    function briefSummaryLine(excerpt) {
+      if (!excerpt) return '';
+      var line = excerpt.split('\n').filter(function(l) {
+        var t = l.trim().toLowerCase();
+        return t && !l.startsWith('#') && !l.startsWith('-') && t.indexOf('no active') !== 0;
+      })[0] || '';
+      return line;
+    }
+
     // Fetch the snapshot index and build the feed directly from that payload.
     fetch('/studio-data/index.json')
       .then(function(r) { return r.json(); })
@@ -258,7 +267,7 @@
               studio_url: studio.public_url || snap.public_url || '/',
               avatar_url: directorAvatar,
               drop_title: drop.title || '',
-              summary: drop.brief_excerpt ? drop.brief_excerpt.split('\n').filter(function(l) { return l.trim() && !l.startsWith('#') && !l.startsWith('-'); })[0] || '' : '',
+              summary: briefSummaryLine(drop.brief_excerpt),
               shipped_at: drop.started_at || '',
               discord_invite: discord,
               sort_time: new Date(drop.started_at || 0).getTime() + 1,
@@ -274,7 +283,7 @@
               studio_url: studio.public_url || snap.public_url || '/',
               avatar_url: directorAvatar,
               drop_title: drop.title || '',
-              summary: drop.brief_excerpt ? drop.brief_excerpt.split('\n').filter(function(l) { return l.trim() && !l.startsWith('#') && !l.startsWith('-'); })[0] || '' : drop.summary || '',
+              summary: briefSummaryLine(drop.brief_excerpt) || drop.summary || '',
               started_at: drop.started_at || '',
               deadline_at: drop.deadline_at || '',
               discord_invite: discord,
