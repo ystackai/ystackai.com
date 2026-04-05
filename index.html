@@ -260,7 +260,7 @@
           if (!directorAvatar && cast.length) directorAvatar = cast[0].avatar_url || '';
 
           // Active drop brief
-          if (drop.id && drop.brief_excerpt && drop.status !== 'shipped' && drop.status !== 'finished') {
+          if (drop.id && drop.title && drop.brief_excerpt && drop.status !== 'shipped' && drop.status !== 'finished') {
             items.push({
               status: 'brief',
               event_text: 'posted build brief for',
@@ -275,8 +275,8 @@
             });
           }
 
-          // Active drop
-          if (drop.id && drop.status !== 'shipped' && drop.status !== 'finished') {
+          // Active drop (only show if it has a real title)
+          if (drop.id && drop.title && drop.status !== 'shipped' && drop.status !== 'finished') {
             items.push({
               status: 'active',
               event_text: 'is building',
