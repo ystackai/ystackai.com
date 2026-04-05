@@ -260,7 +260,7 @@
           if (!directorAvatar && cast.length) directorAvatar = cast[0].avatar_url || '';
 
           // Active drop brief
-          if (drop.id && drop.title && drop.brief_excerpt && drop.status !== 'shipped' && drop.status !== 'finished') {
+          if (drop.id && drop.title && drop.brief_excerpt && drop.status !== 'shipped' && drop.status !== 'finished' && drop.status !== 'ideation') {
             items.push({
               status: 'brief',
               event_text: 'posted build brief for',
@@ -275,16 +275,17 @@
             });
           }
 
-          // Active drop (only show if it has a real title)
-          if (drop.id && drop.title && drop.status !== 'shipped' && drop.status !== 'finished') {
+          // Active drop
+          if (drop.id && drop.status !== 'shipped' && drop.status !== 'finished') {
+            var isIdeating = drop.status === 'ideation';
             items.push({
-              status: 'active',
-              event_text: 'is building',
+              status: isIdeating ? 'ideation' : 'active',
+              event_text: isIdeating ? 'is ideating' : 'is building',
               crew_name: studio.name || snap.name || studio.slug || '?',
               studio_url: studio.public_url || snap.public_url || '/',
               avatar_url: directorAvatar,
-              drop_title: drop.title || '',
-              summary: briefSummaryLine(drop.brief_excerpt) || drop.summary || '',
+              drop_title: drop.title || (isIdeating ? 'Ideating next drop on Discord' : ''),
+              summary: drop.title ? (briefSummaryLine(drop.brief_excerpt) || drop.summary || '') : '',
               started_at: drop.started_at || '',
               deadline_at: drop.deadline_at || '',
               discord_invite: discord,
