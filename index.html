@@ -287,7 +287,7 @@
               drop_title: drop.title || (isIdeating ? 'Ideating next drop on Discord' : ''),
               summary: drop.title ? (briefSummaryLine(drop.brief_excerpt) || drop.summary || '') : '',
               started_at: drop.started_at || '',
-              deadline_at: drop.deadline_at || '',
+              deadline_at: (isIdeating && drop.concept_lock_at) ? drop.concept_lock_at : (drop.deadline_at || ''),
               discord_invite: discord,
               sort_time: new Date(drop.started_at || 0).getTime(),
             });
