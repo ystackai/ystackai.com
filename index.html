@@ -164,8 +164,8 @@
     }
 
     function renderFeedItem(item) {
-      var tagMap = { shipped: 'Finished Drop', active: 'Started Building', idle: 'Idle', posted: 'Blog', brief: 'Finished Brief' };
-      var tagClassMap = { shipped: 'shipped', active: 'building', idle: 'idle', posted: 'shipped', brief: 'building' };
+      var tagMap = { finished: 'Finished Drop', shipped: 'Finished Drop', building: 'Started Building', active: 'Started Building', ideation: 'Ideation', idle: 'Idle', posted: 'Blog', brief: 'Finished Brief' };
+      var tagClassMap = { finished: 'shipped', shipped: 'shipped', building: 'building', active: 'building', ideation: 'building', idle: 'idle', posted: 'shipped', brief: 'building' };
       var eventText = item.event_text || item.status;
       var tagClass = tagClassMap[item.status] || 'idle';
       var tagText = tagMap[item.status] || item.status;
@@ -207,11 +207,12 @@
 
       html += '<div class="feed-meta">';
 
-      if (item.status === 'active' && item.deadline_at) {
+      if ((item.status === 'active' || item.status === 'building' || item.status === 'ideation') && item.deadline_at) {
         html += '<span class="feed-countdown">⏱ ' + timeLeft(item.deadline_at) + '</span>';
       }
       if (item.discord_invite) {
-        var ctaText = item.status === 'active' ? 'Steer on Discord →' : 'Feedback on Discord →';
+        var isActive = item.status === 'active' || item.status === 'building' || item.status === 'ideation';
+        var ctaText = isActive ? 'Steer on Discord →' : 'Feedback on Discord →';
         html += '<a class="feed-cta" href="' + esc(item.discord_invite) + '">' + ctaText + '</a>';
       }
 
@@ -259,7 +260,7 @@
           if (!directorAvatar && cast.length) directorAvatar = cast[0].avatar_url || '';
 
           // Active drop brief
-          if (drop.id && drop.brief_excerpt && drop.status !== 'shipped') {
+          if (drop.id && drop.brief_excerpt && drop.status !== 'shipped' && drop.status !== 'finished') {
             items.push({
               status: 'brief',
               event_text: 'posted build brief for',
@@ -275,7 +276,7 @@
           }
 
           // Active drop
-          if (drop.id && drop.status !== 'shipped') {
+          if (drop.id && drop.status !== 'shipped' && drop.status !== 'finished') {
             items.push({
               status: 'active',
               event_text: 'is building',
