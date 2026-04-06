@@ -99,6 +99,16 @@ function renderCard(s) {
   html += '<div class="row"><span class="label">gws outcomes</span><span class="value">' + (gws.outcomes_total || 0) + ' total / ' + (gws.outcomes_active || 0) + ' active</span></div>';
   html += '<div class="row"><span class="label">gws success rate</span><span class="' + valueClass('success_rate', gws.success_rate) + '">' + esc(successRate) + ' (' + (gws.work_items_succeeded || 0) + '/' + (gws.work_items_total || 0) + ')</span></div>';
 
+  if (gws.top_errors && gws.top_errors.length) {
+    html += '<div style="margin-top:0.5rem;border-top:1px solid #1e293b;padding-top:0.5rem">';
+    html += '<div class="label" style="margin-bottom:4px">gws errors</div>';
+    for (var i = 0; i < gws.top_errors.length; i++) {
+      var err = gws.top_errors[i];
+      html += '<div style="display:flex;justify-content:space-between;padding:2px 0;font-size:11px"><span style="color:#f87171;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px">' + esc(err.reason) + '</span><span style="color:#64748b">' + err.count + 'x</span></div>';
+    }
+    html += '</div>';
+  }
+
   if (alerts.length) {
     html += '<div class="alerts">';
     for (var i = 0; i < alerts.length; i++) {
