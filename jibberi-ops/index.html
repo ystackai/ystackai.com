@@ -3,357 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jibberi Ops</title>
+  <title>Ops Dashboard — ystackai</title>
   <style>
-    :root {
-      --bg: #0f1224;
-      --panel: rgba(18, 23, 48, 0.9);
-      --panel-2: rgba(26, 33, 68, 0.9);
-      --border: rgba(255, 255, 255, 0.12);
-      --text: #eef2ff;
-      --muted: #a9b4d0;
-      --good: #44d492;
-      --warn: #ffcc66;
-      --bad: #ff6b7a;
-      --accent: #8ea7ff;
-    }
-
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(110, 132, 255, 0.35), transparent 36%),
-        radial-gradient(circle at top right, rgba(255, 107, 122, 0.22), transparent 30%),
-        linear-gradient(180deg, #121730 0%, #090b17 100%);
-    }
-
-    .page {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 32px 20px 56px;
-    }
-
-    .hero {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      align-items: flex-start;
-      margin-bottom: 24px;
-    }
-
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 5vw, 3.4rem);
-      letter-spacing: -0.05em;
-    }
-
-    .sub {
-      margin: 0;
-      color: var(--muted);
-      max-width: 68ch;
-      line-height: 1.5;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 16px;
-      border-radius: 999px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      font-size: 0.95rem;
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--muted);
-      box-shadow: 0 0 12px currentColor;
-    }
-
-    .dot.good { color: var(--good); background: var(--good); }
-    .dot.warn { color: var(--warn); background: var(--warn); }
-    .dot.bad { color: var(--bad); background: var(--bad); }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-bottom: 16px;
-    }
-
-    .panel {
-      border: 1px solid var(--border);
-      background: var(--panel);
-      border-radius: 20px;
-      padding: 18px;
-      backdrop-filter: blur(12px);
-    }
-
-    .panel h2, .panel h3 {
-      margin: 0 0 12px;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-    }
-
-    .metric {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      margin: 10px 0;
-      line-height: 1.45;
-    }
-
-    .metric strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    .studio-list, .profile-list, .alerts {
-      display: grid;
-      gap: 14px;
-    }
-
-    .studio-card, .profile-card, .alert {
-      background: var(--panel-2);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .studio-header, .profile-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .title {
-      font-size: 1.05rem;
-      font-weight: 700;
-    }
-
-    .muted { color: var(--muted); }
-
-    code {
-      font-family: inherit;
-      font-size: 0.92rem;
-      color: var(--accent);
-      word-break: break-word;
-    }
-
-    .empty {
-      color: var(--muted);
-      padding: 12px 0;
-    }
-
-    .error {
-      color: var(--bad);
-      white-space: pre-wrap;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0e1a; color: #e0e0e0; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; padding: 1.5rem; }
+    h1 { font-size: 1.1rem; color: #888; font-weight: 400; margin-bottom: 1rem; }
+    h1 span { color: #4ade80; }
+    .meta { color: #555; font-size: 11px; margin-bottom: 1.5rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1rem; }
+    .card { background: #111827; border: 1px solid #1e293b; border-radius: 8px; padding: 1rem; }
+    .card.warning { border-color: #f59e0b; }
+    .card.ok { border-color: #1e293b; }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+    .studio-name { font-size: 1rem; font-weight: 700; color: #f1f5f9; }
+    .badge { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .badge-ideation { background: #1e3a5f; color: #60a5fa; }
+    .badge-building { background: #1e3a1f; color: #4ade80; }
+    .badge-finished { background: #1a2e1a; color: #86efac; }
+    .badge-aborted { background: #3b1a1a; color: #f87171; }
+    .badge-idle { background: #1e1e2e; color: #888; }
+    .row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #1e293b; }
+    .row:last-child { border-bottom: none; }
+    .label { color: #64748b; }
+    .value { color: #e2e8f0; text-align: right; }
+    .value.good { color: #4ade80; }
+    .value.warn { color: #f59e0b; }
+    .value.bad { color: #f87171; }
+    .value.muted { color: #475569; }
+    .alerts { margin-top: 0.5rem; }
+    .alert { background: #2d1b0e; color: #fbbf24; font-size: 11px; padding: 4px 8px; border-radius: 4px; margin-top: 4px; }
+    .title-text { font-size: 11px; color: #94a3b8; font-style: italic; margin-bottom: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .loading { color: #555; text-align: center; padding: 4rem; }
+    .error { color: #f87171; text-align: center; padding: 4rem; }
+    .refresh-btn { background: none; border: 1px solid #334155; color: #94a3b8; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-family: inherit; font-size: 11px; }
+    .refresh-btn:hover { border-color: #4ade80; color: #4ade80; }
   </style>
 </head>
 <body>
-  <main class="page">
-    <section class="hero">
-      <div>
-        <h1>Jibberi Ops</h1>
-        <p class="sub">Read-only production view from <code>/studio-data/ops.json</code>. This is the quick answer to “is shit broken?”, not a control panel.</p>
-      </div>
-      <div id="status-badge" class="badge"><span class="dot"></span><span>Loading…</span></div>
-    </section>
+  <h1>ops / <span>production health</span> <button class="refresh-btn" onclick="load()">refresh</button></h1>
+  <div class="meta" id="meta">loading...</div>
+  <div class="grid" id="grid"><div class="loading">Fetching status...</div></div>
 
-    <section class="grid">
-      <div class="panel" id="overview"></div>
-      <div class="panel" id="runtime"></div>
-      <div class="panel" id="publish"></div>
-    </section>
+<script>
+function esc(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
 
-    <section class="panel" style="margin-bottom:16px;">
-      <h2>Studios</h2>
-      <div id="studios" class="studio-list"></div>
-    </section>
+function badgeClass(status) {
+  return 'badge badge-' + (status || 'idle');
+}
 
-    <section class="panel" style="margin-bottom:16px;">
-      <h2>Build Profiles</h2>
-      <div id="profiles" class="profile-list"></div>
-    </section>
+function valueClass(key, val) {
+  if (key === 'success_rate') {
+    if (val === null || val === undefined) return 'value muted';
+    if (val >= 70) return 'value good';
+    if (val >= 40) return 'value warn';
+    return 'value bad';
+  }
+  if (key === 'messages_24h') {
+    if (val <= 0) return 'value bad';
+    if (val < 5) return 'value warn';
+    return 'value good';
+  }
+  return 'value';
+}
 
-    <section class="panel">
-      <h2>Current Alerts</h2>
-      <div id="alerts" class="alerts"></div>
-    </section>
-  </main>
+function renderCard(s) {
+  var drop = s.drop || {};
+  var brief = s.brief || {};
+  var discord = s.discord || {};
+  var gws = s.gws || {};
+  var alerts = s.alerts || [];
 
-  <script>
-    function fmtBytes(bytes) {
-      if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
-      const units = ["B", "KB", "MB", "GB", "TB"];
-      let value = bytes;
-      let i = 0;
-      while (value >= 1024 && i < units.length - 1) {
-        value /= 1024;
-        i += 1;
-      }
-      return `${value.toFixed(value >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
+  var briefStatus = brief.exists ? brief.length + ' chars' : (brief.is_placeholder ? 'placeholder' : 'empty');
+  var briefClass = brief.exists ? 'value good' : 'value bad';
+
+  var timeDisplay = (drop.time_remaining || {}).display || '-';
+  var timeLabel = (drop.time_remaining || {}).label || '';
+
+  var successRate = gws.success_rate !== null && gws.success_rate !== undefined ? gws.success_rate + '%' : '-';
+
+  var html = '<div class="card ' + (alerts.length ? 'warning' : 'ok') + '">';
+  html += '<div class="card-head">';
+  html += '<span class="studio-name">' + esc(s.slug) + '</span>';
+  html += '<span class="' + badgeClass(drop.status) + '">' + esc(drop.status || 'idle') + '</span>';
+  html += '</div>';
+
+  if (drop.title) {
+    html += '<div class="title-text">' + esc(drop.title) + '</div>';
+  }
+
+  html += '<div class="row"><span class="label">time remaining</span><span class="value">' + esc(timeDisplay) + (timeLabel ? ' <span style="color:#64748b;font-size:10px">(' + esc(timeLabel) + ')</span>' : '') + '</span></div>';
+  html += '<div class="row"><span class="label">brief</span><span class="' + briefClass + '">' + esc(briefStatus) + '</span></div>';
+  html += '<div class="row"><span class="label">discord 24h</span><span class="' + valueClass('messages_24h', discord.messages_24h) + '">' + (discord.messages_24h >= 0 ? discord.messages_24h + ' msgs' : 'n/a') + '</span></div>';
+  html += '<div class="row"><span class="label">events 24h</span><span class="value">' + (discord.total_events_24h >= 0 ? discord.total_events_24h : 'n/a') + '</span></div>';
+
+  html += '<div class="row"><span class="label">gws outcomes</span><span class="value">' + (gws.outcomes_total || 0) + ' total / ' + (gws.outcomes_active || 0) + ' active</span></div>';
+  html += '<div class="row"><span class="label">gws success rate</span><span class="' + valueClass('success_rate', gws.success_rate) + '">' + esc(successRate) + ' (' + (gws.work_items_succeeded || 0) + '/' + (gws.work_items_total || 0) + ')</span></div>';
+
+  if (alerts.length) {
+    html += '<div class="alerts">';
+    for (var i = 0; i < alerts.length; i++) {
+      html += '<div class="alert">' + esc(alerts[i]) + '</div>';
     }
+    html += '</div>';
+  }
 
-    function statusClass(ok, warn) {
-      if (ok) return "good";
-      return warn ? "warn" : "bad";
-    }
+  html += '</div>';
+  return html;
+}
 
-    function setStatusBadge(ok, label, warn = false) {
-      const root = document.getElementById("status-badge");
-      root.innerHTML = `<span class="dot ${statusClass(ok, warn)}"></span><span>${label}</span>`;
-    }
+function load() {
+  document.getElementById('grid').innerHTML = '<div class="loading">Fetching...</div>';
+  fetch('/ops/status.json')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      document.getElementById('meta').textContent = 'Generated: ' + data.generated_at + ' · ' + data.studio_count + ' studios';
+      var html = '';
+      (data.studios || []).forEach(function(s) { html += renderCard(s); });
+      document.getElementById('grid').innerHTML = html || '<div class="loading">No studios.</div>';
+    })
+    .catch(function(err) {
+      document.getElementById('grid').innerHTML = '<div class="error">Failed to load: ' + err.message + '</div>';
+    });
+}
 
-    function metric(label, value) {
-      return `<div class="metric"><span class="muted">${label}</span><strong>${value}</strong></div>`;
-    }
-
-    function renderOverview(data) {
-      const readiness = data.readiness || {};
-      const studios = Array.isArray(data.studio_sources) ? data.studio_sources.length : 0;
-      const blockers = readiness.blocker_count ?? 0;
-      const warnings = readiness.warning_count ?? 0;
-      document.getElementById("overview").innerHTML = `
-        <h2>Overview</h2>
-        ${metric("Timestamp", data.timestamp || "unknown")}
-        ${metric("Director rev", `<code>${data.director_rev || "unknown"}</code>`)}
-        ${metric("Studios", studios)}
-        ${metric("Readiness", `${readiness.ok_count ?? 0}/${readiness.studio_count ?? studios || 0} healthy`)}
-        ${metric("Blockers", blockers)}
-        ${metric("Warnings", warnings)}
-      `;
-      setStatusBadge(Boolean(data.ok), data.ok ? "Healthy" : blockers ? "Blocked" : "Needs attention", warnings > 0 && !blockers);
-    }
-
-    function renderRuntime(data) {
-      const runtime = data.runtime_db || {};
-      const fs = data.filesystem || {};
-      document.getElementById("runtime").innerHTML = `
-        <h2>Runtime</h2>
-        ${metric("DB exists", runtime.exists ? "yes" : "no")}
-        ${metric("DB size", fmtBytes(runtime.size_bytes || 0))}
-        ${metric("DB updated", runtime.modified_at || "unknown")}
-        ${metric("Disk free", fmtBytes(fs.free_bytes || 0))}
-        ${metric("Disk used", fmtBytes(fs.used_bytes || 0))}
-      `;
-    }
-
-    function renderPublish(data) {
-      const last = data.last_successful_publish || {};
-      document.getElementById("publish").innerHTML = `
-        <h2>Publish</h2>
-        ${metric("Current run", data.publish_run_id ?? "unknown")}
-        ${metric("Restarted services", data.restarted_services ? "yes" : "no")}
-        ${metric("Last successful run", last.id ?? "unknown")}
-        ${metric("Last successful at", last.completed_at || "unknown")}
-      `;
-    }
-
-    function renderStudios(data) {
-      const readiness = data.readiness || {};
-      const studios = Array.isArray(readiness.studios) ? readiness.studios : [];
-      const sources = new Map((Array.isArray(data.studio_sources) ? data.studio_sources : []).map((item) => [item.slug || item.repo, item]));
-      const html = studios.map((studio) => {
-        const blockers = Array.isArray(studio.blockers) ? studio.blockers : [];
-        const warnings = Array.isArray(studio.warnings) ? studio.warnings : [];
-        const source = sources.get(studio.slug) || sources.get(studio.repo) || {};
-        const mirror = source.github_issue_mirror || {};
-        return `
-          <article class="studio-card">
-            <div class="studio-header">
-              <div>
-                <div class="title">${studio.slug || studio.repo || "studio"}</div>
-                <div class="muted">${studio.active_drop_slug || "no active drop"}${studio.active_drop_status ? ` • drop ${studio.active_drop_status}` : ""}</div>
-              </div>
-              <div class="badge"><span class="dot ${statusClass(Boolean(studio.ok), warnings.length > 0)}"></span><span>${studio.ok ? "ok" : "attention"}</span></div>
-            </div>
-            ${metric("Live URL", studio.live_url ? `<code>${studio.live_url}</code>` : "unknown")}
-            ${metric("Current post", studio.current_post_id || "none")}
-            ${metric("Chat messages", studio.chat_message_count ?? 0)}
-            ${metric("Delivery mode", source.build_delivery_mode || "direct")}
-            ${metric("Issue mirror", mirror.ok ? `${mirror.issue_count ?? 0} mirrored` : (mirror.error ? `error: ${mirror.error}` : "unknown"))}
-            ${metric("Source rev", source.source_rev ? `<code>${source.source_rev.slice(0, 12)}</code>` : "unknown")}
-            ${blockers.length ? `<div class="alert"><strong>Blockers</strong><div class="muted">${blockers.join("<br>")}</div></div>` : ""}
-            ${warnings.length ? `<div class="alert"><strong>Warnings</strong><div class="muted">${warnings.join("<br>")}</div></div>` : ""}
-          </article>
-        `;
-      }).join("");
-      document.getElementById("studios").innerHTML = html || `<div class="empty">No studio readiness data.</div>`;
-    }
-
-    function renderProfiles(data) {
-      const profiles = Array.isArray(data.build_profiles?.profiles) ? data.build_profiles.profiles : [];
-      const html = profiles.map((profile) => `
-        <article class="profile-card">
-          <div class="profile-header">
-            <div>
-              <div class="title">${profile.repo || "repo"} / ${profile.profile_id || "default"}</div>
-              <div class="muted">${profile.harness || "?"} • ${profile.provider || "?"}</div>
-            </div>
-            <div class="badge"><span class="dot ${statusClass(profile.ok === true, profile.smoke_status && profile.smoke_status !== "ok")}"></span><span>${profile.smoke_status || "unknown"}</span></div>
-          </div>
-          ${metric("Model", `<code>${profile.model || "unknown"}</code>`)}
-          ${metric("Timeout", `${profile.timeout_seconds || 0}s`)}
-          ${metric("Checked", profile.last_checked_at || "never")}
-          ${metric("Last success", profile.last_success_at || "never")}
-          ${metric("Last code run", profile.last_code_run_at || "never")}
-          ${profile.failure_reason ? `<div class="alert"><strong>Failure</strong><div class="error">${profile.failure_reason}</div></div>` : ""}
-        </article>
-      `).join("");
-      document.getElementById("profiles").innerHTML = html || `<div class="empty">No build profile data.</div>`;
-    }
-
-    function renderAlerts(data) {
-      const alerts = [];
-      const readiness = data.readiness || {};
-      if (Array.isArray(readiness.studios)) {
-        readiness.studios.forEach((studio) => {
-          (studio.blockers || []).forEach((item) => alerts.push(`${studio.slug}: ${item}`));
-          (studio.warnings || []).forEach((item) => alerts.push(`${studio.slug}: ${item}`));
-        });
-      }
-      if (Array.isArray(data.build_profiles?.profiles)) {
-        data.build_profiles.profiles.forEach((profile) => {
-          if (profile.failure_reason) {
-            alerts.push(`${profile.repo}/${profile.profile_id}: ${profile.failure_reason}`);
-          }
-        });
-      }
-      document.getElementById("alerts").innerHTML = alerts.length
-        ? alerts.map((item) => `<div class="alert">${item}</div>`).join("")
-        : `<div class="empty">No current blockers or warnings.</div>`;
-    }
-
-    async function boot() {
-      try {
-        const response = await fetch("/studio-data/ops.json", { cache: "no-store" });
-        if (!response.ok) throw new Error(`ops.json returned ${response.status}`);
-        const data = await response.json();
-        renderOverview(data);
-        renderRuntime(data);
-        renderPublish(data);
-        renderStudios(data);
-        renderProfiles(data);
-        renderAlerts(data);
-      } catch (error) {
-        setStatusBadge(false, "ops unavailable");
-        document.getElementById("alerts").innerHTML = `<div class="alert error">${String(error)}</div>`;
-      }
-    }
-
-    boot();
-  </script>
+load();
+setInterval(load, 60000);
+</script>
 </body>
 </html>
